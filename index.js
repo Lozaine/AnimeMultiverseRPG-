@@ -73,5 +73,18 @@ process.on('unhandledRejection', error => {
 const BOT_TOKEN = process.env.BOT_TOKEN || 'your_bot_token_here';
 client.login(BOT_TOKEN).catch(error => {
     console.error('❌ Failed to login:', error);
+    
+    if (error.message.includes('disallowed intents')) {
+        console.error('');
+        console.error('🔧 SETUP REQUIRED:');
+        console.error('Please enable "Message Content Intent" in Discord Developer Portal:');
+        console.error('1. Go to https://discord.com/developers/applications');
+        console.error('2. Select your bot application');
+        console.error('3. Go to Bot section');
+        console.error('4. Enable "Message Content Intent" under Privileged Gateway Intents');
+        console.error('5. Save and restart the bot');
+        console.error('');
+    }
+    
     process.exit(1);
 });
