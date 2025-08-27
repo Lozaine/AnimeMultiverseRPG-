@@ -76,6 +76,9 @@ module.exports = {
                     { name: '🎯 Experience', value: `${character.experience}/100`, inline: true },
                     { name: '❤️ Health', value: `${baseStats.hp}/${baseStats.maxHp}`, inline: true },
                     { name: '⚔️ Attack', value: baseStats.atk.toString(), inline: true },
+                    { name: '🛡️ Defense', value: baseStats.def.toString(), inline: true },
+                    { name: '💨 Speed', value: baseStats.spd.toString(), inline: true },
+                    { name: '💰 Gold', value: character.gold.toString(), inline: true },
                     { name: '💪 Starting Ability', value: selectedFaction.startingAbility, inline: false },
                     { name: '🎁 Faction Perk', value: selectedFaction.perk, inline: false }
                 ])

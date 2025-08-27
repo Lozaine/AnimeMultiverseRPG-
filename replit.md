@@ -71,18 +71,21 @@ Preferred communication style: Simple, everyday language.
 - Added functions for XP calculations, level detection, and progress tracking
 
 #### Combat Stats System
-- Added HP and ATK stats to character database schema
-- Base stats: Level 1 starts with 100 HP, 20 ATK
-- Level-up bonuses: +10 HP, +2 ATK per level
+- Added comprehensive combat stats to character database schema: HP, ATK, DEF, SPD, XP
+- Base stats: Level 1 starts with 100 HP, 20 ATK, 10 DEF, 15 SPD
+- Level-up bonuses: +10 HP, +2 ATK, +1 DEF, +1 SPD per level
 - Automatic stat scaling based on character level
+- XP field added for future alternative experience tracking
 
 #### Enhanced Level-Up Experience
-- Rich embed notifications showing stat gains
-- Detailed level-up information (HP gained, ATK gained, new totals)
-- Updated profile command to display combat stats and accurate XP progress
+- Rich embed notifications showing all stat gains
+- Detailed level-up information (HP, ATK, DEF, SPD gained with new totals)
+- Updated profile command to display all combat stats and accurate XP progress
 - Level progress percentage display in character profiles
+- Character creation shows complete stat overview
 
 #### Database Migration
-- Added hp, max_hp, and atk columns to characters table
+- Added hp, max_hp, atk, def, spd, and xp columns to characters table
 - Backward compatibility with existing characters (default values applied)
 - Dynamic database schema updates during initialization
+- Complete stat tracking system implementation

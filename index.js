@@ -140,7 +140,10 @@ client.on('interactionCreate', async interaction => {
                             levelUpData.newLevel,
                             levelUpData.newStats.hp,
                             levelUpData.newStats.maxHp,
-                            levelUpData.newStats.atk
+                            levelUpData.newStats.atk,
+                            levelUpData.newStats.def,
+                            levelUpData.newStats.spd,
+                            newExp
                         );
                     } else {
                         await updateCharacterProgress(userId, newExp, newGold, character.level);
@@ -162,7 +165,9 @@ client.on('interactionCreate', async interaction => {
                                 name: '🆙 LEVEL UP!', 
                                 value: `You are now level ${levelUpData.newLevel}!\n` +
                                        `+${levelUpData.hpGained} HP (${levelUpData.newStats.maxHp} total)\n` +
-                                       `+${levelUpData.atkGained} ATK (${levelUpData.newStats.atk} total)`, 
+                                       `+${levelUpData.atkGained} ATK (${levelUpData.newStats.atk} total)\n` +
+                                       `+${levelUpData.defGained} DEF (${levelUpData.newStats.def} total)\n` +
+                                       `+${levelUpData.spdGained} SPD (${levelUpData.newStats.spd} total)`, 
                                 inline: false 
                             }
                         ]);
@@ -238,7 +243,10 @@ client.on('interactionCreate', async interaction => {
                             levelUpData.newLevel,
                             levelUpData.newStats.hp,
                             levelUpData.newStats.maxHp,
-                            levelUpData.newStats.atk
+                            levelUpData.newStats.atk,
+                            levelUpData.newStats.def,
+                            levelUpData.newStats.spd,
+                            newExp
                         );
                     } else {
                         await updateCharacterProgress(userId, newExp, newGold, character.level);
@@ -260,7 +268,9 @@ client.on('interactionCreate', async interaction => {
                                 name: '🆙 LEVEL UP!', 
                                 value: `You are now level ${levelUpData.newLevel}!\n` +
                                        `+${levelUpData.hpGained} HP (${levelUpData.newStats.maxHp} total)\n` +
-                                       `+${levelUpData.atkGained} ATK (${levelUpData.newStats.atk} total)`, 
+                                       `+${levelUpData.atkGained} ATK (${levelUpData.newStats.atk} total)\n` +
+                                       `+${levelUpData.defGained} DEF (${levelUpData.newStats.def} total)\n` +
+                                       `+${levelUpData.spdGained} SPD (${levelUpData.newStats.spd} total)`, 
                                 inline: false 
                             }
                         ]);

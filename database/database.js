@@ -25,10 +25,13 @@ async function initializeDatabase() {
                     faction TEXT NOT NULL,
                     level INTEGER DEFAULT 1,
                     experience INTEGER DEFAULT 0,
+                    xp INTEGER DEFAULT 0,
                     gold INTEGER DEFAULT 100,
                     hp INTEGER DEFAULT 100,
                     max_hp INTEGER DEFAULT 100,
                     atk INTEGER DEFAULT 20,
+                    def INTEGER DEFAULT 10,
+                    spd INTEGER DEFAULT 15,
                     completed_quests TEXT DEFAULT '',
                     devil_fruit TEXT,
                     chakra_nature TEXT,
@@ -45,6 +48,9 @@ async function initializeDatabase() {
                     db.run(`ALTER TABLE characters ADD COLUMN hp INTEGER DEFAULT 100`, () => {});
                     db.run(`ALTER TABLE characters ADD COLUMN max_hp INTEGER DEFAULT 100`, () => {});
                     db.run(`ALTER TABLE characters ADD COLUMN atk INTEGER DEFAULT 20`, () => {});
+                    db.run(`ALTER TABLE characters ADD COLUMN xp INTEGER DEFAULT 0`, () => {});
+                    db.run(`ALTER TABLE characters ADD COLUMN def INTEGER DEFAULT 10`, () => {});
+                    db.run(`ALTER TABLE characters ADD COLUMN spd INTEGER DEFAULT 15`, () => {});
                     resolve();
                 }
             });
@@ -87,7 +93,7 @@ async function getCharacter(userId) {
 }
 
 // Update character progress
-async function updateCharacterProgress(userId, experience, gold, level, hp = null, maxHp = null, atk = null) {
+async function updateCharacterProgress(userId, experience, gold, level, hp = null, maxHp = null, atk = null, def = null, spd = null, xp = null) {
     return new Promise((resolve, reject) => {
         // Build dynamic query based on provided parameters
         let query = `UPDATE characters SET experience = ?, gold = ?, level = ?, updated_at = CURRENT_TIMESTAMP`;
@@ -104,6 +110,18 @@ async function updateCharacterProgress(userId, experience, gold, level, hp = nul
         if (atk !== null) {
             query += `, atk = ?`;
             params.push(atk);
+        }
+        if (def !== null) {
+            query += `, def = ?`;
+            params.push(def);
+        }
+        if (spd !== null) {
+            query += `, spd = ?`;
+            params.push(spd);
+        }
+        if (xp !== null) {
+            query += `, xp = ?`;
+            params.push(xp);
         }
         
         query += ` WHERE user_id = ?`;

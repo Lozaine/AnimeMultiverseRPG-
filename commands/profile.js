@@ -38,10 +38,13 @@ module.exports = {
                     { name: '📈 Next Level', value: `${expToNext} XP needed`, inline: true },
                     { name: '❤️ Health', value: `${character.hp || 100}/${character.max_hp || 100}`, inline: true },
                     { name: '⚔️ Attack', value: `${character.atk || 20}`, inline: true },
+                    { name: '🛡️ Defense', value: `${character.def || 10}`, inline: true },
+                    { name: '💨 Speed', value: `${character.spd || 15}`, inline: true },
                     { name: '💰 Gold', value: character.gold.toString(), inline: true },
-                    { name: '🏴‍☠️ Faction', value: `${faction.emoji} ${faction.name}`, inline: true },
                     { name: '🏆 Quests Completed', value: completedQuests.toString(), inline: true },
+                    { name: '🏴‍☠️ Faction', value: `${faction.emoji} ${faction.name}`, inline: true },
                     { name: '📊 Total XP', value: character.experience.toString(), inline: true },
+                    { name: '📊 Current XP', value: `${character.xp || character.experience}`, inline: true },
                     { name: '🎁 Faction Perk', value: faction.perk, inline: false },
                     { name: '💪 Special Ability', value: faction.startingAbility, inline: false }
                 ])
