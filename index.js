@@ -54,24 +54,254 @@ client.once('ready', async () => {
     client.user.setActivity('⚔️ Cross Realm Chronicles | Use slash commands', { type: 'PLAYING' });
 });
 
-// Slash command handler
+// Interaction handler (slash commands and buttons)
 client.on('interactionCreate', async interaction => {
-    if (!interaction.isChatInputCommand()) return;
+    // Handle slash commands
+    if (interaction.isChatInputCommand()) {
+        const command = client.commands.get(interaction.commandName);
+        if (!command) return;
 
-    const command = client.commands.get(interaction.commandName);
-    if (!command) return;
+        try {
+            await command.execute(interaction);
+        } catch (error) {
+            console.error('Command execution error:', error);
+            
+            const errorMessage = '❌ There was an error executing that command!';
+            
+            if (interaction.replied || interaction.deferred) {
+                await interaction.followUp({ content: errorMessage, ephemeral: true });
+            } else {
+                await interaction.reply({ content: errorMessage, ephemeral: true });
+            }
+        }
+    }
+    
+    // Handle button interactions
+    else if (interaction.isButton()) {
+        try {
+            const { getCharacter, updateCharacterProgress } = require('./database/database');
+            const { FACTIONS } = require('./utils/factions');
+            const { QUESTS } = require('./utils/quests');
+            const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+            
+            const userId = interaction.user.id;
+            const character = await getCharacter(userId);
+            
+            if (!character) {
+                return interaction.reply({ 
+                    content: '❌ You need to create a character first! Use `/create`', 
+                    ephemeral: true 
+                });
+            }
+            
+            const faction = FACTIONS[character.faction];
+            
+            // Handle quest selection buttons
+            if (interaction.customId.startsWith('quest_')) {
+                const questNumber = parseInt(interaction.customId.split('_')[1]);
+                const selectedQuest = QUESTS[character.faction][questNumber - 1];
+                
+                // Check level requirement
+                if (character.level < selectedQuest.levelRequirement) {
+                    return interaction.reply({
+                        content: `❌ You need to be level ${selectedQuest.levelRequirement} to attempt this quest. You are currently level ${character.level}.`,
+                        ephemeral: true
+                    });
+                }
+                
+                // Execute quest
+                const successRate = Math.min(0.7 + (character.level * 0.05), 0.95);
+                const success = Math.random() < successRate;
+                
+                if (success) {
+                    // Quest successful
+                    const newExp = character.experience + selectedQuest.reward.experience;
+                    const newGold = character.gold + selectedQuest.reward.gold;
+                    let newLevel = character.level;
+                    
+                    // Check for level up
+                    const expNeeded = newLevel * 100;
+                    if (newExp >= expNeeded) {
+                        newLevel++;
+                    }
+                    
+                    // Update character
+                    await updateCharacterProgress(userId, newExp, newGold, newLevel);
+                    
+                    const embed = new EmbedBuilder()
+                        .setColor('#00ff00')
+                        .setTitle('🎉 Quest Completed Successfully!')
+                        .setDescription(`**${selectedQuest.name}**\n${selectedQuest.successMessage}`)
+                        .addFields([
+                            { name: '💰 Gold Earned', value: selectedQuest.reward.gold.toString(), inline: true },
+                            { name: '⭐ Experience Gained', value: selectedQuest.reward.experience.toString(), inline: true },
+                            { name: '📊 Total Experience', value: newExp.toString(), inline: true }
+                        ]);
+                        
+                    if (newLevel > character.level) {
+                        embed.addFields([{ name: '🆙 LEVEL UP!', value: `You are now level ${newLevel}!`, inline: false }]);
+                    }
+                    
+                    // Add repeat and back buttons
+                    const actionRow = new ActionRowBuilder()
+                        .addComponents(
+                            new ButtonBuilder()
+                                .setCustomId(`repeat_quest_${questNumber}`)
+                                .setLabel('🔄 Repeat Quest')
+                                .setStyle(ButtonStyle.Success),
+                            new ButtonBuilder()
+                                .setCustomId('quest_back')
+                                .setLabel('⬅️ Back to Quest List')
+                                .setStyle(ButtonStyle.Secondary)
+                        );
+                        
+                    await interaction.reply({ embeds: [embed], components: [actionRow] });
+                } else {
+                    // Quest failed
+                    const embed = new EmbedBuilder()
+                        .setColor('#ff6b6b')
+                        .setTitle('💥 Quest Failed!')
+                        .setDescription(`**${selectedQuest.name}**\n${selectedQuest.failureMessage || 'You failed to complete the quest. Train harder and try again!'}`)
+                        .setFooter({ text: 'Don\'t give up! Try again when you\'re stronger.' });
+                        
+                    // Add retry and back buttons
+                    const actionRow = new ActionRowBuilder()
+                        .addComponents(
+                            new ButtonBuilder()
+                                .setCustomId(`repeat_quest_${questNumber}`)
+                                .setLabel('🔄 Try Again')
+                                .setStyle(ButtonStyle.Danger),
+                            new ButtonBuilder()
+                                .setCustomId('quest_back')
+                                .setLabel('⬅️ Back to Quest List')
+                                .setStyle(ButtonStyle.Secondary)
+                        );
+                        
+                    await interaction.reply({ embeds: [embed], components: [actionRow] });
+                }
+            }
+            
+            // Handle repeat quest buttons
+            else if (interaction.customId.startsWith('repeat_quest_')) {
+                const questNumber = parseInt(interaction.customId.split('_')[2]);
+                const selectedQuest = QUESTS[character.faction][questNumber - 1];
+                
+                // Execute quest again
+                const successRate = Math.min(0.7 + (character.level * 0.05), 0.95);
+                const success = Math.random() < successRate;
+                
+                if (success) {
+                    // Quest successful
+                    const newExp = character.experience + selectedQuest.reward.experience;
+                    const newGold = character.gold + selectedQuest.reward.gold;
+                    let newLevel = character.level;
+                    
+                    // Check for level up
+                    const expNeeded = newLevel * 100;
+                    if (newExp >= expNeeded) {
+                        newLevel++;
+                    }
+                    
+                    // Update character
+                    await updateCharacterProgress(userId, newExp, newGold, newLevel);
+                    
+                    const embed = new EmbedBuilder()
+                        .setColor('#00ff00')
+                        .setTitle('🎉 Quest Completed Successfully!')
+                        .setDescription(`**${selectedQuest.name}**\n${selectedQuest.successMessage}`)
+                        .addFields([
+                            { name: '💰 Gold Earned', value: selectedQuest.reward.gold.toString(), inline: true },
+                            { name: '⭐ Experience Gained', value: selectedQuest.reward.experience.toString(), inline: true },
+                            { name: '📊 Total Experience', value: newExp.toString(), inline: true }
+                        ]);
+                        
+                    if (newLevel > character.level) {
+                        embed.addFields([{ name: '🆙 LEVEL UP!', value: `You are now level ${newLevel}!`, inline: false }]);
+                    }
+                    
+                    // Add repeat and back buttons
+                    const actionRow = new ActionRowBuilder()
+                        .addComponents(
+                            new ButtonBuilder()
+                                .setCustomId(`repeat_quest_${questNumber}`)
+                                .setLabel('🔄 Repeat Quest')
+                                .setStyle(ButtonStyle.Success),
+                            new ButtonBuilder()
+                                .setCustomId('quest_back')
+                                .setLabel('⬅️ Back to Quest List')
+                                .setStyle(ButtonStyle.Secondary)
+                        );
+                        
+                    await interaction.update({ embeds: [embed], components: [actionRow] });
+                } else {
+                    // Quest failed
+                    const embed = new EmbedBuilder()
+                        .setColor('#ff6b6b')
+                        .setTitle('💥 Quest Failed!')
+                        .setDescription(`**${selectedQuest.name}**\n${selectedQuest.failureMessage || 'You failed to complete the quest. Train harder and try again!'}`)
+                        .setFooter({ text: 'Don\'t give up! Try again when you\'re stronger.' });
+                        
+                    // Add retry and back buttons
+                    const actionRow = new ActionRowBuilder()
+                        .addComponents(
+                            new ButtonBuilder()
+                                .setCustomId(`repeat_quest_${questNumber}`)
+                                .setLabel('🔄 Try Again')
+                                .setStyle(ButtonStyle.Danger),
+                            new ButtonBuilder()
+                                .setCustomId('quest_back')
+                                .setLabel('⬅️ Back to Quest List')
+                                .setStyle(ButtonStyle.Secondary)
+                        );
+                        
+                    await interaction.update({ embeds: [embed], components: [actionRow] });
+                }
+            }
+            
+            // Handle back to quest list button
+            else if (interaction.customId === 'quest_back') {
+                const questList = QUESTS[character.faction].map((quest, index) => {
+                    const levelReq = quest.levelRequirement > character.level ? 
+                        `❌ (Level ${quest.levelRequirement} required)` : 
+                        `✅ Available`;
+                    return `**${index + 1}. ${quest.name}**\n${quest.description}\n**Reward:** ${quest.reward.experience} XP, ${quest.reward.gold} Gold\n**Status:** ${levelReq}`;
+                }).join('\n\n');
 
-    try {
-        await command.execute(interaction);
-    } catch (error) {
-        console.error('Command execution error:', error);
-        
-        const errorMessage = '❌ There was an error executing that command!';
-        
-        if (interaction.replied || interaction.deferred) {
-            await interaction.followUp({ content: errorMessage, ephemeral: true });
-        } else {
-            await interaction.reply({ content: errorMessage, ephemeral: true });
+                const embed = new EmbedBuilder()
+                    .setColor(faction.color)
+                    .setTitle(`${faction.emoji} Available Quests`)
+                    .setDescription(`Choose a quest for your ${faction.name} character:\n\n${questList}`)
+                    .setFooter({ text: 'Click a button to start a quest!' });
+
+                // Create quest selection buttons
+                const buttons = [];
+                for (let i = 0; i < Math.min(QUESTS[character.faction].length, 5); i++) {
+                    const quest = QUESTS[character.faction][i];
+                    const isAvailable = character.level >= quest.levelRequirement;
+                    buttons.push(
+                        new ButtonBuilder()
+                            .setCustomId(`quest_${i + 1}`)
+                            .setLabel(`${i + 1}. ${quest.name.substring(0, 20)}`)
+                            .setStyle(isAvailable ? ButtonStyle.Primary : ButtonStyle.Secondary)
+                            .setDisabled(!isAvailable)
+                    );
+                }
+
+                const row = new ActionRowBuilder().addComponents(buttons);
+                
+                await interaction.update({ embeds: [embed], components: [row] });
+            }
+            
+        } catch (error) {
+            console.error('Button interaction error:', error);
+            
+            const errorMessage = '❌ There was an error processing your request!';
+            
+            if (interaction.replied || interaction.deferred) {
+                await interaction.followUp({ content: errorMessage, ephemeral: true });
+            } else {
+                await interaction.reply({ content: errorMessage, ephemeral: true });
+            }
         }
     }
 });

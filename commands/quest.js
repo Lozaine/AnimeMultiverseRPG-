@@ -1,4 +1,4 @@
-const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
+const { EmbedBuilder, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { getCharacter, updateCharacterProgress, completeQuest } = require('../database/database');
 const { FACTIONS } = require('../utils/factions');
 const { generateQuest, QUESTS } = require('../utils/quests');
@@ -51,10 +51,26 @@ module.exports = {
                 const embed = new EmbedBuilder()
                     .setColor(faction.color)
                     .setTitle(`${faction.emoji} Available Quests`)
-                    .setDescription(`Choose a quest for your ${faction.name} character:\n\n${questList}\n\nUse: \`/quest start number:[quest_number]\``)
-                    .setFooter({ text: 'Complete quests to gain experience and gold!' });
+                    .setDescription(`Choose a quest for your ${faction.name} character:\n\n${questList}`)
+                    .setFooter({ text: 'Click a button to start a quest!' });
+
+                // Create quest selection buttons
+                const buttons = [];
+                for (let i = 0; i < Math.min(QUESTS[character.faction].length, 5); i++) {
+                    const quest = QUESTS[character.faction][i];
+                    const isAvailable = character.level >= quest.levelRequirement;
+                    buttons.push(
+                        new ButtonBuilder()
+                            .setCustomId(`quest_${i + 1}`)
+                            .setLabel(`${i + 1}. ${quest.name.substring(0, 20)}`)
+                            .setStyle(isAvailable ? ButtonStyle.Primary : ButtonStyle.Secondary)
+                            .setDisabled(!isAvailable)
+                    );
+                }
+
+                const row = new ActionRowBuilder().addComponents(buttons);
                 
-                return interaction.reply({ embeds: [embed] });
+                return interaction.reply({ embeds: [embed], components: [row] });
             }
 
             // Handle quest start
@@ -79,16 +95,7 @@ module.exports = {
                     return interaction.reply({ embeds: [embed] });
                 }
 
-                // Check if quest already completed
-                const completedQuests = character.completed_quests ? character.completed_quests.split(',') : [];
-                const questId = `${character.faction}_${questChoice - 1}`;
-                
-                if (completedQuests.includes(questId)) {
-                    const embed = createEmbed('Quest Already Completed', 
-                        'You have already completed this quest!', 
-                        '#ff6b6b');
-                    return interaction.reply({ embeds: [embed] });
-                }
+                // Quests are now repeatable - removed completion check
 
                 // Simulate quest completion (simple success rate based on level)
                 const successRate = Math.min(0.7 + (character.level * 0.05), 0.95);
@@ -108,7 +115,6 @@ module.exports = {
 
                     // Update character
                     await updateCharacterProgress(userId, newExp, newGold, newLevel);
-                    await completeQuest(userId, questId);
 
                     const embed = new EmbedBuilder()
                         .setColor('#00ff00')
@@ -124,7 +130,20 @@ module.exports = {
                         embed.addFields([{ name: '🆙 LEVEL UP!', value: `You are now level ${newLevel}!`, inline: false }]);
                     }
 
-                    interaction.reply({ embeds: [embed] });
+                    // Add repeat and back buttons
+                    const actionRow = new ActionRowBuilder()
+                        .addComponents(
+                            new ButtonBuilder()
+                                .setCustomId(`repeat_quest_${questChoice}`)
+                                .setLabel('🔄 Repeat Quest')
+                                .setStyle(ButtonStyle.Success),
+                            new ButtonBuilder()
+                                .setCustomId('quest_back')
+                                .setLabel('⬅️ Back to Quest List')
+                                .setStyle(ButtonStyle.Secondary)
+                        );
+
+                    interaction.reply({ embeds: [embed], components: [actionRow] });
                 } else {
                     // Quest failed
                     const embed = new EmbedBuilder()
@@ -133,7 +152,20 @@ module.exports = {
                         .setDescription(`**${selectedQuest.name}**\n${selectedQuest.failureMessage || 'You failed to complete the quest. Train harder and try again!'}`)
                         .setFooter({ text: 'Don\'t give up! Try again when you\'re stronger.' });
 
-                    interaction.reply({ embeds: [embed] });
+                    // Add retry and back buttons
+                    const actionRow = new ActionRowBuilder()
+                        .addComponents(
+                            new ButtonBuilder()
+                                .setCustomId(`repeat_quest_${questChoice}`)
+                                .setLabel('🔄 Try Again')
+                                .setStyle(ButtonStyle.Danger),
+                            new ButtonBuilder()
+                                .setCustomId('quest_back')
+                                .setLabel('⬅️ Back to Quest List')
+                                .setStyle(ButtonStyle.Secondary)
+                        );
+
+                    interaction.reply({ embeds: [embed], components: [actionRow] });
                 }
             }
 

@@ -38,7 +38,7 @@ const QUESTS = {
             name: 'Village Patrol Mission',
             description: 'Patrol the village borders and report any suspicious activity',
             levelRequirement: 1,
-            reward: { experience: 45, gold: 60 },
+            reward: { experience: 50, gold: 75 },
             successMessage: 'Your patrol was successful! You helped maintain village security.',
             failureMessage: 'You missed some suspicious activity during your patrol. More training needed.'
         },
@@ -46,7 +46,7 @@ const QUESTS = {
             name: 'Bandit Elimination',
             description: 'Eliminate a group of bandits threatening nearby merchants',
             levelRequirement: 3,
-            reward: { experience: 90, gold: 120 },
+            reward: { experience: 100, gold: 150 },
             successMessage: 'You defeated the bandits and saved the merchants! They reward you generously.',
             failureMessage: 'The bandits were more skilled than expected and you had to retreat.'
         },
@@ -54,7 +54,7 @@ const QUESTS = {
             name: 'Chunin Exam Trial',
             description: 'Participate in a challenging Chunin Exam trial',
             levelRequirement: 5,
-            reward: { experience: 180, gold: 250 },
+            reward: { experience: 200, gold: 300 },
             successMessage: 'You passed the Chunin Exam trial! Your ninja rank has improved.',
             failureMessage: 'The trial was too difficult and you failed to meet the requirements.'
         },
@@ -62,7 +62,7 @@ const QUESTS = {
             name: 'Akatsuki Investigation',
             description: 'Investigate mysterious Akatsuki activity in the region',
             levelRequirement: 8,
-            reward: { experience: 320, gold: 450 },
+            reward: { experience: 350, gold: 500 },
             successMessage: 'You uncovered crucial information about Akatsuki plans! The village is grateful.',
             failureMessage: 'The Akatsuki members detected your presence and you had to abort the mission.'
         }
@@ -72,7 +72,7 @@ const QUESTS = {
             name: 'Curse Spirit Exorcism',
             description: 'Exorcise a low-grade curse spirit haunting a school',
             levelRequirement: 1,
-            reward: { experience: 55, gold: 80 },
+            reward: { experience: 50, gold: 75 },
             successMessage: 'You successfully exorcised the curse spirit! The school is now safe.',
             failureMessage: 'The curse spirit was stronger than expected and managed to escape.'
         },
@@ -80,7 +80,7 @@ const QUESTS = {
             name: 'Cursed Object Retrieval',
             description: 'Retrieve a dangerous cursed object before it causes harm',
             levelRequirement: 3,
-            reward: { experience: 110, gold: 160 },
+            reward: { experience: 100, gold: 150 },
             successMessage: 'You secured the cursed object! It\'s now safely contained.',
             failureMessage: 'The cursed object\'s influence was too strong and you couldn\'t approach it.'
         },
@@ -88,7 +88,7 @@ const QUESTS = {
             name: 'Special Grade Investigation',
             description: 'Investigate reports of a Special Grade curse manifestation',
             levelRequirement: 5,
-            reward: { experience: 220, gold: 320 },
+            reward: { experience: 200, gold: 300 },
             successMessage: 'You gathered crucial intelligence on the Special Grade curse! Jujutsu High is impressed.',
             failureMessage: 'The Special Grade curse\'s presence was overwhelming and you had to retreat.'
         },
@@ -96,7 +96,7 @@ const QUESTS = {
             name: 'Domain Expansion Training',
             description: 'Train to develop your own Domain Expansion technique',
             levelRequirement: 8,
-            reward: { experience: 380, gold: 550 },
+            reward: { experience: 350, gold: 500 },
             successMessage: 'You successfully manifested your Domain Expansion! Your cursed technique has evolved.',
             failureMessage: 'The Domain Expansion training was too intense and you couldn\'t maintain it.'
         }
@@ -106,7 +106,7 @@ const QUESTS = {
             name: 'Final Selection Trial',
             description: 'Survive the dangerous Final Selection on Mount Fujikasane',
             levelRequirement: 1,
-            reward: { experience: 60, gold: 70 },
+            reward: { experience: 50, gold: 75 },
             successMessage: 'You survived the Final Selection! You are now officially a Demon Slayer.',
             failureMessage: 'The demons on the mountain were too numerous and you barely escaped.'
         },
@@ -114,7 +114,7 @@ const QUESTS = {
             name: 'Demon Hunt Mission',
             description: 'Hunt down a demon terrorizing a nearby village',
             levelRequirement: 3,
-            reward: { experience: 120, gold: 140 },
+            reward: { experience: 100, gold: 150 },
             successMessage: 'You successfully slayed the demon! The village celebrates your heroism.',
             failureMessage: 'The demon was more cunning than expected and escaped into the night.'
         },
@@ -122,7 +122,7 @@ const QUESTS = {
             name: 'Breathing Technique Mastery',
             description: 'Master an advanced form of your breathing technique',
             levelRequirement: 5,
-            reward: { experience: 240, gold: 280 },
+            reward: { experience: 200, gold: 300 },
             successMessage: 'You mastered a new breathing form! Your combat abilities have greatly improved.',
             failureMessage: 'The breathing technique was too complex and you couldn\'t maintain the proper form.'
         },
@@ -130,7 +130,7 @@ const QUESTS = {
             name: 'Twelve Kizuki Encounter',
             description: 'Face one of the powerful Twelve Kizuki demons',
             levelRequirement: 8,
-            reward: { experience: 400, gold: 600 },
+            reward: { experience: 350, gold: 500 },
             successMessage: 'You defeated one of the Twelve Kizuki! Your name will be remembered among the Corps.',
             failureMessage: 'The Twelve Kizuki demon was incredibly powerful and you barely survived the encounter.'
         }
