@@ -94,12 +94,12 @@ module.exports = {
                             { name: '📜 Quest', value: `${quest.name} ${getCategoryEmoji(quest.category)}`, inline: false },
                             { 
                                 name: '📊 Rewards', 
-                                value: `+${xpGained} XP\\n+${coinsGained} Coins${itemReceived ? `\\n${itemReceived.name} (${itemReceived.description})` : ''}`, 
+                                value: `+${xpGained} XP\n+${coinsGained} Coins${itemReceived ? `\n${itemReceived.name} (${itemReceived.description})` : ''}`, 
                                 inline: false 
                             },
                             { 
                                 name: '🧑‍🎤 Progress', 
-                                value: `Level: ${character.level}${levelUpData.leveledUp ? ` → ${levelUpData.newLevel}` : ''}\\nXP: ${finalNewExp} / ${levelUpData.leveledUp ? levelUpData.newLevel * 100 : character.level * 100}\\nCoins: ${finalNewGold}`, 
+                                value: `Level: ${character.level}${levelUpData.leveledUp ? ` → ${levelUpData.newLevel}` : ''}\nXP: ${finalNewExp} / ${levelUpData.leveledUp ? levelUpData.newLevel * 100 : character.level * 100}\nCoins: ${finalNewGold}`, 
                                 inline: false 
                             }
                         ])
@@ -110,10 +110,10 @@ module.exports = {
                         embed.addFields([
                             { 
                                 name: '🆙 LEVEL UP!', 
-                                value: `You are now level ${levelUpData.newLevel}!\\n` +
-                                       `+${levelUpData.hpGained} HP (${levelUpData.newStats.maxHp} total)\\n` +
-                                       `+${levelUpData.atkGained} ATK (${levelUpData.newStats.atk} total)\\n` +
-                                       `+${levelUpData.defGained} DEF (${levelUpData.newStats.def} total)\\n` +
+                                value: `You are now level ${levelUpData.newLevel}!\n` +
+                                       `+${levelUpData.hpGained} HP (${levelUpData.newStats.maxHp} total)\n` +
+                                       `+${levelUpData.atkGained} ATK (${levelUpData.newStats.atk} total)\n` +
+                                       `+${levelUpData.defGained} DEF (${levelUpData.newStats.def} total)\n` +
                                        `+${levelUpData.spdGained} SPD (${levelUpData.newStats.spd} total)`, 
                                 inline: false 
                             }
@@ -160,12 +160,12 @@ module.exports = {
                             { name: '📜 Quest', value: `${quest.name} ${getCategoryEmoji(quest.category)}`, inline: false },
                             { 
                                 name: '📊 Partial Rewards', 
-                                value: `+${reducedXP} XP\\n+${reducedCoins} Coins`, 
+                                value: `+${reducedXP} XP\n+${reducedCoins} Coins`, 
                                 inline: false 
                             },
                             { 
                                 name: '🧑‍🎤 Progress', 
-                                value: `Level: ${character.level}${levelUpData.leveledUp ? ` → ${levelUpData.newLevel}` : ''}\\nXP: ${newExp} / ${levelUpData.leveledUp ? levelUpData.newLevel * 100 : character.level * 100}\\nCoins: ${newGold}`, 
+                                value: `Level: ${character.level}${levelUpData.leveledUp ? ` → ${levelUpData.newLevel}` : ''}\nXP: ${newExp} / ${levelUpData.leveledUp ? levelUpData.newLevel * 100 : character.level * 100}\nCoins: ${newGold}`, 
                                 inline: false 
                             }
                         ])
@@ -176,10 +176,10 @@ module.exports = {
                         embed.addFields([
                             { 
                                 name: '🆙 LEVEL UP!', 
-                                value: `You are now level ${levelUpData.newLevel}!\\n` +
-                                       `+${levelUpData.hpGained} HP (${levelUpData.newStats.maxHp} total)\\n` +
-                                       `+${levelUpData.atkGained} ATK (${levelUpData.newStats.atk} total)\\n` +
-                                       `+${levelUpData.defGained} DEF (${levelUpData.newStats.def} total)\\n` +
+                                value: `You are now level ${levelUpData.newLevel}!\n` +
+                                       `+${levelUpData.hpGained} HP (${levelUpData.newStats.maxHp} total)\n` +
+                                       `+${levelUpData.atkGained} ATK (${levelUpData.newStats.atk} total)\n` +
+                                       `+${levelUpData.defGained} DEF (${levelUpData.newStats.def} total)\n` +
                                        `+${levelUpData.spdGained} SPD (${levelUpData.newStats.spd} total)`, 
                                 inline: false 
                             }
