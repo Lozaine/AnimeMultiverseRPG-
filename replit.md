@@ -60,6 +60,11 @@ Preferred communication style: Simple, everyday language.
 - **Database File**: Local SQLite file storage in `/database` directory
 - **Level Progression Module**: `/utils/levelProgression.js` - Contains all leveling calculations and stat management
 
+## Documentation
+
+### Changelog
+For detailed development history, see [CHANGELOG.md](./CHANGELOG.md) which tracks all changes, features, and technical decisions during development phases.
+
 ## Recent Changes
 
 ### Level Progression System Implementation (Phase 1: Foundation)
