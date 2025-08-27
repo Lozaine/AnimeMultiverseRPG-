@@ -32,7 +32,6 @@ async function initializeDatabase() {
                     atk INTEGER DEFAULT 20,
                     def INTEGER DEFAULT 10,
                     spd INTEGER DEFAULT 15,
-                    completed_quests TEXT DEFAULT '',
                     devil_fruit TEXT,
                     chakra_nature TEXT,
                     cursed_technique TEXT,
@@ -137,36 +136,6 @@ async function updateCharacterProgress(userId, experience, gold, level, hp = nul
     });
 }
 
-// Complete a quest
-async function completeQuest(userId, questId) {
-    return new Promise((resolve, reject) => {
-        // First get current completed quests
-        getCharacter(userId).then(character => {
-            const currentQuests = character.completed_quests || '';
-            const questList = currentQuests ? currentQuests.split(',') : [];
-            
-            if (!questList.includes(questId)) {
-                questList.push(questId);
-            }
-            
-            const updatedQuests = questList.join(',');
-            
-            const query = `
-                UPDATE characters 
-                SET completed_quests = ?, updated_at = CURRENT_TIMESTAMP
-                WHERE user_id = ?
-            `;
-            
-            db.run(query, [updatedQuests, userId], function(err) {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(this.changes);
-                }
-            });
-        }).catch(reject);
-    });
-}
 
 // Get all characters (for leaderboards)
 async function getAllCharacters() {
@@ -199,7 +168,6 @@ module.exports = {
     createCharacter,
     getCharacter,
     updateCharacterProgress,
-    completeQuest,
     getAllCharacters,
     closeDatabase
 };
