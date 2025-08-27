@@ -50,24 +50,18 @@ function getExpProgressInLevel(totalExp, currentLevel) {
  * Calculate base stats for a given level
  */
 function getBaseStatsForLevel(level) {
-    // Base stats at level 1: 100 HP, 20 ATK, 15 DEF, 10 SPD
-    // Each level up: +10 HP, +2 ATK, +1 DEF, +1 SPD
+    // Base stats at level 1: 100 HP, 20 ATK
+    // Each level up: +10 HP, +2 ATK
     const baseHp = 100;
     const baseAtk = 20;
-    const baseDef = 15;
-    const baseSpd = 10;
     
     const hp = baseHp + ((level - 1) * 10);
     const atk = baseAtk + ((level - 1) * 2);
-    const def = baseDef + ((level - 1) * 1);
-    const spd = baseSpd + ((level - 1) * 1);
     
     return {
         hp: hp,
         maxHp: hp,
-        atk: atk,
-        def: def,
-        spd: spd
+        atk: atk
     };
 }
 
@@ -81,17 +75,13 @@ function checkLevelUp(currentLevel, currentExp, newExp) {
         const newStats = getBaseStatsForLevel(newLevel);
         const levelsGained = newLevel - currentLevel;
         
-        const oldStats = getBaseStatsForLevel(currentLevel);
-        
         return {
             leveledUp: true,
             newLevel: newLevel,
             levelsGained: levelsGained,
             newStats: newStats,
-            hpGained: newStats.maxHp - oldStats.maxHp,
-            atkGained: newStats.atk - oldStats.atk,
-            defGained: newStats.def - oldStats.def,
-            spdGained: newStats.spd - oldStats.spd
+            hpGained: newStats.maxHp - getBaseStatsForLevel(currentLevel).maxHp,
+            atkGained: newStats.atk - getBaseStatsForLevel(currentLevel).atk
         };
     }
     

@@ -17,7 +17,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
 async function initializeDatabase() {
     return new Promise((resolve, reject) => {
         db.serialize(() => {
-            // Create characters table (legacy support)
+            // Create characters table
             db.run(`
                 CREATE TABLE IF NOT EXISTS characters (
                     user_id TEXT PRIMARY KEY,
@@ -39,27 +39,12 @@ async function initializeDatabase() {
                 )
             `, (err) => {
                 if (err) {
-                    console.error('Error creating characters table:', err);
-                }
-            });
-
-            // Create new players table with enhanced stats
-            db.run(`
-                CREATE TABLE IF NOT EXISTS players (
-                    userId TEXT PRIMARY KEY,
-                    name TEXT,
-                    faction TEXT,
-                    level INTEGER DEFAULT 1,
-                    xp INTEGER DEFAULT 0,
-                    hp INTEGER DEFAULT 100,
-                    atk INTEGER DEFAULT 20,
-                    def INTEGER DEFAULT 15,
-                    spd INTEGER DEFAULT 10
-                )
-            `, (err) => {
-                if (err) {
                     reject(err);
                 } else {
+                    // Add columns for existing characters if they don't exist
+                    db.run(`ALTER TABLE characters ADD COLUMN hp INTEGER DEFAULT 100`, () => {});
+                    db.run(`ALTER TABLE characters ADD COLUMN max_hp INTEGER DEFAULT 100`, () => {});
+                    db.run(`ALTER TABLE characters ADD COLUMN atk INTEGER DEFAULT 20`, () => {});
                     resolve();
                 }
             });
@@ -191,80 +176,6 @@ function closeDatabase() {
     });
 }
 
-// Create a new player
-async function createPlayer(userId, faction) {
-    return new Promise((resolve, reject) => {
-        const query = `
-            INSERT INTO players (userId, name, faction)
-            VALUES (?, ?, ?)
-        `;
-        
-        // Generate name from userId (can be customized later)
-        const name = `Player_${userId.slice(-4)}`;
-        
-        db.run(query, [userId, name, faction], function(err) {
-            if (err) {
-                reject(err);
-            } else {
-                // Return the created player
-                getPlayer(userId).then(resolve).catch(reject);
-            }
-        });
-    });
-}
-
-// Get player by user ID
-async function getPlayer(userId) {
-    return new Promise((resolve, reject) => {
-        const query = `SELECT * FROM players WHERE userId = ?`;
-        
-        db.get(query, [userId], (err, row) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(row);
-            }
-        });
-    });
-}
-
-// Update player data
-async function updatePlayer(userId, data) {
-    return new Promise((resolve, reject) => {
-        // Build dynamic query based on provided data
-        const updateFields = [];
-        const params = [];
-        
-        // Allowed fields for update
-        const allowedFields = ['name', 'faction', 'level', 'xp', 'hp', 'atk', 'def', 'spd'];
-        
-        allowedFields.forEach(field => {
-            if (data[field] !== undefined) {
-                updateFields.push(`${field} = ?`);
-                params.push(data[field]);
-            }
-        });
-        
-        if (updateFields.length === 0) {
-            reject(new Error('No valid fields provided for update'));
-            return;
-        }
-        
-        params.push(userId); // Add userId for WHERE clause
-        
-        const query = `UPDATE players SET ${updateFields.join(', ')} WHERE userId = ?`;
-        
-        db.run(query, params, function(err) {
-            if (err) {
-                reject(err);
-            } else {
-                // Return updated player data
-                getPlayer(userId).then(resolve).catch(reject);
-            }
-        });
-    });
-}
-
 module.exports = {
     initializeDatabase,
     createCharacter,
@@ -272,9 +183,5 @@ module.exports = {
     updateCharacterProgress,
     completeQuest,
     getAllCharacters,
-    closeDatabase,
-    // New player functions
-    createPlayer,
-    getPlayer,
-    updatePlayer
+    closeDatabase
 };
