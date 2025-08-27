@@ -2,6 +2,7 @@ const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
 const { getCharacter } = require('../database/database');
 const { FACTIONS } = require('../utils/factions');
 const { createEmbed } = require('../utils/embeds');
+const { getExpRequiredForLevel, getExpProgressInLevel, getLevelProgress } = require('../utils/levelProgression');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -21,7 +22,10 @@ module.exports = {
             }
 
             const faction = FACTIONS[character.faction];
-            const expToNext = (character.level * 100) - character.experience;
+            const expForCurrentLevel = getExpRequiredForLevel(character.level + 1);
+            const expInCurrentLevel = getExpProgressInLevel(character.experience, character.level);
+            const expToNext = expForCurrentLevel - expInCurrentLevel;
+            const levelProgress = getLevelProgress(character.level, character.experience);
             const completedQuests = character.completed_quests ? character.completed_quests.split(',').length : 0;
 
             const embed = new EmbedBuilder()
@@ -30,11 +34,14 @@ module.exports = {
                 .setDescription(`**${faction.name}** Warrior`)
                 .addFields([
                     { name: '⭐ Level', value: character.level.toString(), inline: true },
-                    { name: '🎯 Experience', value: `${character.experience}/${character.level * 100}`, inline: true },
+                    { name: '🎯 Experience', value: `${expInCurrentLevel}/${expForCurrentLevel} (${levelProgress}%)`, inline: true },
                     { name: '📈 Next Level', value: `${expToNext} XP needed`, inline: true },
-                    { name: '⚔️ Faction', value: `${faction.emoji} ${faction.name}`, inline: true },
-                    { name: '🏆 Quests Completed', value: completedQuests.toString(), inline: true },
+                    { name: '❤️ Health', value: `${character.hp || 100}/${character.max_hp || 100}`, inline: true },
+                    { name: '⚔️ Attack', value: `${character.atk || 20}`, inline: true },
                     { name: '💰 Gold', value: character.gold.toString(), inline: true },
+                    { name: '🏴‍☠️ Faction', value: `${faction.emoji} ${faction.name}`, inline: true },
+                    { name: '🏆 Quests Completed', value: completedQuests.toString(), inline: true },
+                    { name: '📊 Total XP', value: character.experience.toString(), inline: true },
                     { name: '🎁 Faction Perk', value: faction.perk, inline: false },
                     { name: '💪 Special Ability', value: faction.startingAbility, inline: false }
                 ])

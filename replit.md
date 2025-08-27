@@ -23,7 +23,9 @@ Preferred communication style: Simple, everyday language.
 
 ### Character System
 - **Faction-Based Gameplay**: Four distinct anime factions with unique abilities, perks, and quest types
-- **Progressive Leveling**: Experience-based level system with faction-specific ability unlocks
+- **Progressive Leveling**: Experience-based level system with increasing XP requirements (Level 1 → 100 XP, Level 2 → 200 XP, Level 3 → 300 XP, etc.)
+- **Combat Stats**: HP and ATK stats that increase with each level up (+10 HP, +2 ATK per level)
+- **Level-Up Notifications**: Rich embed notifications showing stat gains and new totals
 - **Flexible Attributes**: Dynamic character attributes that vary by faction (Devil Fruits, Chakra Nature, Cursed Techniques, Breathing Styles)
 
 ### Quest System
@@ -35,6 +37,7 @@ Preferred communication style: Simple, everyday language.
 - **Embed System**: Standardized Discord embed creation with consistent styling and color schemes
 - **Faction Configuration**: Centralized faction data including abilities, colors, and progression trees
 - **Quest Configuration**: Structured quest data with level requirements and reward systems
+- **Level Progression System**: Comprehensive leveling utilities including XP calculations, stat scaling, and level-up detection
 
 ## External Dependencies
 
@@ -48,9 +51,38 @@ Preferred communication style: Simple, everyday language.
 - **Activity Status**: Bot presence and activity display
 
 ### Database Schema
-- **Characters Table**: Stores user_id, name, faction, level, experience, gold, completed quests, and faction-specific attributes
+- **Characters Table**: Stores user_id, name, faction, level, experience, gold, hp, max_hp, atk, completed quests, and faction-specific attributes
 - **Timestamp Tracking**: Created_at and updated_at fields for character lifecycle management
+- **Combat Stats**: HP (current health), max_hp (maximum health), atk (attack power) fields for battle mechanics
 
 ### File System Integration
 - **Command Loading**: Dynamic command discovery and loading from filesystem
 - **Database File**: Local SQLite file storage in `/database` directory
+- **Level Progression Module**: `/utils/levelProgression.js` - Contains all leveling calculations and stat management
+
+## Recent Changes
+
+### Level Progression System Implementation (Phase 1: Foundation)
+**Date**: August 27, 2025
+
+#### XP Curve System
+- Implemented dynamic XP requirements: Level 1 → 100 XP, Level 2 → 200 XP, Level 3 → 300 XP, etc.
+- Created comprehensive level progression utilities in `/utils/levelProgression.js`
+- Added functions for XP calculations, level detection, and progress tracking
+
+#### Combat Stats System
+- Added HP and ATK stats to character database schema
+- Base stats: Level 1 starts with 100 HP, 20 ATK
+- Level-up bonuses: +10 HP, +2 ATK per level
+- Automatic stat scaling based on character level
+
+#### Enhanced Level-Up Experience
+- Rich embed notifications showing stat gains
+- Detailed level-up information (HP gained, ATK gained, new totals)
+- Updated profile command to display combat stats and accurate XP progress
+- Level progress percentage display in character profiles
+
+#### Database Migration
+- Added hp, max_hp, and atk columns to characters table
+- Backward compatibility with existing characters (default values applied)
+- Dynamic database schema updates during initialization

@@ -26,6 +26,9 @@ async function initializeDatabase() {
                     level INTEGER DEFAULT 1,
                     experience INTEGER DEFAULT 0,
                     gold INTEGER DEFAULT 100,
+                    hp INTEGER DEFAULT 100,
+                    max_hp INTEGER DEFAULT 100,
+                    atk INTEGER DEFAULT 20,
                     completed_quests TEXT DEFAULT '',
                     devil_fruit TEXT,
                     chakra_nature TEXT,
@@ -38,6 +41,10 @@ async function initializeDatabase() {
                 if (err) {
                     reject(err);
                 } else {
+                    // Add columns for existing characters if they don't exist
+                    db.run(`ALTER TABLE characters ADD COLUMN hp INTEGER DEFAULT 100`, () => {});
+                    db.run(`ALTER TABLE characters ADD COLUMN max_hp INTEGER DEFAULT 100`, () => {});
+                    db.run(`ALTER TABLE characters ADD COLUMN atk INTEGER DEFAULT 20`, () => {});
                     resolve();
                 }
             });
@@ -80,15 +87,29 @@ async function getCharacter(userId) {
 }
 
 // Update character progress
-async function updateCharacterProgress(userId, experience, gold, level) {
+async function updateCharacterProgress(userId, experience, gold, level, hp = null, maxHp = null, atk = null) {
     return new Promise((resolve, reject) => {
-        const query = `
-            UPDATE characters 
-            SET experience = ?, gold = ?, level = ?, updated_at = CURRENT_TIMESTAMP
-            WHERE user_id = ?
-        `;
+        // Build dynamic query based on provided parameters
+        let query = `UPDATE characters SET experience = ?, gold = ?, level = ?, updated_at = CURRENT_TIMESTAMP`;
+        let params = [experience, gold, level];
         
-        db.run(query, [experience, gold, level, userId], function(err) {
+        if (hp !== null) {
+            query += `, hp = ?`;
+            params.push(hp);
+        }
+        if (maxHp !== null) {
+            query += `, max_hp = ?`;
+            params.push(maxHp);
+        }
+        if (atk !== null) {
+            query += `, atk = ?`;
+            params.push(atk);
+        }
+        
+        query += ` WHERE user_id = ?`;
+        params.push(userId);
+        
+        db.run(query, params, function(err) {
             if (err) {
                 reject(err);
             } else {

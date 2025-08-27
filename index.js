@@ -124,18 +124,27 @@ client.on('interactionCreate', async interaction => {
                 
                 if (success) {
                     // Quest successful
+                    const { checkLevelUp } = require('./utils/levelProgression');
                     const newExp = character.experience + selectedQuest.reward.experience;
                     const newGold = character.gold + selectedQuest.reward.gold;
-                    let newLevel = character.level;
                     
                     // Check for level up
-                    const expNeeded = newLevel * 100;
-                    if (newExp >= expNeeded) {
-                        newLevel++;
-                    }
+                    const levelUpData = checkLevelUp(character.level, character.experience, newExp);
                     
-                    // Update character
-                    await updateCharacterProgress(userId, newExp, newGold, newLevel);
+                    // Update character with new stats if leveled up
+                    if (levelUpData.leveledUp) {
+                        await updateCharacterProgress(
+                            userId, 
+                            newExp, 
+                            newGold, 
+                            levelUpData.newLevel,
+                            levelUpData.newStats.hp,
+                            levelUpData.newStats.maxHp,
+                            levelUpData.newStats.atk
+                        );
+                    } else {
+                        await updateCharacterProgress(userId, newExp, newGold, character.level);
+                    }
                     
                     const embed = new EmbedBuilder()
                         .setColor('#00ff00')
@@ -147,8 +156,16 @@ client.on('interactionCreate', async interaction => {
                             { name: '📊 Total Experience', value: newExp.toString(), inline: true }
                         ]);
                         
-                    if (newLevel > character.level) {
-                        embed.addFields([{ name: '🆙 LEVEL UP!', value: `You are now level ${newLevel}!`, inline: false }]);
+                    if (levelUpData.leveledUp) {
+                        embed.addFields([
+                            { 
+                                name: '🆙 LEVEL UP!', 
+                                value: `You are now level ${levelUpData.newLevel}!\n` +
+                                       `+${levelUpData.hpGained} HP (${levelUpData.newStats.maxHp} total)\n` +
+                                       `+${levelUpData.atkGained} ATK (${levelUpData.newStats.atk} total)`, 
+                                inline: false 
+                            }
+                        ]);
                     }
                     
                     // Add repeat button
@@ -205,18 +222,27 @@ client.on('interactionCreate', async interaction => {
                 
                 if (success) {
                     // Quest successful
+                    const { checkLevelUp } = require('./utils/levelProgression');
                     const newExp = character.experience + selectedQuest.reward.experience;
                     const newGold = character.gold + selectedQuest.reward.gold;
-                    let newLevel = character.level;
                     
                     // Check for level up
-                    const expNeeded = newLevel * 100;
-                    if (newExp >= expNeeded) {
-                        newLevel++;
-                    }
+                    const levelUpData = checkLevelUp(character.level, character.experience, newExp);
                     
-                    // Update character
-                    await updateCharacterProgress(userId, newExp, newGold, newLevel);
+                    // Update character with new stats if leveled up
+                    if (levelUpData.leveledUp) {
+                        await updateCharacterProgress(
+                            userId, 
+                            newExp, 
+                            newGold, 
+                            levelUpData.newLevel,
+                            levelUpData.newStats.hp,
+                            levelUpData.newStats.maxHp,
+                            levelUpData.newStats.atk
+                        );
+                    } else {
+                        await updateCharacterProgress(userId, newExp, newGold, character.level);
+                    }
                     
                     const embed = new EmbedBuilder()
                         .setColor('#00ff00')
@@ -228,8 +254,16 @@ client.on('interactionCreate', async interaction => {
                             { name: '📊 Total Experience', value: newExp.toString(), inline: true }
                         ]);
                         
-                    if (newLevel > character.level) {
-                        embed.addFields([{ name: '🆙 LEVEL UP!', value: `You are now level ${newLevel}!`, inline: false }]);
+                    if (levelUpData.leveledUp) {
+                        embed.addFields([
+                            { 
+                                name: '🆙 LEVEL UP!', 
+                                value: `You are now level ${levelUpData.newLevel}!\n` +
+                                       `+${levelUpData.hpGained} HP (${levelUpData.newStats.maxHp} total)\n` +
+                                       `+${levelUpData.atkGained} ATK (${levelUpData.newStats.atk} total)`, 
+                                inline: false 
+                            }
+                        ]);
                     }
                     
                     // Add repeat button

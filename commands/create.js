@@ -2,6 +2,7 @@ const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
 const { createCharacter, getCharacter } = require('../database/database');
 const { FACTIONS } = require('../utils/factions');
 const { createEmbed } = require('../utils/embeds');
+const { getBaseStatsForLevel } = require('../utils/levelProgression');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -60,6 +61,9 @@ module.exports = {
             // Create character
             const character = await createCharacter(userId, interaction.user.username, factionChoice);
 
+            // Get base stats for level 1
+            const baseStats = getBaseStatsForLevel(1);
+            
             // Success embed
             const embed = new EmbedBuilder()
                 .setColor(selectedFaction.color)
@@ -70,6 +74,8 @@ module.exports = {
                     { name: '⚔️ Faction', value: `${selectedFaction.emoji} ${selectedFaction.name}`, inline: true },
                     { name: '⭐ Level', value: character.level.toString(), inline: true },
                     { name: '🎯 Experience', value: `${character.experience}/100`, inline: true },
+                    { name: '❤️ Health', value: `${baseStats.hp}/${baseStats.maxHp}`, inline: true },
+                    { name: '⚔️ Attack', value: baseStats.atk.toString(), inline: true },
                     { name: '💪 Starting Ability', value: selectedFaction.startingAbility, inline: false },
                     { name: '🎁 Faction Perk', value: selectedFaction.perk, inline: false }
                 ])
