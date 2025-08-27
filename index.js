@@ -78,6 +78,7 @@ client.on('interactionCreate', async interaction => {
     
     // Handle button interactions
     else if (interaction.isButton()) {
+        console.log(`Button clicked: ${interaction.customId} by user: ${interaction.user.id}`);
         try {
             const { getCharacter, updateCharacterProgress } = require('./database/database');
             const { FACTIONS } = require('./utils/factions');
@@ -281,11 +282,40 @@ client.on('interactionCreate', async interaction => {
             
             // Handle back to quest list button
             else if (interaction.customId === 'quest_back') {
+                console.log('Back button clicked by user:', userId);
+                
                 // Get fresh character data for back to quest list
                 character = await getCharacter(userId);
-                const faction = FACTIONS[character.faction];
+                console.log('Character data:', character);
                 
-                const questList = QUESTS[character.faction].map((quest, index) => {
+                if (!character) {
+                    return interaction.update({
+                        content: '❌ Character not found! Please create a character first with `/create`',
+                        embeds: [],
+                        components: []
+                    });
+                }
+                
+                if (!character.faction || !FACTIONS[character.faction]) {
+                    return interaction.update({
+                        content: '❌ Invalid faction data! Please recreate your character with `/create`',
+                        embeds: [],
+                        components: []
+                    });
+                }
+                
+                const faction = FACTIONS[character.faction];
+                const questsForFaction = QUESTS[character.faction];
+                
+                if (!questsForFaction || !Array.isArray(questsForFaction) || questsForFaction.length === 0) {
+                    return interaction.update({
+                        content: `❌ No quests available for ${faction.name}! Please contact support.`,
+                        embeds: [],
+                        components: []
+                    });
+                }
+                
+                const questList = questsForFaction.map((quest, index) => {
                     const levelReq = quest.levelRequirement > character.level ? 
                         `❌ (Level ${quest.levelRequirement} required)` : 
                         `✅ Available`;
@@ -300,8 +330,8 @@ client.on('interactionCreate', async interaction => {
 
                 // Create quest selection buttons
                 const buttons = [];
-                for (let i = 0; i < Math.min(QUESTS[character.faction].length, 5); i++) {
-                    const quest = QUESTS[character.faction][i];
+                for (let i = 0; i < Math.min(questsForFaction.length, 5); i++) {
+                    const quest = questsForFaction[i];
                     const isAvailable = character.level >= quest.levelRequirement;
                     buttons.push(
                         new ButtonBuilder()
