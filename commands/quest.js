@@ -2,6 +2,8 @@ const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
 const { getCharacter, updateCharacterProgress } = require('../database/database');
 const { FACTIONS } = require('../utils/factions');
 const { getRandomPhase1Quest, calculatePhase1SuccessRate, rollForItem } = require('../utils/quests');
+const { getRandomEnemyForCategory, scaleEnemyToLevel, shouldTriggerEnemyEncounter } = require('../utils/enemies');
+const { createCombatEmbed, createCombatButtons } = require('../utils/combat');
 const { createEmbed } = require('../utils/embeds');
 const { checkLevelUp } = require('../utils/levelProgression');
 
@@ -34,6 +36,35 @@ module.exports = {
                 const quest = getRandomPhase1Quest();
                 const faction = FACTIONS[character.faction];
                 
+                // Check for enemy encounter (30% chance)
+                if (shouldTriggerEnemyEncounter()) {
+                    // Enemy encounter! Start combat
+                    const enemy = getRandomEnemyForCategory(quest.category);
+                    const scaledEnemy = scaleEnemyToLevel(enemy, character.level);
+                    
+                    // Create unique enemy ID for this encounter
+                    const enemyId = `${enemy.id}_${Date.now()}`;
+                    
+                    // Store quest data in global cache for after combat
+                    global.activeCombats = global.activeCombats || {};
+                    global.activeCombats[`${userId}_${enemyId}`] = {
+                        quest,
+                        character: { ...character },
+                        enemy: scaledEnemy,
+                        playerTurn: true
+                    };
+                    
+                    // Create combat embed and buttons
+                    const combatEmbed = createCombatEmbed(character, scaledEnemy, '', true);
+                    const combatButtons = createCombatButtons(userId, enemyId);
+                    
+                    return interaction.reply({ 
+                        embeds: [combatEmbed], 
+                        components: [combatButtons] 
+                    });
+                }
+                
+                // No enemy encounter - proceed with normal quest
                 // Calculate success rate based on character level
                 const successRate = calculatePhase1SuccessRate(character.level);
                 const success = Math.random() < successRate;

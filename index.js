@@ -78,11 +78,242 @@ client.on('interactionCreate', async interaction => {
     
     // Handle button interactions
     else if (interaction.isButton()) {
-        // No button interactions currently implemented
-        return interaction.reply({ 
-            content: '❌ This button interaction is not currently supported!', 
-            flags: [4096] // EPHEMERAL flag
-        });
+        try {
+            const { getCharacter, updateCharacterProgress } = require('./database/database');
+            const { checkLevelUp } = require('./utils/levelProgression');
+            const { executePlayerAttack, executeEnemyAttack, createCombatEmbed, createCombatButtons, createVictoryEmbed, createDefeatEmbed, createFleeEmbed } = require('./utils/combat');
+            const { getRandomPhase1Quest, calculatePhase1SuccessRate, rollForItem } = require('./utils/quests');
+            const { EmbedBuilder } = require('discord.js');
+            
+            const userId = interaction.user.id;
+            
+            // Handle combat interactions
+            if (interaction.customId.startsWith('combat_')) {
+                const parts = interaction.customId.split('_');
+                const action = parts[1]; // 'attack' or 'flee'
+                const buttonUserId = parts[2];
+                const enemyId = parts[3];
+                
+                // Check if the button interaction is from the original user
+                if (buttonUserId !== userId) {
+                    return interaction.reply({
+                        content: '❌ You can only interact with your own combat buttons!',
+                        flags: [4096] // EPHEMERAL flag
+                    });
+                }
+                
+                // Get combat data from global cache
+                global.activeCombats = global.activeCombats || {};
+                const combatKey = `${userId}_${enemyId}`;
+                const combatData = global.activeCombats[combatKey];
+                
+                if (!combatData) {
+                    return interaction.reply({
+                        content: '❌ Combat session expired or not found!',
+                        flags: [4096] // EPHEMERAL flag
+                    });
+                }
+                
+                // Get fresh character data
+                const character = await getCharacter(userId);
+                if (!character) {
+                    return interaction.reply({
+                        content: '❌ Character not found!',
+                        flags: [4096] // EPHEMERAL flag
+                    });
+                }
+                
+                let { quest, enemy } = combatData;
+                
+                // Copy current character stats to combat character
+                const combatCharacter = {
+                    ...character,
+                    hp: character.hp || character.max_hp
+                };
+                
+                if (action === 'flee') {
+                    // Player flees - reduced quest rewards
+                    const reducedXp = Math.floor(quest.xpReward * 0.5);
+                    const reducedCoins = Math.floor(quest.coinReward * 0.3);
+                    
+                    const newExp = character.experience + reducedXp;
+                    const newGold = character.gold + reducedCoins;
+                    
+                    // Check for level up
+                    const levelUpData = checkLevelUp(character.level, character.experience, newExp);
+                    
+                    // Update character
+                    if (levelUpData.leveledUp) {
+                        await updateCharacterProgress(
+                            userId, 
+                            newExp, 
+                            newGold, 
+                            levelUpData.newLevel,
+                            levelUpData.newStats.hp,
+                            levelUpData.newStats.maxHp,
+                            levelUpData.newStats.atk,
+                            levelUpData.newStats.def,
+                            levelUpData.newStats.spd,
+                            newExp
+                        );
+                    } else {
+                        await updateCharacterProgress(userId, newExp, newGold, character.level);
+                    }
+                    
+                    // Clean up combat data
+                    delete global.activeCombats[combatKey];
+                    
+                    const fleeEmbed = createFleeEmbed(enemy, quest.xpReward, quest.coinReward);
+                    return interaction.update({ embeds: [fleeEmbed], components: [] });
+                }
+                
+                if (action === 'attack') {
+                    // Player attacks
+                    const attackResult = executePlayerAttack(combatCharacter, enemy);
+                    let combatLog = `⚔️ You attack for ${attackResult.damage} damage${attackResult.isCrit ? ' (Critical Hit!)' : ''}!\n`;
+                    
+                    if (attackResult.enemyDefeated) {
+                        // Enemy defeated - victory!
+                        const questSuccess = Math.random() < calculatePhase1SuccessRate(character.level);
+                        let questXp = quest.xpReward;
+                        let questCoins = quest.coinReward;
+                        let itemReceived = null;
+                        
+                        if (questSuccess) {
+                            itemReceived = rollForItem(quest, character.level);
+                            if (itemReceived && itemReceived.type === 'currency') {
+                                questCoins += 10;
+                            }
+                            if (itemReceived && itemReceived.type === 'boost') {
+                                questXp += 3;
+                            }
+                        } else {
+                            // Quest partially successful
+                            questXp = Math.floor(questXp * 0.7);
+                            questCoins = Math.floor(questCoins * 0.5);
+                        }
+                        
+                        const totalXp = questXp + enemy.rewards.xp;
+                        const totalCoins = questCoins + enemy.rewards.coins;
+                        const finalNewExp = character.experience + totalXp;
+                        const finalNewGold = character.gold + totalCoins;
+                        
+                        // Check for level up
+                        const levelUpData = checkLevelUp(character.level, character.experience, finalNewExp);
+                        
+                        // Update character
+                        if (levelUpData.leveledUp) {
+                            await updateCharacterProgress(
+                                userId, 
+                                finalNewExp, 
+                                finalNewGold, 
+                                levelUpData.newLevel,
+                                levelUpData.newStats.hp,
+                                levelUpData.newStats.maxHp,
+                                levelUpData.newStats.atk,
+                                levelUpData.newStats.def,
+                                levelUpData.newStats.spd,
+                                finalNewExp
+                            );
+                        } else {
+                            await updateCharacterProgress(userId, finalNewExp, finalNewGold, character.level);
+                        }
+                        
+                        // Clean up combat data
+                        delete global.activeCombats[combatKey];
+                        
+                        const victoryEmbed = createVictoryEmbed(combatCharacter, enemy, questXp, questCoins);
+                        
+                        if (levelUpData.leveledUp) {
+                            victoryEmbed.addFields([
+                                { 
+                                    name: '🆙 LEVEL UP!', 
+                                    value: `You are now level ${levelUpData.newLevel}!\n` +
+                                           `+${levelUpData.hpGained} HP (${levelUpData.newStats.maxHp} total)\n` +
+                                           `+${levelUpData.atkGained} ATK (${levelUpData.newStats.atk} total)\n` +
+                                           `+${levelUpData.defGained} DEF (${levelUpData.newStats.def} total)\n` +
+                                           `+${levelUpData.spdGained} SPD (${levelUpData.newStats.spd} total)`, 
+                                    inline: false 
+                                }
+                            ]);
+                        }
+                        
+                        return interaction.update({ embeds: [victoryEmbed], components: [] });
+                    } else {
+                        // Enemy still alive - enemy attacks back
+                        const enemyAttackResult = executeEnemyAttack(enemy, combatCharacter);
+                        combatLog += `${enemy.emoji} ${enemy.name} attacks for ${enemyAttackResult.damage} damage${enemyAttackResult.isCrit ? ' (Critical Hit!)' : ''}!`;
+                        
+                        if (enemyAttackResult.playerDefeated) {
+                            // Player defeated
+                            const defeatXp = 5; // Small learning XP
+                            const newExp = character.experience + defeatXp;
+                            const newGold = character.gold; // No coins gained
+                            
+                            // Check for level up (unlikely)
+                            const levelUpData = checkLevelUp(character.level, character.experience, newExp);
+                            
+                            // Update character - restore HP to 1
+                            if (levelUpData.leveledUp) {
+                                await updateCharacterProgress(
+                                    userId, 
+                                    newExp, 
+                                    newGold, 
+                                    levelUpData.newLevel,
+                                    1, // HP restored to 1
+                                    levelUpData.newStats.maxHp,
+                                    levelUpData.newStats.atk,
+                                    levelUpData.newStats.def,
+                                    levelUpData.newStats.spd,
+                                    newExp
+                                );
+                            } else {
+                                await updateCharacterProgress(userId, newExp, newGold, character.level, 1); // HP restored to 1
+                            }
+                            
+                            // Clean up combat data
+                            delete global.activeCombats[combatKey];
+                            
+                            const defeatEmbed = createDefeatEmbed(combatCharacter, enemy);
+                            return interaction.update({ embeds: [defeatEmbed], components: [] });
+                        } else {
+                            // Combat continues - update combat data
+                            global.activeCombats[combatKey] = {
+                                ...combatData,
+                                enemy: enemy,
+                                character: combatCharacter
+                            };
+                            
+                            // Create updated combat embed
+                            const updatedCombatEmbed = createCombatEmbed(combatCharacter, enemy, combatLog, true);
+                            const combatButtons = createCombatButtons(userId, enemyId);
+                            
+                            return interaction.update({ 
+                                embeds: [updatedCombatEmbed], 
+                                components: [combatButtons] 
+                            });
+                        }
+                    }
+                }
+            }
+            
+            // Handle other button interactions (none currently)
+            return interaction.reply({ 
+                content: '❌ This button interaction is not currently supported!', 
+                flags: [4096] // EPHEMERAL flag
+            });
+            
+        } catch (error) {
+            console.error('Button interaction error:', error);
+            
+            const errorMessage = '❌ There was an error processing your request!';
+            
+            if (interaction.replied || interaction.deferred) {
+                await interaction.followUp({ content: errorMessage, flags: [4096] });
+            } else {
+                await interaction.reply({ content: errorMessage, flags: [4096] });
+            }
+        }
     }
 });
 
