@@ -89,3 +89,10 @@ Preferred communication style: Simple, everyday language.
 - Backward compatibility with existing characters (default values applied)
 - Dynamic database schema updates during initialization
 - Complete stat tracking system implementation
+
+#### Button Interaction Security
+- Implemented user-specific button restrictions for all quest interactions
+- Button custom IDs now include original user ID for authorization
+- Prevents other users from interfering with someone's quest progress
+- Added ephemeral error messages when unauthorized users attempt button interactions
+- Applied to both quest selection buttons and repeat quest buttons

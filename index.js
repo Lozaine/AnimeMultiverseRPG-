@@ -98,7 +98,17 @@ client.on('interactionCreate', async interaction => {
             
             // Handle quest selection buttons
             if (interaction.customId.startsWith('quest_')) {
-                const questNumber = parseInt(interaction.customId.split('_')[1]);
+                const parts = interaction.customId.split('_');
+                const questNumber = parseInt(parts[1]);
+                const originalUserId = parts[2];
+                
+                // Check if the button interaction is from the original user
+                if (originalUserId && originalUserId !== userId) {
+                    return interaction.reply({
+                        content: '❌ You can only interact with your own quest buttons!',
+                        flags: [4096] // EPHEMERAL flag
+                    });
+                }
                 const quests = QUESTS[character.faction];
                 
                 if (!quests || !quests[questNumber - 1]) {
@@ -173,11 +183,11 @@ client.on('interactionCreate', async interaction => {
                         ]);
                     }
                     
-                    // Add repeat button
+                    // Add repeat button with user restriction
                     const actionRow = new ActionRowBuilder()
                         .addComponents(
                             new ButtonBuilder()
-                                .setCustomId(`repeat_quest_${questNumber}`)
+                                .setCustomId(`repeat_quest_${questNumber}_${userId}`)
                                 .setLabel('🔄 Repeat Quest')
                                 .setStyle(ButtonStyle.Success)
                         );
@@ -191,11 +201,11 @@ client.on('interactionCreate', async interaction => {
                         .setDescription(`**${selectedQuest.name}**\n${selectedQuest.failureMessage || 'You failed to complete the quest. Train harder and try again!'}`)
                         .setFooter({ text: 'Don\'t give up! Try again when you\'re stronger.' });
                         
-                    // Add retry button
+                    // Add retry button with user restriction
                     const actionRow = new ActionRowBuilder()
                         .addComponents(
                             new ButtonBuilder()
-                                .setCustomId(`repeat_quest_${questNumber}`)
+                                .setCustomId(`repeat_quest_${questNumber}_${userId}`)
                                 .setLabel('🔄 Try Again')
                                 .setStyle(ButtonStyle.Danger)
                         );
@@ -206,7 +216,17 @@ client.on('interactionCreate', async interaction => {
             
             // Handle repeat quest buttons
             else if (interaction.customId.startsWith('repeat_quest_')) {
-                const questNumber = parseInt(interaction.customId.split('_')[2]);
+                const parts = interaction.customId.split('_');
+                const questNumber = parseInt(parts[2]);
+                const originalUserId = parts[3];
+                
+                // Check if the button interaction is from the original user
+                if (originalUserId && originalUserId !== userId) {
+                    return interaction.reply({
+                        content: '❌ You can only interact with your own quest buttons!',
+                        flags: [4096] // EPHEMERAL flag
+                    });
+                }
                 
                 // Get fresh character data for repeat quest
                 character = await getCharacter(userId);
@@ -276,11 +296,11 @@ client.on('interactionCreate', async interaction => {
                         ]);
                     }
                     
-                    // Add repeat button
+                    // Add repeat button with user restriction
                     const actionRow = new ActionRowBuilder()
                         .addComponents(
                             new ButtonBuilder()
-                                .setCustomId(`repeat_quest_${questNumber}`)
+                                .setCustomId(`repeat_quest_${questNumber}_${userId}`)
                                 .setLabel('🔄 Repeat Quest')
                                 .setStyle(ButtonStyle.Success)
                         );
@@ -294,11 +314,11 @@ client.on('interactionCreate', async interaction => {
                         .setDescription(`**${selectedQuest.name}**\n${selectedQuest.failureMessage || 'You failed to complete the quest. Train harder and try again!'}`)
                         .setFooter({ text: 'Don\'t give up! Try again when you\'re stronger.' });
                         
-                    // Add retry button
+                    // Add retry button with user restriction
                     const actionRow = new ActionRowBuilder()
                         .addComponents(
                             new ButtonBuilder()
-                                .setCustomId(`repeat_quest_${questNumber}`)
+                                .setCustomId(`repeat_quest_${questNumber}_${userId}`)
                                 .setLabel('🔄 Try Again')
                                 .setStyle(ButtonStyle.Danger)
                         );

@@ -61,7 +61,7 @@ module.exports = {
                     const isAvailable = character.level >= quest.levelRequirement;
                     buttons.push(
                         new ButtonBuilder()
-                            .setCustomId(`quest_${i + 1}`)
+                            .setCustomId(`quest_${i + 1}_${interaction.user.id}`)
                             .setLabel(`${i + 1}. ${quest.name.substring(0, 20)}`)
                             .setStyle(isAvailable ? ButtonStyle.Primary : ButtonStyle.Secondary)
                             .setDisabled(!isAvailable)
