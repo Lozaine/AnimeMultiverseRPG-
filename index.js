@@ -87,6 +87,18 @@ client.on('interactionCreate', async interaction => {
             const userId = interaction.user.id;
             let character = await getCharacter(userId);
             
+            // Helper function to create unauthorized access embed
+            const createUnauthorizedEmbed = () => {
+                return new EmbedBuilder()
+                    .setColor('#ff6b6b')
+                    .setTitle('🚫 Access Denied')
+                    .setDescription('You can only interact with your own quest buttons!')
+                    .addFields([
+                        { name: '💡 Tip', value: 'Use `/quest list` to start your own quests', inline: false }
+                    ])
+                    .setTimestamp();
+            };
+            
             if (!character) {
                 return interaction.reply({ 
                     content: '❌ You need to create a character first! Use `/create`', 
@@ -105,7 +117,7 @@ client.on('interactionCreate', async interaction => {
                 // Check if the button interaction is from the original user
                 if (originalUserId && originalUserId !== userId) {
                     return interaction.reply({
-                        content: '❌ You can only interact with your own quest buttons!',
+                        embeds: [createUnauthorizedEmbed()],
                         flags: [4096] // EPHEMERAL flag
                     });
                 }
@@ -223,7 +235,7 @@ client.on('interactionCreate', async interaction => {
                 // Check if the button interaction is from the original user
                 if (originalUserId && originalUserId !== userId) {
                     return interaction.reply({
-                        content: '❌ You can only interact with your own quest buttons!',
+                        embeds: [createUnauthorizedEmbed()],
                         flags: [4096] // EPHEMERAL flag
                     });
                 }

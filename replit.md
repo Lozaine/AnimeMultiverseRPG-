@@ -94,5 +94,7 @@ Preferred communication style: Simple, everyday language.
 - Implemented user-specific button restrictions for all quest interactions
 - Button custom IDs now include original user ID for authorization
 - Prevents other users from interfering with someone's quest progress
-- Added ephemeral error messages when unauthorized users attempt button interactions
+- Enhanced ephemeral error embeds for unauthorized access attempts
+- Error messages are visually appealing with tips for proper usage
 - Applied to both quest selection buttons and repeat quest buttons
+- Only the unauthorized user sees the error message (ephemeral)
