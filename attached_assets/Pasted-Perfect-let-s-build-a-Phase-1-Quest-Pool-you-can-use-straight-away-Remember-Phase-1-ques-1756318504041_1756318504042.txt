@@ -1,0 +1,61 @@
+Perfect 👍 — let’s build a **Phase 1 Quest Pool** you can use straight away.
+Remember: Phase 1 quests = **universal, simple, faction-neutral**, focused on introducing mechanics (gain XP, earn a little coin, maybe get food/items).
+
+---
+
+# 🎯 Phase 1 Quest List (Universal Quests)
+
+### 🌿 Gathering & Resource Quests
+
+1. **Fishing Trip** – Catch fish for a local vendor. *(+10 XP, +20 coins)*
+2. **Herbal Collection** – Collect healing herbs from the forest. *(+8 XP, healing item)*
+3. **Wood Gathering** – Chop and deliver firewood to a village. *(+12 XP, +15 coins)*
+4. **Ore Prospecting** – Mine basic ore from nearby caves. *(+10 XP, small crafting material)*
+
+---
+
+### 🐗 Hunting & Protection Quests
+
+5. **Hunt the Wild Boar** – Defeat a rampaging boar threatening villagers. *(+15 XP, meat item)*
+6. **Wolf Pack Trouble** – Chase off a pack of wolves from farmland. *(+15 XP, +25 coins)*
+7. **Cave Bat Nest** – Clear bats nesting in a cave. *(+12 XP, +coins)*
+8. **Guard Duty** – Protect a merchant cart on the road. *(+18 XP, +20 coins)*
+
+---
+
+### 📦 Delivery & Errand Quests
+
+9. **Letter Delivery** – Deliver a message between two towns. *(+10 XP, +15 coins)*
+10. **Supply Run** – Help carry goods to a market stall. *(+8 XP, small food item)*
+11. **Water Carrier** – Fetch buckets of water for villagers. *(+6 XP, +10 coins)*
+12. **Lost Item Hunt** – Find a villager’s lost trinket. *(+8 XP, small reward item)*
+
+---
+
+### 👥 Social/Community Quests
+
+13. **Help the Farmer** – Tend crops or scare crows away. *(+10 XP, +vegetable food item)*
+14. **Repair Work** – Fix fences or patch roofs in town. *(+12 XP, +coins)*
+15. **Street Cleanup** – Collect trash and clear debris. *(+6 XP, small XP boost)*
+16. **Festival Prep** – Help set up decorations for a local event. *(+10 XP, +special token)*
+
+---
+
+### ⚔️ Training Quests
+
+17. **Basic Sparring** – Practice with a training dummy. *(+10 XP)*
+18. **Endurance Run** – Jog around the training grounds. *(+8 XP)*
+19. **Weapon Polishing** – Sharpen or clean village armory weapons. *(+10 XP, +small coin)*
+20. **Meditation Practice** – Focus your spirit to strengthen resolve. *(+12 XP, +small MP boost)*
+
+---
+
+✅ These are:
+
+* **Quick, low-stakes quests** to teach players the loop.
+* **Equal for all factions** → no advantage.
+* **Reward pool** = XP + coins + basic consumables (food/healing items).
+
+---
+
+👉 Would you like me to also **design a sample reward scaling table** (XP/coins/item rarity) for these Phase 1 quests so the balance feels consistent from day one?

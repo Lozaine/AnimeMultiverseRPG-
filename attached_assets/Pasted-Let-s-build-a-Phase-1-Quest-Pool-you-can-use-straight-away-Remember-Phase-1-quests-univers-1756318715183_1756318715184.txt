@@ -1,0 +1,152 @@
+Let’s build a **Phase 1 Quest Pool** you can use straight away.
+Remember: Phase 1 quests = **universal, simple, faction-neutral**, focused on introducing mechanics (gain XP, earn a little coin, maybe get food/items).
+
+---
+
+# 🎯 Phase 1 Quest List (Universal Quests)
+
+### 🌿 Gathering & Resource Quests
+
+1. **Fishing Trip** – Catch fish for a local vendor. *(+10 XP, +20 coins)*
+2. **Herbal Collection** – Collect healing herbs from the forest. *(+8 XP, healing item)*
+3. **Wood Gathering** – Chop and deliver firewood to a village. *(+12 XP, +15 coins)*
+4. **Ore Prospecting** – Mine basic ore from nearby caves. *(+10 XP, small crafting material)*
+
+---
+
+### 🐗 Hunting & Protection Quests
+
+5. **Hunt the Wild Boar** – Defeat a rampaging boar threatening villagers. *(+15 XP, meat item)*
+6. **Wolf Pack Trouble** – Chase off a pack of wolves from farmland. *(+15 XP, +25 coins)*
+7. **Cave Bat Nest** – Clear bats nesting in a cave. *(+12 XP, +coins)*
+8. **Guard Duty** – Protect a merchant cart on the road. *(+18 XP, +20 coins)*
+
+---
+
+### 📦 Delivery & Errand Quests
+
+9. **Letter Delivery** – Deliver a message between two towns. *(+10 XP, +15 coins)*
+10. **Supply Run** – Help carry goods to a market stall. *(+8 XP, small food item)*
+11. **Water Carrier** – Fetch buckets of water for villagers. *(+6 XP, +10 coins)*
+12. **Lost Item Hunt** – Find a villager’s lost trinket. *(+8 XP, small reward item)*
+
+---
+
+### 👥 Social/Community Quests
+
+13. **Help the Farmer** – Tend crops or scare crows away. *(+10 XP, +vegetable food item)*
+14. **Repair Work** – Fix fences or patch roofs in town. *(+12 XP, +coins)*
+15. **Street Cleanup** – Collect trash and clear debris. *(+6 XP, small XP boost)*
+16. **Festival Prep** – Help set up decorations for a local event. *(+10 XP, +special token)*
+
+---
+
+### ⚔️ Training Quests
+
+17. **Basic Sparring** – Practice with a training dummy. *(+10 XP)*
+18. **Endurance Run** – Jog around the training grounds. *(+8 XP)*
+19. **Weapon Polishing** – Sharpen or clean village armory weapons. *(+10 XP, +small coin)*
+20. **Meditation Practice** – Focus your spirit to strengthen resolve. *(+12 XP, +small MP boost)*
+
+---
+
+✅ These are:
+
+* **Quick, low-stakes quests** to teach players the loop.
+* **Equal for all factions** → no advantage.
+* **Reward pool** = XP + coins + basic consumables (food/healing items).
+
+---
+
+Since Phase 1 is about **learning mechanics** and **keeping factions equal**, rewards should be **small, consistent, and simple** (XP + coins + maybe basic consumables).
+
+---
+
+# 📊 Phase 1 Reward Scaling Table
+
+| **Quest Type**        | **Examples**                                    | **XP Reward** | **Coin Reward** | **Item Chance**                                         |
+| --------------------- | ----------------------------------------------- | ------------- | --------------- | ------------------------------------------------------- |
+| **Easy Tasks**        | Water Carrier, Street Cleanup, Letter Delivery  | 5–8 XP        | 5–15 coins      | 10% chance (basic food: rice ball, bread)               |
+| **Gathering Quests**  | Fishing Trip, Herbal Collection, Wood Gathering | 8–12 XP       | 10–20 coins     | 25% chance (herbs, fish, vegetables)                    |
+| **Training Quests**   | Sparring, Endurance Run, Meditation             | 10–12 XP      | 0–10 coins      | 15% chance (stamina potion, focus talisman)             |
+| **Hunting Quests**    | Wild Boar Hunt, Wolf Pack Trouble, Bat Cave     | 12–18 XP      | 15–25 coins     | 35% chance (meat, hide, claw — low-tier materials)      |
+| **Errand/Community**  | Supply Run, Repair Work, Festival Prep          | 8–12 XP       | 15–20 coins     | 20% chance (small consumable item, e.g. lantern, charm) |
+| **Escort/Protection** | Guard Duty, Delivery Protection                 | 15–20 XP      | 20–30 coins     | 30% chance (extra coin pouch or common buff item)       |
+
+---
+
+## 🎁 Item Pool (Phase 1 Basic Consumables)
+
+* 🍙 **Food Items** → Restore small HP (Onigiri, bread, fish).
+* 🌿 **Healing Herbs** → Restore small HP/MP mix.
+* 🪵 **Crafting Basics** → Wood, ore, hide (future crafting use).
+* 🔮 **Minor Charms** → +5 temporary buff (Attack/Defense/HP) for next quest only.
+
+---
+
+## ⚖️ Why This Scaling Works
+
+* **Easy tasks** (5–8 XP, low coin) → spam-friendly, teaching quests.
+* **Hunting/Protection** (15–20 XP, better coin, item chance) → slightly harder but more rewarding.
+* **Consumables** help encourage repeat runs (healing needed to keep questing).
+* **Items** are mostly “future proof” (Phase 1 = collect, Phase 2+ = use in crafting/shop).
+
+---
+
+**Player runs:**
+`/quest start`
+
+---
+
+### ✅ Quest Result Embed (Discord Example)
+
+```
+🎯 Quest Complete!  
+
+**Quest:** Hunt the Wild Boar 🐗  
+**Result:** You defeated the wild boar terrorizing the village!  
+
+📊 **Rewards**  
+• +15 XP  
+• +22 Coins  
+• Loot: 🍖 Boar Meat (Consumable – restores 15 HP)  
+
+🧑‍🎤 **Your Progress**  
+Level: 1 → 2  
+XP: 15 / 30  
+Coins: 45  
+```
+
+---
+
+### ⚒️ Example Embed Code (Node.js / discord.js)
+
+```js
+const { EmbedBuilder } = require('discord.js');
+
+const questEmbed = new EmbedBuilder()
+  .setColor('#f39c12')
+  .setTitle('🎯 Quest Complete!')
+  .setDescription('You defeated the wild boar terrorizing the village!')
+  .addFields(
+    { name: '📜 Quest', value: 'Hunt the Wild Boar 🐗', inline: false },
+    { name: '📊 Rewards', value: '+15 XP\n+22 Coins\n🍖 Boar Meat (Restores 15 HP)', inline: false },
+    { name: '🧑‍🎤 Progress', value: 'Level: 1 → 2\nXP: 15 / 30\nCoins: 45', inline: false },
+  )
+  .setFooter({ text: 'Cross Realm Chronicles – Phase 1 Quest System' })
+  .setTimestamp();
+```
+
+---
+
+## 🚀 Gameplay Flow in Phase 1
+
+1. Player types `/quest start`.
+2. Bot randomly selects a **Phase 1 quest** from the pool.
+3. Quest runs instantly → no combat yet, just flavor text + reward.
+4. Bot updates player profile (XP, coins, items) in SQLite.
+5. Embed shows quest + results → player sees progress clearly.
+
+---
+
+
