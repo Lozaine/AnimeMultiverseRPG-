@@ -78,7 +78,6 @@ client.on('interactionCreate', async interaction => {
     
     // Handle button interactions
     else if (interaction.isButton()) {
-        console.log(`Button clicked: ${interaction.customId} by user: ${interaction.user.id}`);
         try {
             const { getCharacter, updateCharacterProgress } = require('./database/database');
             const { FACTIONS } = require('./utils/factions');
@@ -152,17 +151,13 @@ client.on('interactionCreate', async interaction => {
                         embed.addFields([{ name: '🆙 LEVEL UP!', value: `You are now level ${newLevel}!`, inline: false }]);
                     }
                     
-                    // Add repeat and back buttons
+                    // Add repeat button
                     const actionRow = new ActionRowBuilder()
                         .addComponents(
                             new ButtonBuilder()
                                 .setCustomId(`repeat_quest_${questNumber}`)
                                 .setLabel('🔄 Repeat Quest')
-                                .setStyle(ButtonStyle.Success),
-                            new ButtonBuilder()
-                                .setCustomId('quest_back')
-                                .setLabel('⬅️ Back to Quest List')
-                                .setStyle(ButtonStyle.Secondary)
+                                .setStyle(ButtonStyle.Success)
                         );
                         
                     await interaction.reply({ embeds: [embed], components: [actionRow] });
@@ -174,17 +169,13 @@ client.on('interactionCreate', async interaction => {
                         .setDescription(`**${selectedQuest.name}**\n${selectedQuest.failureMessage || 'You failed to complete the quest. Train harder and try again!'}`)
                         .setFooter({ text: 'Don\'t give up! Try again when you\'re stronger.' });
                         
-                    // Add retry and back buttons
+                    // Add retry button
                     const actionRow = new ActionRowBuilder()
                         .addComponents(
                             new ButtonBuilder()
                                 .setCustomId(`repeat_quest_${questNumber}`)
                                 .setLabel('🔄 Try Again')
-                                .setStyle(ButtonStyle.Danger),
-                            new ButtonBuilder()
-                                .setCustomId('quest_back')
-                                .setLabel('⬅️ Back to Quest List')
-                                .setStyle(ButtonStyle.Secondary)
+                                .setStyle(ButtonStyle.Danger)
                         );
                         
                     await interaction.reply({ embeds: [embed], components: [actionRow] });
@@ -241,17 +232,13 @@ client.on('interactionCreate', async interaction => {
                         embed.addFields([{ name: '🆙 LEVEL UP!', value: `You are now level ${newLevel}!`, inline: false }]);
                     }
                     
-                    // Add repeat and back buttons
+                    // Add repeat button
                     const actionRow = new ActionRowBuilder()
                         .addComponents(
                             new ButtonBuilder()
                                 .setCustomId(`repeat_quest_${questNumber}`)
                                 .setLabel('🔄 Repeat Quest')
-                                .setStyle(ButtonStyle.Success),
-                            new ButtonBuilder()
-                                .setCustomId('quest_back')
-                                .setLabel('⬅️ Back to Quest List')
-                                .setStyle(ButtonStyle.Secondary)
+                                .setStyle(ButtonStyle.Success)
                         );
                         
                     await interaction.update({ embeds: [embed], components: [actionRow] });
@@ -263,89 +250,19 @@ client.on('interactionCreate', async interaction => {
                         .setDescription(`**${selectedQuest.name}**\n${selectedQuest.failureMessage || 'You failed to complete the quest. Train harder and try again!'}`)
                         .setFooter({ text: 'Don\'t give up! Try again when you\'re stronger.' });
                         
-                    // Add retry and back buttons
+                    // Add retry button
                     const actionRow = new ActionRowBuilder()
                         .addComponents(
                             new ButtonBuilder()
                                 .setCustomId(`repeat_quest_${questNumber}`)
                                 .setLabel('🔄 Try Again')
-                                .setStyle(ButtonStyle.Danger),
-                            new ButtonBuilder()
-                                .setCustomId('quest_back')
-                                .setLabel('⬅️ Back to Quest List')
-                                .setStyle(ButtonStyle.Secondary)
+                                .setStyle(ButtonStyle.Danger)
                         );
                         
                     await interaction.update({ embeds: [embed], components: [actionRow] });
                 }
             }
             
-            // Handle back to quest list button
-            else if (interaction.customId === 'quest_back') {
-                console.log('Back button clicked by user:', userId);
-                
-                // Get fresh character data for back to quest list
-                character = await getCharacter(userId);
-                console.log('Character data:', character);
-                
-                if (!character) {
-                    return interaction.update({
-                        content: '❌ Character not found! Please create a character first with `/create`',
-                        embeds: [],
-                        components: []
-                    });
-                }
-                
-                if (!character.faction || !FACTIONS[character.faction]) {
-                    return interaction.update({
-                        content: '❌ Invalid faction data! Please recreate your character with `/create`',
-                        embeds: [],
-                        components: []
-                    });
-                }
-                
-                const faction = FACTIONS[character.faction];
-                const questsForFaction = QUESTS[character.faction];
-                
-                if (!questsForFaction || !Array.isArray(questsForFaction) || questsForFaction.length === 0) {
-                    return interaction.update({
-                        content: `❌ No quests available for ${faction.name}! Please contact support.`,
-                        embeds: [],
-                        components: []
-                    });
-                }
-                
-                const questList = questsForFaction.map((quest, index) => {
-                    const levelReq = quest.levelRequirement > character.level ? 
-                        `❌ (Level ${quest.levelRequirement} required)` : 
-                        `✅ Available`;
-                    return `**${index + 1}. ${quest.name}**\n${quest.description}\n**Reward:** ${quest.reward.experience} XP, ${quest.reward.gold} Gold\n**Status:** ${levelReq}`;
-                }).join('\n\n');
-
-                const embed = new EmbedBuilder()
-                    .setColor(faction.color)
-                    .setTitle(`${faction.emoji} Available Quests`)
-                    .setDescription(`Choose a quest for your ${faction.name} character:\n\n${questList}`)
-                    .setFooter({ text: 'Click a button to start a quest!' });
-
-                // Create quest selection buttons
-                const buttons = [];
-                for (let i = 0; i < Math.min(questsForFaction.length, 5); i++) {
-                    const quest = questsForFaction[i];
-                    const isAvailable = character.level >= quest.levelRequirement;
-                    buttons.push(
-                        new ButtonBuilder()
-                            .setCustomId(`quest_${i + 1}`)
-                            .setLabel(`${i + 1}. ${quest.name.substring(0, 20)}`)
-                            .setStyle(isAvailable ? ButtonStyle.Primary : ButtonStyle.Secondary)
-                            .setDisabled(!isAvailable)
-                    );
-                }
-
-                const row = new ActionRowBuilder().addComponents(buttons);
-                
-                await interaction.update({ embeds: [embed], components: [row] });
-            }
             
         } catch (error) {
             console.error('Button interaction error:', error);
