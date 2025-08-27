@@ -85,12 +85,12 @@ client.on('interactionCreate', async interaction => {
             const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
             
             const userId = interaction.user.id;
-            const character = await getCharacter(userId);
+            let character = await getCharacter(userId);
             
             if (!character) {
                 return interaction.reply({ 
                     content: '❌ You need to create a character first! Use `/create`', 
-                    ephemeral: true 
+                    flags: [4096] // EPHEMERAL flag
                 });
             }
             
@@ -99,13 +99,22 @@ client.on('interactionCreate', async interaction => {
             // Handle quest selection buttons
             if (interaction.customId.startsWith('quest_')) {
                 const questNumber = parseInt(interaction.customId.split('_')[1]);
-                const selectedQuest = QUESTS[character.faction][questNumber - 1];
+                const quests = QUESTS[character.faction];
+                
+                if (!quests || !quests[questNumber - 1]) {
+                    return interaction.reply({
+                        content: `❌ Quest not found! Please try again.`,
+                        flags: [4096] // EPHEMERAL flag
+                    });
+                }
+                
+                const selectedQuest = quests[questNumber - 1];
                 
                 // Check level requirement
                 if (character.level < selectedQuest.levelRequirement) {
                     return interaction.reply({
                         content: `❌ You need to be level ${selectedQuest.levelRequirement} to attempt this quest. You are currently level ${character.level}.`,
-                        ephemeral: true
+                        flags: [4096] // EPHEMERAL flag
                     });
                 }
                 
@@ -184,7 +193,19 @@ client.on('interactionCreate', async interaction => {
             // Handle repeat quest buttons
             else if (interaction.customId.startsWith('repeat_quest_')) {
                 const questNumber = parseInt(interaction.customId.split('_')[2]);
-                const selectedQuest = QUESTS[character.faction][questNumber - 1];
+                
+                // Get fresh character data for repeat quest
+                character = await getCharacter(userId);
+                const quests = QUESTS[character.faction];
+                
+                if (!quests || !quests[questNumber - 1]) {
+                    return interaction.reply({
+                        content: `❌ Quest not found! Please try again.`,
+                        flags: [4096] // EPHEMERAL flag
+                    });
+                }
+                
+                const selectedQuest = quests[questNumber - 1];
                 
                 // Execute quest again
                 const successRate = Math.min(0.7 + (character.level * 0.05), 0.95);
@@ -260,6 +281,10 @@ client.on('interactionCreate', async interaction => {
             
             // Handle back to quest list button
             else if (interaction.customId === 'quest_back') {
+                // Get fresh character data for back to quest list
+                character = await getCharacter(userId);
+                const faction = FACTIONS[character.faction];
+                
                 const questList = QUESTS[character.faction].map((quest, index) => {
                     const levelReq = quest.levelRequirement > character.level ? 
                         `❌ (Level ${quest.levelRequirement} required)` : 
@@ -298,9 +323,9 @@ client.on('interactionCreate', async interaction => {
             const errorMessage = '❌ There was an error processing your request!';
             
             if (interaction.replied || interaction.deferred) {
-                await interaction.followUp({ content: errorMessage, ephemeral: true });
+                await interaction.followUp({ content: errorMessage, flags: [4096] });
             } else {
-                await interaction.reply({ content: errorMessage, ephemeral: true });
+                await interaction.reply({ content: errorMessage, flags: [4096] });
             }
         }
     }
