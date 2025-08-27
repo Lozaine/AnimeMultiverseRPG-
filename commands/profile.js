@@ -1,22 +1,23 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
 const { getCharacter } = require('../database/database');
 const { FACTIONS } = require('../utils/factions');
 const { createEmbed } = require('../utils/embeds');
 
 module.exports = {
-    name: 'profile',
-    description: 'View your character profile',
-    async execute(message, args) {
-        const userId = message.author.id;
+    data: new SlashCommandBuilder()
+        .setName('profile')
+        .setDescription('View your character profile'),
+    async execute(interaction) {
+        const userId = interaction.user.id;
         
         try {
             const character = await getCharacter(userId);
             
             if (!character) {
                 const embed = createEmbed('No Character Found', 
-                    'You don\'t have a character yet! Use `!create` to create one.', 
+                    'You don\'t have a character yet! Use `/create` to create one.', 
                     '#ff6b6b');
-                return message.reply({ embeds: [embed] });
+                return interaction.reply({ embeds: [embed] });
             }
 
             const faction = FACTIONS[character.faction];
@@ -51,14 +52,14 @@ module.exports = {
                 embed.addFields([{ name: '🌬️ Breathing Style', value: character.breathing_style, inline: true }]);
             }
 
-            message.reply({ embeds: [embed] });
+            interaction.reply({ embeds: [embed] });
 
         } catch (error) {
             console.error('Profile view error:', error);
             const embed = createEmbed('Profile Error', 
                 'An error occurred while retrieving your profile. Please try again.', 
                 '#ff6b6b');
-            message.reply({ embeds: [embed] });
+            interaction.reply({ embeds: [embed] });
         }
     }
 };

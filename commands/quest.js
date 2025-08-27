@@ -1,29 +1,46 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
 const { getCharacter, updateCharacterProgress, completeQuest } = require('../database/database');
 const { FACTIONS } = require('../utils/factions');
 const { generateQuest, QUESTS } = require('../utils/quests');
 const { createEmbed } = require('../utils/embeds');
 
 module.exports = {
-    name: 'quest',
-    description: 'Start a faction-specific quest or view available quests',
-    async execute(message, args) {
-        const userId = message.author.id;
+    data: new SlashCommandBuilder()
+        .setName('quest')
+        .setDescription('Start a faction-specific quest or view available quests')
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('list')
+                .setDescription('View available quests for your faction'))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('start')
+                .setDescription('Start a specific quest')
+                .addIntegerOption(option =>
+                    option.setName('number')
+                        .setDescription('Quest number to start')
+                        .setRequired(true)
+                        .setMinValue(1)
+                        .setMaxValue(10))),
+    async execute(interaction) {
+        const userId = interaction.user.id;
         
         try {
             const character = await getCharacter(userId);
             
             if (!character) {
                 const embed = createEmbed('No Character Found', 
-                    'You don\'t have a character yet! Use `!create` to create one.', 
+                    'You don\'t have a character yet! Use `/create` to create one.', 
                     '#ff6b6b');
-                return message.reply({ embeds: [embed] });
+                return interaction.reply({ embeds: [embed] });
             }
 
             const faction = FACTIONS[character.faction];
             
-            // If no subcommand, show available quests
-            if (!args[0]) {
+            const subcommand = interaction.options.getSubcommand();
+            
+            // Handle quest list
+            if (subcommand === 'list') {
                 const questList = QUESTS[character.faction].map((quest, index) => {
                     const levelReq = quest.levelRequirement > character.level ? 
                         `❌ (Level ${quest.levelRequirement} required)` : 
@@ -34,22 +51,22 @@ module.exports = {
                 const embed = new EmbedBuilder()
                     .setColor(faction.color)
                     .setTitle(`${faction.emoji} Available Quests`)
-                    .setDescription(`Choose a quest for your ${faction.name} character:\n\n${questList}\n\nUse: \`!quest start [quest_number]\``)
+                    .setDescription(`Choose a quest for your ${faction.name} character:\n\n${questList}\n\nUse: \`/quest start number:[quest_number]\``)
                     .setFooter({ text: 'Complete quests to gain experience and gold!' });
                 
-                return message.reply({ embeds: [embed] });
+                return interaction.reply({ embeds: [embed] });
             }
 
             // Handle quest start
-            if (args[0] === 'start') {
-                const questChoice = parseInt(args[1]);
+            if (subcommand === 'start') {
+                const questChoice = interaction.options.getInteger('number');
                 const availableQuests = QUESTS[character.faction];
                 
-                if (isNaN(questChoice) || questChoice < 1 || questChoice > availableQuests.length) {
+                if (questChoice < 1 || questChoice > availableQuests.length) {
                     const embed = createEmbed('Invalid Quest', 
                         `Please choose a valid quest number (1-${availableQuests.length})`, 
                         '#ff6b6b');
-                    return message.reply({ embeds: [embed] });
+                    return interaction.reply({ embeds: [embed] });
                 }
 
                 const selectedQuest = availableQuests[questChoice - 1];
@@ -59,7 +76,7 @@ module.exports = {
                     const embed = createEmbed('Level Too Low', 
                         `You need to be level ${selectedQuest.levelRequirement} to attempt this quest. You are currently level ${character.level}.`, 
                         '#ff6b6b');
-                    return message.reply({ embeds: [embed] });
+                    return interaction.reply({ embeds: [embed] });
                 }
 
                 // Check if quest already completed
@@ -70,7 +87,7 @@ module.exports = {
                     const embed = createEmbed('Quest Already Completed', 
                         'You have already completed this quest!', 
                         '#ff6b6b');
-                    return message.reply({ embeds: [embed] });
+                    return interaction.reply({ embeds: [embed] });
                 }
 
                 // Simulate quest completion (simple success rate based on level)
@@ -107,7 +124,7 @@ module.exports = {
                         embed.addFields([{ name: '🆙 LEVEL UP!', value: `You are now level ${newLevel}!`, inline: false }]);
                     }
 
-                    message.reply({ embeds: [embed] });
+                    interaction.reply({ embeds: [embed] });
                 } else {
                     // Quest failed
                     const embed = new EmbedBuilder()
@@ -116,7 +133,7 @@ module.exports = {
                         .setDescription(`**${selectedQuest.name}**\n${selectedQuest.failureMessage || 'You failed to complete the quest. Train harder and try again!'}`)
                         .setFooter({ text: 'Don\'t give up! Try again when you\'re stronger.' });
 
-                    message.reply({ embeds: [embed] });
+                    interaction.reply({ embeds: [embed] });
                 }
             }
 
@@ -125,7 +142,7 @@ module.exports = {
             const embed = createEmbed('Quest Error', 
                 'An error occurred while processing the quest. Please try again.', 
                 '#ff6b6b');
-            message.reply({ embeds: [embed] });
+            interaction.reply({ embeds: [embed] });
         }
     }
 };

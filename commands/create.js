@@ -1,54 +1,64 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
 const { createCharacter, getCharacter } = require('../database/database');
 const { FACTIONS } = require('../utils/factions');
 const { createEmbed } = require('../utils/embeds');
 
 module.exports = {
-    name: 'create',
-    description: 'Create a new character and choose your faction',
-    async execute(message, args) {
-        const userId = message.author.id;
+    data: new SlashCommandBuilder()
+        .setName('create')
+        .setDescription('Create a new character and choose your faction')
+        .addStringOption(option =>
+            option.setName('faction')
+                .setDescription('Choose your faction')
+                .setRequired(false)
+                .addChoices(
+                    { name: '🏴‍☠️ One Piece Pirates', value: 'one_piece' },
+                    { name: '🥷 Naruto Shinobi', value: 'naruto' },
+                    { name: '👁️ Jujutsu Sorcerers', value: 'jujutsu_kaisen' },
+                    { name: '⚔️ Demon Slayers', value: 'demon_slayer' }
+                )),
+    async execute(interaction) {
+        const userId = interaction.user.id;
         
         try {
             // Check if user already has a character
             const existingCharacter = await getCharacter(userId);
             if (existingCharacter) {
                 const embed = createEmbed('Character Already Exists', 
-                    `You already have a character! Use \`!profile\` to view your character.`, 
+                    `You already have a character! Use \`/profile\` to view your character.`, 
                     '#ff6b6b');
-                return message.reply({ embeds: [embed] });
+                return interaction.reply({ embeds: [embed] });
             }
 
+            // Get faction choice from interaction
+            const factionChoice = interaction.options.getString('faction');
+            
             // If no faction specified, show faction selection
-            if (!args[0]) {
+            if (!factionChoice) {
                 const factionList = Object.keys(FACTIONS).map((key, index) => {
                     const faction = FACTIONS[key];
                     return `**${index + 1}. ${faction.name}** ${faction.emoji}\n${faction.description}\n**Perk:** ${faction.perk}`;
                 }).join('\n\n');
 
                 const embed = createEmbed('🌟 Choose Your Faction', 
-                    `Welcome to Cross Realm Chronicles! Choose your faction:\n\n${factionList}\n\nUse: \`!create [faction_number]\``, 
+                    `Welcome to Cross Realm Chronicles! Choose your faction:\n\n${factionList}\n\nUse: \`/create faction:[your_choice]\``, 
                     '#4f46e5');
                 
-                return message.reply({ embeds: [embed] });
+                return interaction.reply({ embeds: [embed] });
             }
 
-            // Parse faction choice
-            const factionChoice = parseInt(args[0]);
-            const factionKeys = Object.keys(FACTIONS);
-            
-            if (isNaN(factionChoice) || factionChoice < 1 || factionChoice > factionKeys.length) {
+            // Validate faction choice
+            if (!FACTIONS[factionChoice]) {
                 const embed = createEmbed('Invalid Faction', 
-                    `Please choose a valid faction number (1-${factionKeys.length})`, 
+                    'Please choose a valid faction from the dropdown options.', 
                     '#ff6b6b');
-                return message.reply({ embeds: [embed] });
+                return interaction.reply({ embeds: [embed] });
             }
 
-            const selectedFactionKey = factionKeys[factionChoice - 1];
-            const selectedFaction = FACTIONS[selectedFactionKey];
+            const selectedFaction = FACTIONS[factionChoice];
 
             // Create character
-            const character = await createCharacter(userId, message.author.username, selectedFactionKey);
+            const character = await createCharacter(userId, interaction.user.username, factionChoice);
 
             // Success embed
             const embed = new EmbedBuilder()
@@ -63,17 +73,17 @@ module.exports = {
                     { name: '💪 Starting Ability', value: selectedFaction.startingAbility, inline: false },
                     { name: '🎁 Faction Perk', value: selectedFaction.perk, inline: false }
                 ])
-                .setFooter({ text: 'Use !profile to view your character • !quest to start your journey!' })
+                .setFooter({ text: 'Use /profile to view your character • /quest to start your journey!' })
                 .setTimestamp();
 
-            message.reply({ embeds: [embed] });
+            interaction.reply({ embeds: [embed] });
 
         } catch (error) {
             console.error('Character creation error:', error);
             const embed = createEmbed('Creation Failed', 
                 'An error occurred while creating your character. Please try again.', 
                 '#ff6b6b');
-            message.reply({ embeds: [embed] });
+            interaction.reply({ embeds: [embed] });
         }
     }
 };

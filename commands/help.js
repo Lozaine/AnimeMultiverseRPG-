@@ -1,9 +1,10 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
-    name: 'help',
-    description: 'Show help information and available commands',
-    async execute(message, args) {
+    data: new SlashCommandBuilder()
+        .setName('help')
+        .setDescription('Show help information and available commands'),
+    async execute(interaction) {
         const embed = new EmbedBuilder()
             .setColor('#4f46e5')
             .setTitle('⚔️ Cross Realm Chronicles - Help')
@@ -11,12 +12,12 @@ module.exports = {
             .addFields([
                 {
                     name: '🌟 Getting Started',
-                    value: '`!create` - Create your character and choose a faction\n`!profile` - View your character information',
+                    value: '`/create` - Create your character and choose a faction\n`/profile` - View your character information',
                     inline: false
                 },
                 {
                     name: '⚔️ Adventure Commands',
-                    value: '`!quest` - View available quests\n`!quest start [number]` - Start a specific quest',
+                    value: '`/quest list` - View available quests\n`/quest start` - Start a specific quest',
                     inline: false
                 },
                 {
@@ -26,7 +27,7 @@ module.exports = {
                 },
                 {
                     name: '🎮 How to Play',
-                    value: '• Create a character with `!create`\n• Choose your faction for unique abilities\n• Complete quests to gain experience and gold\n• Level up to unlock harder quests\n• Each faction has unique perks and abilities!',
+                    value: '• Create a character with `/create`\n• Choose your faction for unique abilities\n• Complete quests to gain experience and gold\n• Level up to unlock harder quests\n• Each faction has unique perks and abilities!',
                     inline: false
                 },
                 {
@@ -38,6 +39,6 @@ module.exports = {
             .setFooter({ text: 'Cross Realm Chronicles • Multiverse Anime RPG' })
             .setTimestamp();
 
-        message.reply({ embeds: [embed] });
+        interaction.reply({ embeds: [embed] });
     }
 };

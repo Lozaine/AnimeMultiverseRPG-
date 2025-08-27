@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, Collection } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, REST, Routes } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 const { initializeDatabase } = require('./database/database');
@@ -6,9 +6,7 @@ const { initializeDatabase } = require('./database/database');
 // Create Discord client
 const client = new Client({
     intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent
+        GatewayIntentBits.Guilds
     ]
 });
 
@@ -16,13 +14,15 @@ const client = new Client({
 client.commands = new Collection();
 
 // Load commands
+const commands = [];
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
 for (const file of commandFiles) {
     const filePath = path.join(commandsPath, file);
     const command = require(filePath);
-    client.commands.set(command.name, command);
+    client.commands.set(command.data.name, command);
+    commands.push(command.data.toJSON());
 }
 
 // Bot ready event
@@ -37,26 +37,42 @@ client.once('ready', async () => {
         console.error('❌ Database initialization failed:', error);
     }
     
+    // Register slash commands globally
+    const rest = new REST().setToken(process.env.BOT_TOKEN);
+    try {
+        console.log('🔄 Refreshing slash commands...');
+        await rest.put(
+            Routes.applicationCommands(client.user.id),
+            { body: commands }
+        );
+        console.log('✅ Slash commands registered successfully!');
+    } catch (error) {
+        console.error('❌ Failed to register slash commands:', error);
+    }
+    
     // Set bot activity
-    client.user.setActivity('⚔️ Cross Realm Chronicles | !help', { type: 'PLAYING' });
+    client.user.setActivity('⚔️ Cross Realm Chronicles | Use slash commands', { type: 'PLAYING' });
 });
 
-// Message handler
-client.on('messageCreate', async message => {
-    // Ignore bot messages and messages without prefix
-    if (message.author.bot || !message.content.startsWith('!')) return;
+// Slash command handler
+client.on('interactionCreate', async interaction => {
+    if (!interaction.isChatInputCommand()) return;
 
-    const args = message.content.slice(1).trim().split(/ +/);
-    const commandName = args.shift().toLowerCase();
-
-    const command = client.commands.get(commandName);
+    const command = client.commands.get(interaction.commandName);
     if (!command) return;
 
     try {
-        await command.execute(message, args);
+        await command.execute(interaction);
     } catch (error) {
         console.error('Command execution error:', error);
-        await message.reply('❌ There was an error executing that command!');
+        
+        const errorMessage = '❌ There was an error executing that command!';
+        
+        if (interaction.replied || interaction.deferred) {
+            await interaction.followUp({ content: errorMessage, ephemeral: true });
+        } else {
+            await interaction.reply({ content: errorMessage, ephemeral: true });
+        }
     }
 });
 

@@ -11,9 +11,10 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### Bot Framework
-- **Discord.js v14**: Modern Discord bot framework with Gateway Intents for message handling and bot interactions
-- **Command Handler**: File-based command system that dynamically loads commands from the `/commands` directory
-- **Event-Driven Architecture**: Uses Discord.js event listeners for message handling and bot lifecycle management
+- **Discord.js v14**: Modern Discord bot framework with slash command support and interaction handling
+- **Slash Command System**: Global slash commands with autocomplete, validation, and modern Discord UX
+- **Command Handler**: File-based command system that dynamically loads and registers slash commands from the `/commands` directory
+- **Event-Driven Architecture**: Uses Discord.js interaction events for slash command handling and bot lifecycle management
 
 ### Database Layer
 - **SQLite3**: Local file-based database for character data persistence
