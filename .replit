@@ -26,12 +26,12 @@ args = "discord_bot_test"
 name = "Discord RPG Bot"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm install discord.js sqlite3 && node index.js"
-
 [workflows.workflow.metadata]
 outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node index.js"
 
 [[workflows.workflow]]
 name = "discord_bot_test"
