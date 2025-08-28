@@ -66,6 +66,41 @@
 
 ## Phase 2: Interactive Systems & Documentation
 
+### [2025-08-28] - Enhanced Faction-Aware Quest System & Critical Bug Fixes
+
+#### Enhanced Quest System with Faction Integration
+- **Faction-Aware Quest Bonuses**: Complete implementation of faction-specific bonuses for all quest types
+  - Pirates excel at gathering (+20% XP, +40% coins) and delivery (+30% XP, +20% coins)
+  - Shinobi master protection (+40% XP, +30% coins) and training (+50% XP, +30% items)
+  - Sorcerers dominate hunting quests (+40% XP, +30% items)
+  - Slayers are ultimate hunters (+50% XP, +40% items) with training focus (+40% XP)
+- **Quest Command Integration**: Updated `/quest` command to fully utilize faction bonus system
+- **Victory Embed Enhancement**: Combat victories now display faction bonus information and detailed rewards breakdown
+- **Dynamic Reward Calculation**: Rewards automatically scale based on faction strengths and quest type affinity
+- **Success Rate Bonuses**: +10% success rate on faction-preferred quest types
+
+#### Critical Bug Fixes
+- **Level Up HP Display Fix**: Resolved "undefined total" bug in level up messages
+  - Fixed property name inconsistency: `maxHp` → `max_hp` across all commands
+  - Updated quest command level up display to show correct HP totals
+  - Updated item use command level up display to show correct HP totals
+- **Help Command Display Fix**: Fixed faction names in `/help` command showing proper display names
+  - Changed from technical identifiers (`one_piece`, `naruto`, etc.)
+  - Now displays user-friendly names (`One Piece Pirates`, `Naruto Shinobi`, etc.)
+
+#### Files Modified
+- `commands/quest.js` - Enhanced with faction bonuses, fixed HP display bug
+- `commands/use.js` - Fixed HP display property name inconsistency
+- `commands/help.js` - Updated faction display names from technical to user-friendly
+- `utils/quests.js` - Enhanced with faction bonus calculation functions
+- `utils/combat.js` - Updated victory embeds to support faction bonus display
+
+#### System Improvements
+- **Enhanced User Experience**: Level up messages now display correctly formatted stat totals
+- **Improved Faction Identity**: Help command shows proper faction names for better clarity
+- **Comprehensive Faction Integration**: Quest system fully integrated with faction bonus mechanics
+- **Consistent Property Naming**: Standardized HP property references across entire codebase
+
 ### [2025-08-28] - Interactive Inventory System & Item Usage System Overhaul
 
 #### Added
