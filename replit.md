@@ -79,6 +79,7 @@ Preferred communication style: Simple, everyday language.
 - **Category Structure**: Getting Started, Faction Guide, Combat Guide, Character Progression, Quest System, Items & Inventory, Command Reference
 - **Detailed Content**: Over 25 sections covering all game mechanics, strategies, and systems
 - **User-Friendly Design**: Rich embeds with proper formatting, examples, and navigation guidance
+- **Separated Help System**: Updated `/help` command as beginner-friendly quick start guide, keeping `/wiki` for comprehensive documentation
 
 #### Wiki Categories & Content
 - **Getting Started**: Character creation, first quest, basic commands for new players

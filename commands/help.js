@@ -3,47 +3,47 @@ const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('help')
-        .setDescription('User guide and command index for Cross Realm Chronicles'),
+        .setDescription('Quick start guide for new players'),
     async execute(interaction) {
         const embed = new EmbedBuilder()
-            .setColor('#4f46e5')
-            .setTitle('📖 Cross Realm Chronicles - Player Manual')
-            .setDescription('Your essential guide to commands and basic gameplay. Use `/wiki` for detailed game mechanics!')
+            .setColor('#00d4aa')
+            .setTitle('🎮 Cross Realm Chronicles - Beginner Guide')
+            .setDescription('**New to Cross Realm Chronicles? Start here!**\n\nThis is your quick start guide. Use `/wiki` for detailed game mechanics.')
             .addFields([
                 {
-                    name: '🚀 Essential Commands',
-                    value: '`/create` - Create your character and choose a faction\n`/profile` - View your character stats and progress\n`/quest start` - Begin your adventure with quests\n`/inventory` - View your collected items\n`/use <item>` - Consume items for healing and effects',
+                    name: '🚀 Getting Started (3 Easy Steps)',
+                    value: '**1.** `/create <faction>` - Pick your anime faction and create your character\n**2.** `/quest` - Go on your first adventure to earn XP and gold\n**3.** `/profile` - Check your progress and see how strong you\'ve become!',
                     inline: false
                 },
                 {
-                    name: '🎮 Quick Start Guide',
-                    value: '1️⃣ Create a character with `/create`\n2️⃣ Choose your anime faction (One Piece, Naruto, etc.)\n3️⃣ Start quests with `/quest start`\n4️⃣ Fight enemies and collect items\n5️⃣ Level up and get stronger!',
+                    name: '🌟 Choose Your Faction',
+                    value: '🏴‍☠️ **one_piece** - Adventure-loving pirates with treasure hunting skills\n🥷 **naruto** - Stealthy shinobi with chakra techniques\n👁️ **jujutsu_kaisen** - Powerful sorcerers with cursed energy\n⚔️ **demon_slayer** - Skilled warriors with breathing techniques',
                     inline: false
                 },
                 {
-                    name: '⚔️ Combat Basics',
-                    value: '• 30% chance of enemy encounters during quests\n• Choose **Attack** to fight or **Flee** to escape\n• Victory gives bonus XP and rewards\n• Defeat restores you to 1 HP with small learning XP',
+                    name: '⚡ Essential Commands',
+                    value: '`/quest` - Start adventures to level up\n`/inventory` - See what items you have\n`/use <item>` - Use potions and tools\n`/profile` - View your character stats',
+                    inline: true
+                },
+                {
+                    name: '📱 Quick Tips',
+                    value: '• Each faction is good at different quest types\n• Use items to heal and boost your character\n• Combat can happen during quests - be ready!\n• Level up to unlock new faction abilities',
+                    inline: true
+                },
+                {
+                    name: '🆘 Need More Help?',
+                    value: '**For detailed guides:** `/wiki`\n**Getting started:** `/wiki category:getting_started`\n**Faction details:** `/wiki category:factions`\n**Combat help:** `/wiki category:combat`',
                     inline: false
                 },
                 {
-                    name: '🏴‍☠️ Available Factions',
-                    value: '**🏴‍☠️ One Piece Pirates** - Devil Fruit powers\n**🥷 Naruto Shinobi** - Chakra techniques\n**👁️ Jujutsu Sorcerers** - Cursed techniques\n**⚔️ Demon Slayers** - Breathing styles',
-                    inline: false
-                },
-                {
-                    name: '📦 Inventory System',
-                    value: '• Collect items from quests and combat\n• Store up to 100 items total\n• Use consumables to heal and gain bonuses\n• Items stack automatically for easy management',
-                    inline: false
-                },
-                {
-                    name: '📚 Need More Info?',
-                    value: 'Use `/wiki` to access the complete game encyclopedia with detailed guides on combat, leveling, factions, and more!',
+                    name: '🎯 Your First Goal',
+                    value: 'Create a character, complete 3-5 quests, and reach level 3 to unlock your first faction ability. Good luck, adventurer!',
                     inline: false
                 }
             ])
-            .setFooter({ text: 'Cross Realm Chronicles • New to the game? Start with /create!' })
+            .setFooter({ text: 'Cross Realm Chronicles • Use /wiki for in-depth game mechanics' })
             .setTimestamp();
 
-        interaction.reply({ embeds: [embed] });
+        await interaction.reply({ embeds: [embed] });
     }
 };
