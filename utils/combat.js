@@ -5,7 +5,7 @@ const { calculateDamage, calculateCritChance, rollCriticalHit } = require('./ene
 // Create combat embed
 function createCombatEmbed(player, enemy, combatLog = '', isPlayerTurn = true) {
     const playerHpPercent = Math.floor((player.hp / player.max_hp) * 100);
-    const enemyHpPercent = Math.floor((enemy.stats.hp / enemy.stats.maxHp) * 100);
+    const enemyHpPercent = Math.floor((enemy.stats.hp / enemy.stats.max_hp) * 100);
     
     const playerHpBar = createHealthBar(playerHpPercent);
     const enemyHpBar = createHealthBar(enemyHpPercent);
@@ -22,7 +22,7 @@ function createCombatEmbed(player, enemy, combatLog = '', isPlayerTurn = true) {
             },
             {
                 name: `${enemy.emoji} ${enemy.name}`,
-                value: `HP: ${enemy.stats.hp}/${enemy.stats.maxHp} ${enemyHpBar}\nATK: ${enemy.stats.atk} | DEF: ${enemy.stats.def} | SPD: ${enemy.stats.spd}`,
+                value: `HP: ${enemy.stats.hp}/${enemy.stats.max_hp} ${enemyHpBar}\nATK: ${enemy.stats.atk} | DEF: ${enemy.stats.def} | SPD: ${enemy.stats.spd}`,
                 inline: true
             }
         ]);

@@ -64,7 +64,7 @@ function getBaseStatsForLevel(level) {
     
     return {
         hp: hp,
-        maxHp: hp,
+        max_hp: hp,
         atk: atk,
         def: def,
         spd: spd
@@ -87,7 +87,7 @@ function checkLevelUp(currentLevel, currentExp, newExp) {
             newLevel: newLevel,
             levelsGained: levelsGained,
             newStats: newStats,
-            hpGained: newStats.maxHp - oldStats.maxHp,
+            hpGained: newStats.max_hp - oldStats.max_hp,
             atkGained: newStats.atk - oldStats.atk,
             defGained: newStats.def - oldStats.def,
             spdGained: newStats.spd - oldStats.spd

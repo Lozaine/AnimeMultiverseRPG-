@@ -162,7 +162,7 @@ function scaleEnemyToLevel(enemy, playerLevel) {
         ...enemy,
         stats: {
             hp: Math.floor(enemy.baseStats.hp + (scaleFactor * 20)),
-            maxHp: Math.floor(enemy.baseStats.hp + (scaleFactor * 20)),
+            max_hp: Math.floor(enemy.baseStats.hp + (scaleFactor * 20)),
             atk: Math.floor(enemy.baseStats.atk + (scaleFactor * 3)),
             def: Math.floor(enemy.baseStats.def + (scaleFactor * 2)),
             spd: Math.floor(enemy.baseStats.spd + (scaleFactor * 2))

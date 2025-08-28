@@ -150,7 +150,7 @@ client.on('interactionCreate', async interaction => {
                             newGold, 
                             levelUpData.newLevel,
                             levelUpData.newStats.hp,
-                            levelUpData.newStats.maxHp,
+                            levelUpData.newStats.max_hp,
                             levelUpData.newStats.atk,
                             levelUpData.newStats.def,
                             levelUpData.newStats.spd,
@@ -217,7 +217,7 @@ client.on('interactionCreate', async interaction => {
                                 finalNewGold, 
                                 levelUpData.newLevel,
                                 levelUpData.newStats.hp,
-                                levelUpData.newStats.maxHp,
+                                levelUpData.newStats.max_hp,
                                 levelUpData.newStats.atk,
                                 levelUpData.newStats.def,
                                 levelUpData.newStats.spd,
@@ -237,7 +237,7 @@ client.on('interactionCreate', async interaction => {
                                 { 
                                     name: '🆙 LEVEL UP!', 
                                     value: `You are now level ${levelUpData.newLevel}!\n` +
-                                           `+${levelUpData.hpGained} HP (${levelUpData.newStats.maxHp} total)\n` +
+                                           `+${levelUpData.hpGained} HP (${levelUpData.newStats.max_hp} total)\n` +
                                            `+${levelUpData.atkGained} ATK (${levelUpData.newStats.atk} total)\n` +
                                            `+${levelUpData.defGained} DEF (${levelUpData.newStats.def} total)\n` +
                                            `+${levelUpData.spdGained} SPD (${levelUpData.newStats.spd} total)`, 
@@ -269,7 +269,7 @@ client.on('interactionCreate', async interaction => {
                                     newGold, 
                                     levelUpData.newLevel,
                                     1, // HP restored to 1
-                                    levelUpData.newStats.maxHp,
+                                    levelUpData.newStats.max_hp,
                                     levelUpData.newStats.atk,
                                     levelUpData.newStats.def,
                                     levelUpData.newStats.spd,
