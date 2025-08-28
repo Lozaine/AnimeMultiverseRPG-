@@ -14,7 +14,8 @@ module.exports = {
                 .setMinValue(1)),
     async execute(interaction) {
         const userId = interaction.user.id;
-        const page = interaction.options.getInteger('page') || 1;
+        // Handle both slash commands and button interactions
+        const page = (interaction.options && interaction.options.getInteger('page')) || 1;
         
         try {
             const character = await getCharacter(userId);
