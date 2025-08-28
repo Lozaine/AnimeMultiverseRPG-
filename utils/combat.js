@@ -122,30 +122,76 @@ function executeEnemyAttack(enemy, player) {
     };
 }
 
-// Create victory embed
-function createVictoryEmbed(player, enemy, questXp, questCoins) {
+// Enhanced createVictoryEmbed function with faction bonus support
+function createVictoryEmbed(player, enemy, questXp, questCoins, factionBonusInfo = null) {
     const totalXp = questXp + enemy.rewards.xp;
     const totalCoins = questCoins + enemy.rewards.coins;
     
     const embed = new EmbedBuilder()
         .setColor('#00ff00')
-        .setTitle('🏆 Victory!')
-        .setDescription(`You defeated the ${enemy.emoji} **${enemy.name}**!`)
+        .setTitle('🎉 Victory!')
+        .setDescription(`${player.name} has triumphed over ${enemy.name}!`)
         .addFields([
             {
-                name: '💰 Rewards',
-                value: `**Quest Rewards:**\n+${questXp} XP\n+${questCoins} Coins\n\n**Combat Rewards:**\n+${enemy.rewards.xp} XP\n+${enemy.rewards.coins} Coins`,
+                name: '⚔️ Combat Results',
+                value: `${enemy.emoji} **${enemy.name}** has been defeated!\nYour heroic victory brings peace to the area.`,
                 inline: false
             },
             {
-                name: '📊 Total Gained',
-                value: `+${totalXp} XP\n+${totalCoins} Coins`,
+                name: '💰 Rewards Earned',
+                value: `**Enemy Rewards:**\n• XP: +${enemy.rewards.xp}\n• Coins: +${enemy.rewards.coins}\n\n**Quest Rewards:**\n• XP: +${questXp}\n• Coins: +${questCoins}\n\n**Grand Total:** +${totalXp} XP, +${totalCoins} coins`,
                 inline: false
             }
         ])
-        .setFooter({ text: 'Combat victory! You can continue questing.' })
         .setTimestamp();
     
+    return embed;
+}
+
+// Alternative detailed version that includes more combat details
+function createDetailedVictoryEmbed(character, enemy, questXp, questCoins, combatStats = null) {
+    const embed = new EmbedBuilder()
+        .setTitle('🎉 Victory!')
+        .setDescription(`${character.name} has triumphed over ${enemy.name}!`)
+        .setColor('#10b981')
+        .setThumbnail(enemy.image || null);
+    
+    // Combat summary
+    let combatSummary = `${enemy.emoji} **${enemy.name}** has been defeated!`;
+    if (combatStats) {
+        combatSummary += `\n\n**Combat Summary:**`;
+        combatSummary += `\n• Damage Dealt: ${combatStats.damageDealt || 'Unknown'}`;
+        combatSummary += `\n• Damage Taken: ${combatStats.damageTaken || 'Unknown'}`;
+        combatSummary += `\n• Critical Hits: ${combatStats.criticalHits || 0}`;
+        combatSummary += `\n• Rounds: ${combatStats.rounds || 1}`;
+    }
+    
+    embed.addFields([
+        {
+            name: '⚔️ Battle Results',
+            value: combatSummary,
+            inline: false
+        }
+    ]);
+    
+    // Rewards breakdown
+    const rewardsBreakdown = `**Enemy Rewards:**\n` +
+                           `• XP: +${enemy.rewards.xp}\n` +
+                           `• Coins: +${enemy.rewards.coins}\n\n` +
+                           `**Quest Rewards:**\n` +
+                           `• XP: +${questXp}\n` +
+                           `• Coins: +${questCoins}\n\n` +
+                           `**Grand Total:** +${enemy.rewards.xp + questXp} XP, +${enemy.rewards.coins + questCoins} coins`;
+    
+    embed.addFields([
+        {
+            name: '💰 Rewards Earned',
+            value: rewardsBreakdown,
+            inline: false
+        }
+    ]);
+    
+    embed.setTimestamp();
     return embed;
 }
 
@@ -202,6 +248,7 @@ module.exports = {
     executePlayerAttack,
     executeEnemyAttack,
     createVictoryEmbed,
+    createDetailedVictoryEmbed,
     createDefeatEmbed,
     createFleeEmbed
 };

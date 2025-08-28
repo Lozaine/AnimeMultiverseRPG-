@@ -1,0 +1,192 @@
+// Example of how to modify your quest command to use faction bonuses
+// This would be part of your quest command file
+
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { getCharacter, updateCharacterProgress, addItemToInventory } = require('../database/database');
+const { getRandomPhase1Quest, calculatePhase1SuccessRate, rollForItem, applyFactionBonuses, calculateQuestRewards } = require('../utils/quests');
+const { checkLevelUp } = require('../utils/levelProgression');
+const { createEmbed } = require('../utils/embeds');
+
+module.exports = {
+    data: new SlashCommandBuilder()
+        .setName('quest')
+        .setDescription('Embark on a quest to gain experience and rewards!'),
+
+    async execute(interaction) {
+        const userId = interaction.user.id;
+
+        try {
+            // Get character data
+            const character = await getCharacter(userId);
+            if (!character) {
+                return interaction.reply({
+                    content: '❌ You need to create a character first! Use `/create` to get started.',
+                    ephemeral: true
+                });
+            }
+
+            // Get a random quest
+            const baseQuest = getRandomPhase1Quest();
+            
+            // Apply faction bonuses to the quest
+            const questWithBonuses = applyFactionBonuses(baseQuest, character.level, character.faction);
+            
+            // Calculate success rate with faction bonuses
+            const successRate = calculatePhase1SuccessRate(character.level, character.faction, baseQuest.category);
+            const questSuccess = Math.random() < successRate;
+            
+            // Calculate final rewards
+            const rewards = calculateQuestRewards(baseQuest, character.level, character.faction, questSuccess);
+            
+            // Roll for items with faction bonuses
+            const itemReceived = rollForItem(baseQuest, character.level, character.faction);
+            
+            // Update character experience and gold
+            const newExp = character.experience + rewards.xp;
+            const newGold = character.gold + rewards.coins;
+            
+            // Check for level up
+            const levelUpData = checkLevelUp(character.level, character.experience, newExp);
+            
+            // Update character in database
+            if (levelUpData.leveledUp) {
+                await updateCharacterProgress(
+                    userId,
+                    newExp,
+                    newGold,
+                    levelUpData.newLevel,
+                    levelUpData.newStats.hp,
+                    levelUpData.newStats.max_hp,
+                    levelUpData.newStats.atk,
+                    levelUpData.newStats.def,
+                    levelUpData.newStats.spd
+                );
+            } else {
+                await updateCharacterProgress(userId, newExp, newGold, character.level);
+            }
+
+            // Add item to inventory if received
+            let itemAddResult = null;
+            if (itemReceived && questSuccess) {
+                itemAddResult = await addItemToInventory(
+                    userId,
+                    itemReceived.name,
+                    itemReceived.description,
+                    itemReceived.type,
+                    1,
+                    'quest'
+                );
+            }
+
+            // Create result embed
+            const embed = new EmbedBuilder()
+                .setTitle(`⚔️ ${questWithBonuses.name}`)
+                .setDescription(questWithBonuses.description)
+                .setColor(questSuccess ? '#10b981' : '#f59e0b');
+
+            // Add quest result
+            const resultMessage = questSuccess ? baseQuest.successMessage : baseQuest.failureMessage;
+            embed.addFields([
+                {
+                    name: questSuccess ? '✅ Quest Completed!' : '⚠️ Quest Partially Completed',
+                    value: resultMessage,
+                    inline: false
+                }
+            ]);
+
+            // Add rewards info
+            let rewardText = `**XP Gained:** +${rewards.xp}\n**Coins Earned:** +${rewards.coins}`;
+            
+            // Show faction bonus information
+            if (rewards.bonusInfo && character.faction) {
+                const { FACTIONS } = require('../utils/factions');
+                const factionName = FACTIONS[character.faction]?.name || character.faction;
+                
+                rewardText += `\n\n🏴‍☠️ **${factionName} Bonus Applied!**`;
+                rewardText += `\n• XP Multiplier: ${rewards.bonusInfo.xpMultiplier}x`;
+                rewardText += `\n• Coin Multiplier: ${rewards.bonusInfo.coinMultiplier}x`;
+                rewardText += `\n• Item Chance Multiplier: ${rewards.bonusInfo.itemMultiplier}x`;
+                
+                if (rewards.bonusInfo.originalXp !== rewards.xp || rewards.bonusInfo.originalCoins !== rewards.coins) {
+                    rewardText += `\n*Base rewards: ${rewards.bonusInfo.originalXp} XP, ${rewards.bonusInfo.originalCoins} coins*`;
+                }
+            }
+
+            embed.addFields([
+                {
+                    name: '💰 Rewards',
+                    value: rewardText,
+                    inline: false
+                }
+            ]);
+
+            // Add item received info
+            if (itemReceived && questSuccess) {
+                if (itemAddResult && !itemAddResult.inventoryFull) {
+                    embed.addFields([
+                        {
+                            name: '🎁 Item Received!',
+                            value: `${itemReceived.name}\n*${itemReceived.description}*`,
+                            inline: false
+                        }
+                    ]);
+                } else if (itemAddResult && itemAddResult.inventoryFull) {
+                    embed.addFields([
+                        {
+                            name: '📦 Inventory Full!',
+                            value: `You would have received ${itemReceived.name}, but your inventory is full!`,
+                            inline: false
+                        }
+                    ]);
+                }
+            }
+
+            // Add level up info
+            if (levelUpData.leveledUp) {
+                embed.addFields([
+                    {
+                        name: '🆙 LEVEL UP!',
+                        value: `Congratulations! You reached level ${levelUpData.newLevel}!\n` +
+                               `+${levelUpData.hpGained} HP (${levelUpData.newStats.max_hp} total)\n` +
+                               `+${levelUpData.atkGained} ATK (${levelUpData.newStats.atk} total)\n` +
+                               `+${levelUpData.defGained} DEF (${levelUpData.newStats.def} total)\n` +
+                               `+${levelUpData.spdGained} SPD (${levelUpData.newStats.spd} total)`,
+                        inline: false
+                    }
+                ]);
+            }
+
+            // Add character progress
+            const expToNext = require('../utils/levelProgression').getExpToNextLevel(levelUpData.newLevel || character.level, newExp);
+            const levelProgress = require('../utils/levelProgression').getLevelProgress(levelUpData.newLevel || character.level, newExp);
+            
+            embed.addFields([
+                {
+                    name: '📈 Character Progress',
+                    value: `**Level:** ${levelUpData.newLevel || character.level}\n` +
+                           `**XP Progress:** ${levelProgress}% (${expToNext} XP to next level)\n` +
+                           `**Total Gold:** ${newGold}`,
+                    inline: false
+                }
+            ]);
+
+            // Add footer with quest category and faction affinity
+            let footerText = `Quest Category: ${baseQuest.category}`;
+            if (character.faction) {
+                const { isQuestAffinityMatch } = require('../utils/factions');
+                const hasAffinity = isQuestAffinityMatch(character.faction, baseQuest.category);
+                footerText += ` ${hasAffinity ? '⭐ (Faction Affinity)' : ''}`;
+            }
+            embed.setFooter({ text: footerText });
+
+            return interaction.reply({ embeds: [embed] });
+
+        } catch (error) {
+            console.error('Quest command error:', error);
+            return interaction.reply({
+                content: '❌ An error occurred while processing your quest!',
+                ephemeral: true
+            });
+        }
+    }
+};

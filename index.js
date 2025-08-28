@@ -187,13 +187,22 @@ client.on('interactionCreate', async interaction => {
                     
                     if (attackResult.enemyDefeated) {
                         // Enemy defeated - victory!
-                        const questSuccess = Math.random() < calculatePhase1SuccessRate(character.level);
-                        let questXp = quest.xpReward;
-                        let questCoins = quest.coinReward;
+                        
+                        // Import the enhanced quest functions
+                        const { calculatePhase1SuccessRate, rollForItem, calculateQuestRewards } = require('./utils/quests');
+                        
+                        // Calculate quest success with faction bonuses
+                        const questSuccess = Math.random() < calculatePhase1SuccessRate(character.level, character.faction, quest.category);
+                        
+                        // Calculate quest rewards with faction bonuses
+                        const questRewards = calculateQuestRewards(quest, character.level, character.faction, questSuccess);
+                        let questXp = questRewards.xp;
+                        let questCoins = questRewards.coins;
                         let itemReceived = null;
                         
+                        // Roll for item with faction bonuses
                         if (questSuccess) {
-                            itemReceived = rollForItem(quest, character.level);
+                            itemReceived = rollForItem(quest, character.level, character.faction);
                             if (itemReceived) {
                                 // Add item to inventory
                                 const inventoryResult = await addItemToInventory(userId, itemReceived.name, itemReceived.description, itemReceived.type, 1, 'combat');
@@ -208,10 +217,6 @@ client.on('interactionCreate', async interaction => {
                                     }
                                 }
                             }
-                        } else {
-                            // Quest partially successful
-                            questXp = Math.floor(questXp * 0.7);
-                            questCoins = Math.floor(questCoins * 0.5);
                         }
                         
                         const totalXp = questXp + enemy.rewards.xp;
@@ -243,7 +248,25 @@ client.on('interactionCreate', async interaction => {
                         // Clean up combat data
                         delete global.activeCombats[combatKey];
                         
+                        // Create victory embed with enhanced reward information
                         const victoryEmbed = createVictoryEmbed(combatCharacter, enemy, questXp, questCoins);
+                        
+                        // Add faction bonus information to victory embed if bonuses were applied
+                        if (questRewards.bonusInfo && character.faction) {
+                            const { FACTIONS } = require('./utils/factions');
+                            const factionName = FACTIONS[character.faction]?.name || character.faction;
+                            
+                            victoryEmbed.addFields([
+                                {
+                                    name: `${FACTIONS[character.faction]?.emoji || '⚔️'} ${factionName} Bonus!`,
+                                    value: `Your faction training pays off!\n` +
+                                           `• Quest XP: ${questRewards.bonusInfo.originalXp} → ${questXp} (${questRewards.bonusInfo.xpMultiplier}x)\n` +
+                                           `• Quest Coins: ${questRewards.bonusInfo.originalCoins} → ${questCoins} (${questRewards.bonusInfo.coinMultiplier}x)\n` +
+                                           `• Item Chance: Enhanced (${questRewards.bonusInfo.itemMultiplier}x)`,
+                                    inline: false
+                                }
+                            ]);
+                        }
                         
                         if (levelUpData.leveledUp) {
                             victoryEmbed.addFields([

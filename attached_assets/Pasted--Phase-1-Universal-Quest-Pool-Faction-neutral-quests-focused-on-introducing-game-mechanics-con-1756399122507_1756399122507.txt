@@ -159,7 +159,7 @@ const PHASE_1_QUESTS = [
             { name: '💧 Pure Water', description: 'Restores 5 HP and 3 MP', type: 'healing' }
         ],
         successMessage: 'You carried water all day for the villagers. Though simple work, it was much appreciated.',
-        failureMessage: 'You spilled some water along the way, but managed to help most of the villagers.'
+        failureMessage: 'You spilled some water along the way, but you managed to help most of the villagers.'
     },
     {
         id: 'lost_item_hunt',
@@ -293,28 +293,28 @@ const PHASE_1_QUESTS = [
     }
 ];
 
+// Import faction system
+const { getFactionBonus, isQuestAffinityMatch } = require('./factions');
+
 // Function to get a random Phase 1 quest
 function getRandomPhase1Quest() {
     const randomIndex = Math.floor(Math.random() * PHASE_1_QUESTS.length);
     return PHASE_1_QUESTS[randomIndex];
 }
 
-// Import faction system
-const { getFactionBonus, isQuestAffinityMatch } = require('./factions');
-
 // Enhanced function to calculate quest success rate with faction bonuses
 function calculatePhase1SuccessRate(characterLevel, factionId = null, questCategory = null) {
     // Base success rate of 70%, +5% per level, max 95%
-    let baseRate = 0.70;
+    const baseRate = 0.70;
     const levelBonus = characterLevel * 0.05;
-    let successRate = baseRate + levelBonus;
+    let successRate = Math.min(baseRate + levelBonus, 0.95);
     
-    // Apply faction affinity bonus (+10% for matching quest types)
+    // Apply faction affinity bonus to success rate
     if (factionId && questCategory && isQuestAffinityMatch(factionId, questCategory)) {
-        successRate += 0.10;
+        successRate = Math.min(successRate + 0.10, 0.98); // +10% success rate for affinity match
     }
     
-    return Math.min(successRate, 0.95);
+    return successRate;
 }
 
 // Enhanced function to determine if player gets an item from quest with faction bonuses
@@ -323,10 +323,13 @@ function rollForItem(quest, characterLevel, factionId = null) {
     let adjustedChance = quest.itemChance + (characterLevel * 2); // +2% per level
     
     // Apply faction bonus to item chance
-    if (factionId && quest.category) {
+    if (factionId) {
         const factionBonus = getFactionBonus(factionId, quest.category);
-        adjustedChance = adjustedChance * factionBonus.items;
+        adjustedChance *= factionBonus.items; // Apply faction item multiplier
     }
+    
+    // Cap at 95% chance
+    adjustedChance = Math.min(adjustedChance, 95);
     
     if (itemRoll <= adjustedChance && quest.possibleItems.length > 0) {
         const randomItem = quest.possibleItems[Math.floor(Math.random() * quest.possibleItems.length)];
@@ -335,68 +338,81 @@ function rollForItem(quest, characterLevel, factionId = null) {
     return null;
 }
 
-// Apply faction bonuses to quest rewards
-function applyFactionBonuses(quest, characterLevel, factionId) {
-    if (!factionId || !quest.category) {
-        return { ...quest }; // Return copy without bonuses
+// NEW: Function to apply faction bonuses to quest rewards
+function applyFactionBonuses(quest, characterLevel, factionId = null) {
+    if (!factionId) {
+        return {
+            xpReward: quest.xpReward,
+            coinReward: quest.coinReward,
+            itemChance: quest.itemChance,
+            bonusApplied: false
+        };
     }
     
-    const bonuses = getFactionBonus(factionId, quest.category);
+    const factionBonus = getFactionBonus(factionId, quest.category);
     
-    return {
+    const modifiedQuest = {
         ...quest,
-        xpReward: Math.floor(quest.xpReward * bonuses.xp),
-        coinReward: Math.floor(quest.coinReward * bonuses.coins),
-        itemChance: Math.floor(quest.itemChance * bonuses.items)
+        xpReward: Math.floor(quest.xpReward * factionBonus.xp),
+        coinReward: Math.floor(quest.coinReward * factionBonus.coins),
+        itemChance: Math.min(quest.itemChance * factionBonus.items, 95),
+        bonusApplied: true,
+        factionBonus: factionBonus
     };
+    
+    return modifiedQuest;
 }
 
-// Get recommended quests for a faction (prioritizes faction affinity quests)
+// NEW: Function to get quest with faction-specific recommendations
 function getRecommendedQuestsForFaction(factionId, count = 3) {
-    if (!factionId) {
-        // Return random quests if no faction
-        const shuffled = [...PHASE_1_QUESTS].sort(() => 0.5 - Math.random());
-        return shuffled.slice(0, count);
-    }
-    
     const { FACTIONS } = require('./factions');
     const faction = FACTIONS[factionId];
     
-    if (!faction || !faction.questAffinities) {
+    if (!faction) {
         return PHASE_1_QUESTS.slice(0, count);
     }
     
-    // Separate quests by faction affinity
-    const affinityQuests = [];
-    const otherQuests = [];
+    // Separate quests by affinity
+    const affinityQuests = PHASE_1_QUESTS.filter(quest => 
+        faction.questAffinities.includes(quest.category)
+    );
     
-    PHASE_1_QUESTS.forEach(quest => {
-        if (faction.questAffinities.includes(quest.category)) {
-            affinityQuests.push(quest);
-        } else {
-            otherQuests.push(quest);
-        }
-    });
+    const otherQuests = PHASE_1_QUESTS.filter(quest => 
+        !faction.questAffinities.includes(quest.category)
+    );
     
-    // Prioritize affinity quests, then add others
-    const shuffledAffinity = affinityQuests.sort(() => 0.5 - Math.random());
-    const shuffledOthers = otherQuests.sort(() => 0.5 - Math.random());
+    // Shuffle both arrays
+    const shuffledAffinity = affinityQuests.sort(() => Math.random() - 0.5);
+    const shuffledOthers = otherQuests.sort(() => Math.random() - 0.5);
     
-    const recommendations = [...shuffledAffinity, ...shuffledOthers].slice(0, count);
-    return recommendations;
+    // Prioritize affinity quests, but include some variety
+    const recommended = [];
+    
+    // Add 60% affinity quests
+    const affinityCount = Math.ceil(count * 0.6);
+    recommended.push(...shuffledAffinity.slice(0, affinityCount));
+    
+    // Fill the rest with other quests
+    const remainingCount = count - recommended.length;
+    recommended.push(...shuffledOthers.slice(0, remainingCount));
+    
+    // If we still need more quests, add from affinity
+    if (recommended.length < count) {
+        const stillNeeded = count - recommended.length;
+        recommended.push(...shuffledAffinity.slice(affinityCount, affinityCount + stillNeeded));
+    }
+    
+    return recommended.slice(0, count);
 }
 
-// Calculate final quest rewards with all bonuses applied
-function calculateQuestRewards(baseQuest, characterLevel, factionId, questSuccess = true) {
-    const bonuses = factionId ? getFactionBonus(factionId, baseQuest.category) : { xp: 1.0, coins: 1.0, items: 1.0 };
+// NEW: Function to calculate total quest rewards with all bonuses
+function calculateQuestRewards(quest, characterLevel, factionId = null, questSuccess = true) {
+    const modifiedQuest = applyFactionBonuses(quest, characterLevel, factionId);
     
-    const originalXp = baseQuest.xpReward;
-    const originalCoins = baseQuest.coinReward;
+    let finalXp = modifiedQuest.xpReward;
+    let finalCoins = modifiedQuest.coinReward;
     
-    let finalXp = Math.floor(originalXp * bonuses.xp);
-    let finalCoins = Math.floor(originalCoins * bonuses.coins);
-    
-    // Reduce rewards if quest failed
+    // Apply success/failure penalties
     if (!questSuccess) {
         finalXp = Math.floor(finalXp * 0.7);
         finalCoins = Math.floor(finalCoins * 0.5);
@@ -405,12 +421,14 @@ function calculateQuestRewards(baseQuest, characterLevel, factionId, questSucces
     return {
         xp: finalXp,
         coins: finalCoins,
-        bonusInfo: factionId ? {
-            originalXp,
-            originalCoins,
-            xpMultiplier: bonuses.xp,
-            coinMultiplier: bonuses.coins,
-            itemMultiplier: bonuses.items
+        itemChance: modifiedQuest.itemChance,
+        bonusInfo: modifiedQuest.bonusApplied ? {
+            factionBonus: modifiedQuest.factionBonus,
+            originalXp: quest.xpReward,
+            originalCoins: quest.coinReward,
+            xpMultiplier: modifiedQuest.factionBonus.xp,
+            coinMultiplier: modifiedQuest.factionBonus.coins,
+            itemMultiplier: modifiedQuest.factionBonus.items
         } : null
     };
 }

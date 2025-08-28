@@ -1,7 +1,7 @@
 const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
 const { getCharacter, updateCharacterProgress, addItemToInventory } = require('../database/database');
 const { FACTIONS } = require('../utils/factions');
-const { getRandomPhase1Quest, calculatePhase1SuccessRate, rollForItem } = require('../utils/quests');
+const { getRandomPhase1Quest, calculatePhase1SuccessRate, rollForItem, applyFactionBonuses, calculateQuestRewards } = require('../utils/quests');
 const { getRandomEnemyForCategory, scaleEnemyToLevel, shouldTriggerEnemyEncounter } = require('../utils/enemies');
 const { createCombatEmbed, createCombatButtons } = require('../utils/combat');
 const { createEmbed } = require('../utils/embeds');
@@ -65,18 +65,22 @@ module.exports = {
                 }
                 
                 // No enemy encounter - proceed with normal quest
-                // Calculate success rate based on character level
-                const successRate = calculatePhase1SuccessRate(character.level);
+                // Apply faction bonuses to the quest
+                const questWithBonuses = applyFactionBonuses(quest, character.level, character.faction);
+                
+                // Calculate success rate with faction bonuses
+                const successRate = calculatePhase1SuccessRate(character.level, character.faction, quest.category);
                 const success = Math.random() < successRate;
                 
-                // Base rewards
-                let xpGained = quest.xpReward;
-                let coinsGained = quest.coinReward;
+                // Calculate final rewards with faction bonuses
+                const rewards = calculateQuestRewards(quest, character.level, character.faction, success);
+                let xpGained = rewards.xp;
+                let coinsGained = rewards.coins;
                 let itemReceived = null;
                 
                 if (success) {
-                    // Roll for bonus item
-                    itemReceived = rollForItem(quest, character.level);
+                    // Roll for bonus item with faction bonuses
+                    itemReceived = rollForItem(quest, character.level, character.faction);
                     
                     // Handle item rewards first
                     if (itemReceived) {
@@ -122,10 +126,10 @@ module.exports = {
                     // Create success embed
                     const embed = new EmbedBuilder()
                         .setColor('#f39c12')
-                        .setTitle('🎯 Quest Complete!')
+                        .setTitle('⚔️ Quest Complete!')
                         .setDescription(quest.successMessage)
                         .addFields([
-                            { name: '📜 Quest', value: `${quest.name} ${getCategoryEmoji(quest.category)}`, inline: false },
+                            { name: '📜 Quest', value: `${questWithBonuses.name} ${getCategoryEmoji(quest.category)}`, inline: false },
                             { 
                                 name: '📊 Rewards', 
                                 value: `+${xpGained} XP\n+${coinsGained} Coins${itemReceived ? `\n${itemReceived.name} (${itemReceived.description})` : ''}`, 
@@ -139,6 +143,23 @@ module.exports = {
                         ])
                         .setFooter({ text: 'Cross Realm Chronicles – Phase 1 Quest System' })
                         .setTimestamp();
+                        
+                    // Add faction bonus information if bonuses were applied
+                    if (rewards.bonusInfo && character.faction) {
+                        const factionName = faction?.name || character.faction;
+                        
+                        embed.addFields([
+                            {
+                                name: `${faction?.emoji || '⚔️'} ${factionName} Bonus!`,
+                                value: `Your faction training pays off!\n` +
+                                       `• XP Multiplier: ${rewards.bonusInfo.xpMultiplier}x\n` +
+                                       `• Coin Multiplier: ${rewards.bonusInfo.coinMultiplier}x\n` +
+                                       `• Item Chance Multiplier: ${rewards.bonusInfo.itemMultiplier}x\n` +
+                                       `*Base rewards: ${rewards.bonusInfo.originalXp} XP, ${rewards.bonusInfo.originalCoins} coins*`,
+                                inline: false
+                            }
+                        ]);
+                    }
                         
                     if (levelUpData.leveledUp) {
                         embed.addFields([
@@ -157,9 +178,9 @@ module.exports = {
                     return interaction.reply({ embeds: [embed] });
                     
                 } else {
-                    // Quest failed - reduced rewards
-                    const reducedXP = Math.floor(xpGained * 0.5);
-                    const reducedCoins = Math.floor(coinsGained * 0.3);
+                    // Quest failed - rewards already reduced in calculateQuestRewards
+                    const reducedXP = xpGained; // Already reduced
+                    const reducedCoins = coinsGained; // Already reduced
                     
                     const newExp = character.experience + reducedXP;
                     const newGold = character.gold + reducedCoins;
@@ -191,7 +212,7 @@ module.exports = {
                         .setTitle('💥 Quest Challenging!')
                         .setDescription(quest.failureMessage || 'The quest didn\'t go perfectly, but you gained some experience.')
                         .addFields([
-                            { name: '📜 Quest', value: `${quest.name} ${getCategoryEmoji(quest.category)}`, inline: false },
+                            { name: '📜 Quest', value: `${questWithBonuses.name} ${getCategoryEmoji(quest.category)}`, inline: false },
                             { 
                                 name: '📊 Partial Rewards', 
                                 value: `+${reducedXP} XP\n+${reducedCoins} Coins`, 
@@ -205,6 +226,18 @@ module.exports = {
                         ])
                         .setFooter({ text: 'Don\'t give up! Try another quest to improve your skills.' })
                         .setTimestamp();
+                        
+                    // Add faction bonus info even for failed quests
+                    if (rewards.bonusInfo && character.faction) {
+                        const factionName = faction?.name || character.faction;
+                        
+                        const { isQuestAffinityMatch } = require('../utils/factions');
+                        const hasAffinity = isQuestAffinityMatch(character.faction, quest.category);
+                        
+                        embed.setFooter({ 
+                            text: `Quest Category: ${quest.category}${hasAffinity ? ' ⭐ (Faction Affinity)' : ''} | Don\'t give up!` 
+                        });
+                    }
                         
                     if (levelUpData.leveledUp) {
                         embed.addFields([
