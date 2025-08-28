@@ -17,7 +17,7 @@ module.exports = {
                 },
                 {
                     name: '🌟 Choose Your Faction',
-                    value: '🏴‍☠️ **one_piece** - Adventure-loving pirates with treasure hunting skills\n🥷 **naruto** - Stealthy shinobi with chakra techniques\n👁️ **jujutsu_kaisen** - Powerful sorcerers with cursed energy\n⚔️ **demon_slayer** - Skilled warriors with breathing techniques',
+                    value: '🏴‍☠️ **One Piece Pirates** - Adventure-loving pirates with treasure hunting skills\n🥷 **Naruto Shinobi** - Stealthy shinobi with chakra techniques\n👁️ **Jujutsu Sorcerers** - Powerful sorcerers with cursed energy\n⚔️ **Demon Slayers** - Skilled warriors with breathing techniques',
                     inline: false
                 },
                 {
