@@ -16,7 +16,8 @@ module.exports = {
                     { name: '📈 Level Progression', value: 'leveling' },
                     { name: '🏴‍☠️ Faction Details', value: 'factions' },
                     { name: '💻 Commands Reference', value: 'commands' },
-                    { name: '📦 Inventory & Items', value: 'inventory' }
+                    { name: '📦 Inventory & Items', value: 'inventory' },
+                    { name: '📋 Item Database', value: 'items' }
                 )),
     async execute(interaction) {
         const section = interaction.options.getString('section');
@@ -40,7 +41,7 @@ module.exports = {
                 },
                 {
                     name: '🎯 Quick Access',
-                    value: '`/wiki section:gettingStarted` - New player guide\n`/wiki section:combat` - Learn combat mechanics\n`/wiki section:quests` - Quest system explained\n`/wiki section:leveling` - Level progression info\n`/wiki section:factions` - Detailed faction guides\n`/wiki section:inventory` - Items and inventory management',
+                    value: '`/wiki section:gettingStarted` - New player guide\n`/wiki section:combat` - Learn combat mechanics\n`/wiki section:quests` - Quest system explained\n`/wiki section:leveling` - Level progression info\n`/wiki section:factions` - Detailed faction guides\n`/wiki section:inventory` - Items and inventory management\n`/wiki section:items` - Complete item database with descriptions',
                     inline: false
                 },
                 {

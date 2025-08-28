@@ -214,6 +214,64 @@ Your inventory can store up to **100 items total**. Items automatically stack wh
         color: '#059669'
     },
 
+    items: {
+        title: '📋 Complete Item Database',
+        content: `**Consumable Items:**
+
+**🍽️ Food Items (Restore HP):**
+• **🐟 Fresh Fish** - Restores 10 HP
+• **🍖 Boar Meat** - Restores 15 HP (best healing food)
+• **🍞 Fresh Bread** - Restores 8 HP
+• **🍙 Rice Ball** - Restores 6 HP 
+• **🥕 Fresh Vegetables** - Restores 12 HP
+
+**💊 Healing Items (Restore HP + MP):**
+• **🌿 Healing Herbs** - Restores 8 HP and 5 MP
+• **💧 Pure Water** - Restores 5 HP and 3 MP
+
+**⚡ Enhancement Items:**
+• **🏃 Stamina Potion** - Restores stamina and energy
+• **✨ XP Boost Token** - Grants +3 XP bonus
+• **🪙 Lucky Charm** - +5 temporary luck boost for next quest
+• **🧘 Focus Talisman** - +5 temporary MP boost
+
+**💰 Currency Items:**
+• **💰 Extra Coin Pouch** - Contains 10 extra coins
+
+**🎭 Special Items:**
+• **🎫 Festival Token** - Special commemorative item
+
+---
+
+**Non-Consumable Items:**
+
+**⚒️ Crafting Materials:**
+• **🪵 Quality Wood** - Basic crafting material for construction
+• **⛰️ Iron Ore** - Basic crafting material for metalwork
+• **🐺 Wolf Hide** - Basic crafting material for leatherwork
+• **🦇 Bat Wing** - Alchemy ingredient for potions
+
+**🔧 Tools & Equipment:**
+• **🔧 Tool Set** - Basic crafting tools for repairs
+• **⚔️ Whetstone** - Tool for weapon maintenance
+
+**📚 Learning Materials:**
+• **💪 Training Manual** - Study guide for combat basics
+
+---
+
+**Item Usage Notes:**
+• **Food items** heal instantly when consumed
+• **Healing items** restore both HP and MP
+• **Enhancement items** provide temporary bonuses
+• **Materials** are saved for future crafting features
+• **Tools** will be used in crafting systems
+
+**Where to Find Items:**
+Each quest type has specific item rewards - gathering quests give materials, hunting gives food, community work gives tools and boosts.`,
+        color: '#8b5cf6'
+    },
+
     commands: {
         title: '💻 Commands Reference',
         content: `**Essential Commands:**
@@ -260,7 +318,7 @@ function createWikiEmbed(section) {
         return new EmbedBuilder()
             .setColor('#ef4444')
             .setTitle('❌ Wiki Section Not Found')
-            .setDescription('Available sections: gettingStarted, combat, quests, leveling, factions, inventory, commands')
+            .setDescription('Available sections: gettingStarted, combat, quests, leveling, factions, inventory, items, commands')
             .setTimestamp();
     }
 
@@ -282,10 +340,11 @@ function getWikiSectionsList() {
 📈 \`leveling\` - XP system and character progression  
 🏴‍☠️ \`factions\` - Detailed faction information
 📦 \`inventory\` - Items, inventory management, and usage
+📋 \`items\` - Complete database of all items with descriptions
 💻 \`commands\` - Complete command reference
 
 **Usage:** \`/wiki section:[name]\`
-**Example:** \`/wiki section:inventory\``;
+**Example:** \`/wiki section:items\``;
 }
 
 module.exports = {
