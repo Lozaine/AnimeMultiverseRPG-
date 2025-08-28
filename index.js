@@ -92,7 +92,7 @@ client.on('interactionCreate', async interaction => {
                 const parts = interaction.customId.split('_');
                 const action = parts[1]; // 'attack' or 'flee'
                 const buttonUserId = parts[2];
-                const enemyId = parts[3];
+                const enemyId = parts.slice(3).join('_'); // Rejoin all parts after userId to handle underscores in enemyId
                 
                 // Check if the button interaction is from the original user
                 if (buttonUserId !== userId) {
