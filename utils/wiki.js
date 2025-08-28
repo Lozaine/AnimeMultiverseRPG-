@@ -63,66 +63,41 @@ When creating your character, you'll choose from four distinct anime universes, 
                 name: 'Your First Quest Adventure',
                 content: `**The Quest System - Your Path to Power**
 
-After character creation, the quest system becomes your primary avenue for growth, rewards, and adventure. Understanding how quests work is crucial for optimal progression.
+After character creation, use \`/quest\` to begin your adventure! The quest system is your primary source of growth, rewards, and exciting experiences.
 
-**🎯 Quest Mechanics Deep Dive:**
+**🎯 Quest Basics:**
+- Quests are generated based on your level and faction
+- Success rates depend on your stats and faction bonuses
+- Each quest type offers different rewards and challenges
+- Higher levels unlock more rewarding quest types
 
-**Quest Generation System:**
-- Quests are dynamically generated based on your character level, faction, and game progression
-- Each quest attempt costs no resources but has a time commitment representing the adventure
-- Success rates vary based on your stats, faction bonuses, and quest difficulty
-- Higher-level characters unlock more challenging and rewarding quest types
+**📊 Main Quest Categories:**
 
-**📊 Quest Categories Explained:**
+🌿 **Gathering** - Resource collection adventures
+- Best for: One Piece Pirates (treasure hunting bonus)
+- Rewards: Crafting materials, moderate XP (50-150), gold (20-60)
 
-🌿 **Gathering Quests** - Resource Collection Adventures
-- **Objective:** Collect herbs, minerals, magical components, and rare materials
-- **Difficulty:** Low to Medium risk, consistent rewards
-- **Best For:** One Piece Pirates (treasure hunting instincts), steady income generation
-- **Rewards:** Crafting materials, moderate XP (50-150), reliable gold (20-60)
-- **Special Features:** Chance for rare material discoveries, environmental interaction
+⚔️ **Hunting** - Combat-focused missions  
+- Best for: Demon Slayers & Jujutsu Sorcerers (combat bonus)
+- Rewards: High XP (100-300), combat experience, rare drops
 
-⚔️ **Hunting Quests** - Combat-Focused Missions
-- **Objective:** Track and eliminate dangerous creatures, monsters, or threats
-- **Difficulty:** Medium to High risk, high XP potential
-- **Best For:** Demon Slayers and Jujutsu Sorcerers (combat specialists)
-- **Rewards:** High XP (100-300), combat experience, rare equipment drops
-- **Special Features:** Guaranteed enemy encounters, skill development opportunities
+📦 **Delivery** - Transportation missions
+- Best for: Naruto Shinobi & One Piece Pirates (speed/navigation)
+- Rewards: Consistent XP (75-200), relationship building
 
-📦 **Delivery Quests** - Transportation Missions
-- **Objective:** Transport items, messages, or people across distances safely
-- **Difficulty:** Low to Medium risk, time-sensitive completion
-- **Best For:** Naruto Shinobi (speed and stealth) and One Piece Pirates (navigation)
-- **Rewards:** Consistent XP (75-200), relationship building, travel experience
-- **Special Features:** Potential ambush encounters, reputation system integration
+🛡️ **Protection** - Guardian missions
+- Best for: All factions (especially Shinobi & Demon Slayers)
+- Rewards: High XP (120-250), community standing
 
-🛡️ **Protection Quests** - Guardian Missions
-- **Objective:** Defend locations, escort travelers, or guard important events
-- **Difficulty:** Medium risk, strategic thinking required
-- **Best For:** All factions (especially Naruto Shinobi and Demon Slayers)
-- **Rewards:** High XP (120-250), community standing, defensive skill development
-- **Special Features:** Wave-based challenges, tactical decision points
+🏋️ **Training** - Skill development missions
+- Best for: All factions (ability unlocking)
+- Rewards: Massive XP (150-400), stat improvements
 
-🏋️ **Training Quests** - Skill Development Missions
-- **Objective:** Practice techniques, spar with masters, or undergo trials
-- **Difficulty:** Controlled risk, personal growth focused
-- **Best For:** All factions (especially beneficial for ability unlocking)
-- **Rewards:** Massive XP bonuses (150-400), stat improvements, ability prerequisites
-- **Special Features:** Faction-specific training, mastery progression tracking
-
-🏘️ **Community Quests** - Social Service Missions
-- **Objective:** Help local communities with various needs and problems
-- **Difficulty:** Low risk, relationship and reputation focused
-- **Best For:** Demon Slayers (community protection ethos)
-- **Rewards:** Community reputation, steady income, social connections
-- **Special Features:** Unlocks special community-based rewards and recognition
-
-📋 **Errand Quests** - Simple Task Missions
-- **Objective:** Complete straightforward tasks and odd jobs
-- **Difficulty:** Very low risk, quick completion
-- **Best For:** All factions (reliable income source)
-- **Rewards:** Quick XP (25-100), immediate gold, task completion satisfaction
-- **Special Features:** Fast turnaround, no combat risk, beginner-friendly
+**💡 Quest Tips:**
+- Your faction gets bonuses on preferred quest types
+- Combat encounters can happen during quests
+- Failed quests still give reduced rewards
+- Use \`/quest\` repeatedly to keep growing stronger!
 
 **🎮 Your First Quest Strategy:**
 1. **Start Simple:** Begin with Errand or Gathering quests to understand mechanics
@@ -135,61 +110,52 @@ After character creation, the quest system becomes your primary avenue for growt
                 name: 'Essential Commands Mastery',
                 content: `**Complete Command Reference for New Players**
 
-Understanding and mastering the command system is essential for effective gameplay in Cross Realm Chronicles. Each command serves specific purposes and has advanced features worth exploring.
+Master these essential commands to excel in Cross Realm Chronicles!
 
-**🔧 Core Gameplay Commands:**
+**🎮 Core Gameplay Commands:**
 
-**\`/profile\` - Character Information Hub**
-- **Primary Function:** Displays comprehensive character statistics and progression
-- **Information Shown:** Level, XP progress, HP/ATK/DEF/SPD stats, faction details
-- **Advanced Features:** Shows completed quest count, faction-specific attributes, level-up progress
-- **Pro Tips:** Use regularly to track stat growth and plan progression strategies
-- **Hidden Details:** Reveals faction ability unlock requirements and progression milestones
+**\`/create <faction> [character_name]\`**
+Start your adventure! Choose your faction and optional custom name.
+• Factions: \`one_piece\`, \`naruto\`, \`jujutsu_kaisen\`, \`demon_slayer\`
+• Example: \`/create demon_slayer "Tanjiro Kamado"\`
+• This choice is permanent!
 
-**\`/inventory\` - Item Management Center**
-- **Primary Function:** Complete overview of all owned items and equipment
-- **Organization:** Items grouped by type (consumables, equipment, quest items, rare materials)
-- **Advanced Features:** Quantity tracking, item descriptions, usage suggestions
-- **Pro Tips:** Regular inventory management prevents item overflow and optimizes storage
-- **Strategic Use:** Plan item usage based on upcoming quests and current needs
+**\`/profile [user]\`**
+View character stats, level, experience, and equipment.
+• See your progression and faction abilities
+• Can view other players' profiles
+• Updates in real-time
 
-**\`/use <item> [quantity]\` - Item Consumption System**
-- **Primary Function:** Activate consumable items for immediate effects
-- **Advanced Usage:** Specify quantities for bulk consumption (\`/use Health Potion 3\`)
-- **Auto-Complete:** Start typing item names for intelligent suggestions from your inventory
-- **Effect Stacking:** Multiple items can be used in succession for cumulative benefits
-- **Pro Tips:** Save powerful items for challenging quests, use basic items for regular maintenance
-- **Emergency Usage:** Keep healing items ready for post-combat recovery
+**\`/quest\`**
+Go on adventures to earn XP, gold, and items!
+• Quest difficulty scales with your level
+• Faction bonuses apply to preferred quest types
+• Potential enemy encounters in dangerous missions
 
-**\`/quest\` - Adventure Initiation System**
-- **Primary Function:** Start new quest adventures for XP, gold, and item rewards
-- **Quest Selection:** System automatically selects appropriate quests based on your level and faction
-- **Faction Bonuses:** Receive enhanced rewards for quest types aligned with your faction
-- **Risk Assessment:** Each quest displays difficulty and potential rewards before acceptance
-- **Pro Tips:** Vary quest types to maximize different faction bonuses and experience variety
-- **Advanced Strategy:** Plan quest sequences to optimize XP gain and resource accumulation
+**⚔️ Inventory & Items:**
 
-**\`/reset\` - Character Reset Function**
-- **Primary Function:** Completely restart your character progression (PERMANENT ACTION)
-- **Warning System:** Requires explicit confirmation to prevent accidental resets
-- **Complete Deletion:** Removes all progress, items, stats, and faction abilities
-- **Use Cases:** Starting over with different faction, correcting early game mistakes
-- **Important Note:** This action cannot be undone - consider carefully before using
-- **Alternative:** Contact support for specific issues before resorting to full reset
+**\`/inventory [page]\`**
+Access your item collection with organized categories.
+• Shows consumables, equipment, and quest items
+• Interactive dropdown for quick item usage
+• 12 items per page with pagination
 
-**🎯 Command Usage Strategy:**
-1. **Daily Routine:** Check \`/profile\` → \`/inventory\` → \`/quest\` for optimal progression flow
-2. **Item Management:** Use \`/inventory\` before and after quests to track gains and plan usage
-3. **Resource Optimization:** Use \`/use\` strategically before difficult quests for stat boosts
-4. **Progress Tracking:** Regular \`/profile\` checks help identify when to focus on specific quest types
-5. **Safety First:** Never use \`/reset\` without careful consideration and understanding of consequences
+**\`/use <item> [quantity]\`**
+Consume items from your inventory.
+• Auto-complete suggests available items
+• Healing potions, stat boosters, and more
 
-**💡 Advanced Command Tips:**
-- Commands work in any channel where the bot has permissions
-- Most commands provide helpful error messages if used incorrectly
-- Tab completion works for command parameters in most Discord clients
-- Commands process immediately but quest results may involve combat encounters
-- All commands are logged for progress tracking and support purposes`
+**📚 Information Commands:**
+
+**\`/wiki [category]\`**
+Access comprehensive game guides and help.
+• Categories: getting_started, factions, combat, progression, quests, items
+• Interactive navigation with detailed explanations
+
+**Command Tips:**
+• Use tab completion for faster entry
+• All commands work in any channel
+• Error messages guide you if something goes wrong`
             }
         ]
     },
