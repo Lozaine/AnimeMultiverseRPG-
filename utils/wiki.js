@@ -1,7 +1,7 @@
 // Cross Realm Chronicles Wiki System
 // Comprehensive documentation and help system for the Discord RPG Bot
 
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
 const WIKI_CATEGORIES = {
     getting_started: {
@@ -10,39 +10,186 @@ const WIKI_CATEGORIES = {
         sections: [
             {
                 name: 'Creating Your Character',
-                content: `Use \`/create <faction> [character_name]\` to begin your adventure!
+                content: `**Character Creation Guide**
 
-**Available Factions:**
-🏴‍☠️ **One Piece Pirates** - Adventure, treasure hunting, and Devil Fruit powers
-🥷 **Naruto Shinobi** - Stealth, chakra techniques, and village protection  
-👁️ **Jujutsu Sorcerers** - Cursed energy, domain expansion, and supernatural combat
-⚔️ **Demon Slayers** - Breathing techniques, swordsmanship, and demon hunting
+Use \`/create <faction> [character_name]\` to begin your journey in Cross Realm Chronicles!
 
-**Character Names:**
-- You can specify a custom character name or use your Discord username
-- Example: \`/create naruto Hokage_Warrior\` or just \`/create naruto\``
+**📋 Faction Selection Process:**
+When creating your character, you'll choose from four distinct anime universes, each offering unique gameplay experiences:
+
+🏴‍☠️ **One Piece Pirates** 
+- **Philosophy:** Freedom, adventure, and the pursuit of dreams
+- **Playstyle:** Exploration-focused with treasure hunting mechanics
+- **Special Features:** Devil Fruit powers, crew dynamics, and naval adventures
+- **Starting Benefits:** +5 HP, +3 ATK, +2 DEF, +5 SPD
+- **Unique Mechanics:** Pirate's Intuition (+15% item find, +10% crit chance)
+
+🥷 **Naruto Shinobi**
+- **Philosophy:** Protecting your village and mastering ninja arts
+- **Playstyle:** Balanced approach with stealth and tactical advantages
+- **Special Features:** Chakra manipulation, elemental jutsu, and clan abilities
+- **Starting Benefits:** +4 HP, +4 ATK, +3 DEF, +8 SPD
+- **Unique Mechanics:** Basic Chakra Control (+3 all stats, +20% stealth)
+
+👁️ **Jujutsu Sorcerers**
+- **Philosophy:** Exorcising curses and protecting humanity from supernatural threats
+- **Playstyle:** High-risk, high-reward combat with powerful techniques
+- **Special Features:** Cursed energy manipulation, domain expansion, reverse techniques
+- **Starting Benefits:** +3 HP, +6 ATK, +4 DEF, +6 SPD
+- **Unique Mechanics:** Cursed Energy Manipulation (+25% vs cursed enemies)
+
+⚔️ **Demon Slayers**
+- **Philosophy:** Dedication to protecting humanity through swordsmanship mastery
+- **Playstyle:** Combat-focused with disciplined training progression
+- **Special Features:** Breathing techniques, enhanced blade techniques, demon detection
+- **Starting Benefits:** +6 HP, +7 ATK, +5 DEF, +4 SPD
+- **Unique Mechanics:** Basic Breathing Technique (+4 ATK, +3 DEF, +15% stamina)
+
+**🎭 Character Naming System:**
+- **Custom Names:** Create unique character identities separate from Discord usernames
+- **Examples:** \`/create one_piece "Monkey D. Adventure"\`, \`/create naruto "Shadow Clone Master"\`
+- **Default Option:** Omit character name to use your Discord username
+- **Name Rules:** Can include spaces, special characters, and up to 32 characters
+- **Immersion Factor:** Your character name appears in all game interactions and profiles
+
+**⚡ Post-Creation Tips:**
+- Your faction choice is permanent - choose wisely based on your preferred playstyle
+- Starting equipment and abilities are immediately available after creation
+- Each faction has different XP and reward multipliers for various quest types
+- You can view detailed faction information anytime with \`/wiki category:factions\`
+- Your character begins at Level 1 with 100 XP needed to reach Level 2`
             },
             {
-                name: 'Your First Quest',
-                content: `After creating your character, use \`/quest\` to see available missions.
+                name: 'Your First Quest Adventure',
+                content: `**The Quest System - Your Path to Power**
 
-**Quest Categories:**
-• **Gathering** - Collect resources and materials
-• **Hunting** - Combat encounters and monster battles  
-• **Delivery** - Transport items and messages
-• **Protection** - Guard locations and people
-• **Training** - Improve your skills and abilities
-• **Community** - Help local communities
-• **Errand** - Simple tasks and odd jobs`
+After character creation, the quest system becomes your primary avenue for growth, rewards, and adventure. Understanding how quests work is crucial for optimal progression.
+
+**🎯 Quest Mechanics Deep Dive:**
+
+**Quest Generation System:**
+- Quests are dynamically generated based on your character level, faction, and game progression
+- Each quest attempt costs no resources but has a time commitment representing the adventure
+- Success rates vary based on your stats, faction bonuses, and quest difficulty
+- Higher-level characters unlock more challenging and rewarding quest types
+
+**📊 Quest Categories Explained:**
+
+🌿 **Gathering Quests** - Resource Collection Adventures
+- **Objective:** Collect herbs, minerals, magical components, and rare materials
+- **Difficulty:** Low to Medium risk, consistent rewards
+- **Best For:** One Piece Pirates (treasure hunting instincts), steady income generation
+- **Rewards:** Crafting materials, moderate XP (50-150), reliable gold (20-60)
+- **Special Features:** Chance for rare material discoveries, environmental interaction
+
+⚔️ **Hunting Quests** - Combat-Focused Missions
+- **Objective:** Track and eliminate dangerous creatures, monsters, or threats
+- **Difficulty:** Medium to High risk, high XP potential
+- **Best For:** Demon Slayers and Jujutsu Sorcerers (combat specialists)
+- **Rewards:** High XP (100-300), combat experience, rare equipment drops
+- **Special Features:** Guaranteed enemy encounters, skill development opportunities
+
+📦 **Delivery Quests** - Transportation Missions
+- **Objective:** Transport items, messages, or people across distances safely
+- **Difficulty:** Low to Medium risk, time-sensitive completion
+- **Best For:** Naruto Shinobi (speed and stealth) and One Piece Pirates (navigation)
+- **Rewards:** Consistent XP (75-200), relationship building, travel experience
+- **Special Features:** Potential ambush encounters, reputation system integration
+
+🛡️ **Protection Quests** - Guardian Missions
+- **Objective:** Defend locations, escort travelers, or guard important events
+- **Difficulty:** Medium risk, strategic thinking required
+- **Best For:** All factions (especially Naruto Shinobi and Demon Slayers)
+- **Rewards:** High XP (120-250), community standing, defensive skill development
+- **Special Features:** Wave-based challenges, tactical decision points
+
+🏋️ **Training Quests** - Skill Development Missions
+- **Objective:** Practice techniques, spar with masters, or undergo trials
+- **Difficulty:** Controlled risk, personal growth focused
+- **Best For:** All factions (especially beneficial for ability unlocking)
+- **Rewards:** Massive XP bonuses (150-400), stat improvements, ability prerequisites
+- **Special Features:** Faction-specific training, mastery progression tracking
+
+🏘️ **Community Quests** - Social Service Missions
+- **Objective:** Help local communities with various needs and problems
+- **Difficulty:** Low risk, relationship and reputation focused
+- **Best For:** Demon Slayers (community protection ethos)
+- **Rewards:** Community reputation, steady income, social connections
+- **Special Features:** Unlocks special community-based rewards and recognition
+
+📋 **Errand Quests** - Simple Task Missions
+- **Objective:** Complete straightforward tasks and odd jobs
+- **Difficulty:** Very low risk, quick completion
+- **Best For:** All factions (reliable income source)
+- **Rewards:** Quick XP (25-100), immediate gold, task completion satisfaction
+- **Special Features:** Fast turnaround, no combat risk, beginner-friendly
+
+**🎮 Your First Quest Strategy:**
+1. **Start Simple:** Begin with Errand or Gathering quests to understand mechanics
+2. **Faction Focus:** Choose quest types that align with your faction's bonuses
+3. **Risk Management:** Balance safe quests with challenging ones for optimal growth
+4. **Equipment Check:** Use items from your starting equipment to enhance success rates
+5. **Experience Tracking:** Monitor XP gains to plan your leveling progression efficiently`
             },
             {
-                name: 'Basic Commands',
-                content: `**Essential Commands:**
-\`/profile\` - View your character stats and progress
-\`/inventory\` - Check your items and equipment
-\`/use <item>\` - Use consumable items for effects
-\`/quest\` - Start new quests and adventures
-\`/reset\` - Reset your character (WARNING: Permanent!)`
+                name: 'Essential Commands Mastery',
+                content: `**Complete Command Reference for New Players**
+
+Understanding and mastering the command system is essential for effective gameplay in Cross Realm Chronicles. Each command serves specific purposes and has advanced features worth exploring.
+
+**🔧 Core Gameplay Commands:**
+
+**\`/profile\` - Character Information Hub**
+- **Primary Function:** Displays comprehensive character statistics and progression
+- **Information Shown:** Level, XP progress, HP/ATK/DEF/SPD stats, faction details
+- **Advanced Features:** Shows completed quest count, faction-specific attributes, level-up progress
+- **Pro Tips:** Use regularly to track stat growth and plan progression strategies
+- **Hidden Details:** Reveals faction ability unlock requirements and progression milestones
+
+**\`/inventory\` - Item Management Center**
+- **Primary Function:** Complete overview of all owned items and equipment
+- **Organization:** Items grouped by type (consumables, equipment, quest items, rare materials)
+- **Advanced Features:** Quantity tracking, item descriptions, usage suggestions
+- **Pro Tips:** Regular inventory management prevents item overflow and optimizes storage
+- **Strategic Use:** Plan item usage based on upcoming quests and current needs
+
+**\`/use <item> [quantity]\` - Item Consumption System**
+- **Primary Function:** Activate consumable items for immediate effects
+- **Advanced Usage:** Specify quantities for bulk consumption (\`/use Health Potion 3\`)
+- **Auto-Complete:** Start typing item names for intelligent suggestions from your inventory
+- **Effect Stacking:** Multiple items can be used in succession for cumulative benefits
+- **Pro Tips:** Save powerful items for challenging quests, use basic items for regular maintenance
+- **Emergency Usage:** Keep healing items ready for post-combat recovery
+
+**\`/quest\` - Adventure Initiation System**
+- **Primary Function:** Start new quest adventures for XP, gold, and item rewards
+- **Quest Selection:** System automatically selects appropriate quests based on your level and faction
+- **Faction Bonuses:** Receive enhanced rewards for quest types aligned with your faction
+- **Risk Assessment:** Each quest displays difficulty and potential rewards before acceptance
+- **Pro Tips:** Vary quest types to maximize different faction bonuses and experience variety
+- **Advanced Strategy:** Plan quest sequences to optimize XP gain and resource accumulation
+
+**\`/reset\` - Character Reset Function**
+- **Primary Function:** Completely restart your character progression (PERMANENT ACTION)
+- **Warning System:** Requires explicit confirmation to prevent accidental resets
+- **Complete Deletion:** Removes all progress, items, stats, and faction abilities
+- **Use Cases:** Starting over with different faction, correcting early game mistakes
+- **Important Note:** This action cannot be undone - consider carefully before using
+- **Alternative:** Contact support for specific issues before resorting to full reset
+
+**🎯 Command Usage Strategy:**
+1. **Daily Routine:** Check \`/profile\` → \`/inventory\` → \`/quest\` for optimal progression flow
+2. **Item Management:** Use \`/inventory\` before and after quests to track gains and plan usage
+3. **Resource Optimization:** Use \`/use\` strategically before difficult quests for stat boosts
+4. **Progress Tracking:** Regular \`/profile\` checks help identify when to focus on specific quest types
+5. **Safety First:** Never use \`/reset\` without careful consideration and understanding of consequences
+
+**💡 Advanced Command Tips:**
+- Commands work in any channel where the bot has permissions
+- Most commands provide helpful error messages if used incorrectly
+- Tab completion works for command parameters in most Discord clients
+- Commands process immediately but quest results may involve combat encounters
+- All commands are logged for progress tracking and support purposes`
             }
         ]
     },
@@ -506,7 +653,7 @@ Access this comprehensive help system
     }
 };
 
-// Function to create wiki embed
+// Function to create wiki embed with navigation
 function createWikiEmbed(category, sectionIndex = 0) {
     const cat = WIKI_CATEGORIES[category];
     if (!cat) return null;
@@ -519,11 +666,81 @@ function createWikiEmbed(category, sectionIndex = 0) {
         .setDescription(section.content)
         .setColor('#4a90e2')
         .setFooter({ 
-            text: `Page ${sectionIndex + 1}/${cat.sections.length} | Use /wiki ${category} to navigate` 
+            text: `Page ${sectionIndex + 1}/${cat.sections.length} | Cross Realm Chronicles Wiki` 
         })
         .setTimestamp();
 
     return embed;
+}
+
+// Function to create navigation components
+function createWikiNavigation(category, currentSection = 0) {
+    const cat = WIKI_CATEGORIES[category];
+    if (!cat) return [];
+
+    const components = [];
+
+    // Section selection dropdown
+    if (cat.sections.length > 1) {
+        const sectionOptions = cat.sections.map((section, index) => ({
+            label: section.name,
+            value: `wiki_section_${category}_${index}`,
+            description: section.content.substring(0, 100).replace(/\*\*/g, '').trim() + '...',
+            default: index === currentSection
+        }));
+
+        const sectionSelect = new StringSelectMenuBuilder()
+            .setCustomId(`wiki_section_${category}`)
+            .setPlaceholder('Select a section to read about...')
+            .addOptions(sectionOptions);
+
+        components.push(new ActionRowBuilder().addComponents(sectionSelect));
+    }
+
+    // Navigation buttons
+    const buttons = [];
+    
+    // Previous section button
+    if (currentSection > 0) {
+        buttons.push(
+            new ButtonBuilder()
+                .setCustomId(`wiki_prev_${category}_${currentSection}`)
+                .setLabel('◀ Previous')
+                .setStyle(ButtonStyle.Secondary)
+        );
+    }
+
+    // Back to category button
+    buttons.push(
+        new ButtonBuilder()
+            .setCustomId(`wiki_category_${category}`)
+            .setLabel('📚 Category Overview')
+            .setStyle(ButtonStyle.Primary)
+    );
+
+    // Next section button
+    if (currentSection < cat.sections.length - 1) {
+        buttons.push(
+            new ButtonBuilder()
+                .setCustomId(`wiki_next_${category}_${currentSection}`)
+                .setLabel('Next ▶')
+                .setStyle(ButtonStyle.Secondary)
+        );
+    }
+
+    // Main menu button
+    buttons.push(
+        new ButtonBuilder()
+            .setCustomId('wiki_main_menu')
+            .setLabel('🏠 Main Menu')
+            .setStyle(ButtonStyle.Success)
+    );
+
+    if (buttons.length > 0) {
+        components.push(new ActionRowBuilder().addComponents(buttons));
+    }
+
+    return components;
 }
 
 // Function to create category overview embed
@@ -532,33 +749,82 @@ function createCategoryOverviewEmbed(category) {
     if (!cat) return null;
 
     let sectionList = cat.sections.map((section, index) => 
-        `**${index + 1}.** ${section.name}`
-    ).join('\n');
+        `**${index + 1}.** ${section.name}\n*${section.content.substring(0, 80).replace(/\*\*/g, '').trim()}...*`
+    ).join('\n\n');
 
     const embed = new EmbedBuilder()
         .setTitle(cat.title)
-        .setDescription(`${cat.description}\n\n**Sections:**\n${sectionList}`)
+        .setDescription(`${cat.description}\n\n**Available Sections:**\n\n${sectionList}`)
         .setColor('#4a90e2')
-        .setFooter({ text: 'Use the buttons below to navigate sections' })
+        .setFooter({ text: 'Use the dropdown menu below to jump to any section' })
         .setTimestamp();
 
     return embed;
 }
 
+// Function to create category navigation
+function createCategoryNavigation(category) {
+    const cat = WIKI_CATEGORIES[category];
+    if (!cat) return [];
+
+    const components = [];
+
+    // Section selection dropdown for category overview
+    const sectionOptions = cat.sections.map((section, index) => ({
+        label: section.name,
+        value: `wiki_section_${category}_${index}`,
+        description: section.content.substring(0, 100).replace(/\*\*/g, '').trim() + '...'
+    }));
+
+    const sectionSelect = new StringSelectMenuBuilder()
+        .setCustomId(`wiki_section_${category}`)
+        .setPlaceholder('Select a section to explore in detail...')
+        .addOptions(sectionOptions);
+
+    components.push(new ActionRowBuilder().addComponents(sectionSelect));
+
+    // Main menu button
+    const mainMenuButton = new ButtonBuilder()
+        .setCustomId('wiki_main_menu')
+        .setLabel('🏠 Back to Main Menu')
+        .setStyle(ButtonStyle.Success);
+
+    components.push(new ActionRowBuilder().addComponents(mainMenuButton));
+
+    return components;
+}
+
 // Function to create main wiki menu embed
 function createMainWikiEmbed() {
     let categoryList = Object.entries(WIKI_CATEGORIES).map(([key, cat]) => 
-        `${cat.title} - ${cat.description}`
+        `${cat.title}\n*${cat.description}*`
     ).join('\n\n');
 
     const embed = new EmbedBuilder()
-        .setTitle('📚 Cross Realm Chronicles Wiki')
-        .setDescription(`Welcome to the comprehensive guide for Cross Realm Chronicles!\n\n**Categories:**\n\n${categoryList}`)
+        .setTitle('📚 Cross Realm Chronicles - Complete Game Encyclopedia')
+        .setDescription(`Welcome to your comprehensive guide for mastering Cross Realm Chronicles! This wiki contains everything you need to become a legendary adventurer across the anime multiverse.\n\n**Available Categories:**\n\n${categoryList}\n\n*Select any category below to begin exploring detailed guides, strategies, and game mechanics.*`)
         .setColor('#4a90e2')
-        .setFooter({ text: 'Use /wiki <category> to explore specific topics' })
+        .setFooter({ text: 'Cross Realm Chronicles Wiki • Your complete adventure companion' })
         .setTimestamp();
 
     return embed;
+}
+
+// Function to create main menu navigation
+function createMainMenuNavigation() {
+    const categoryOptions = Object.entries(WIKI_CATEGORIES).map(([key, cat]) => ({
+        label: cat.title.replace(/[^\w\s]/g, '').trim(),
+        value: `wiki_category_${key}`,
+        description: cat.description,
+        emoji: cat.title.split(' ')[0] // Extract emoji from title
+    }));
+
+    const categorySelect = new StringSelectMenuBuilder()
+        .setCustomId('wiki_main_categories')
+        .setPlaceholder('🔍 Choose a category to explore...')
+        .addOptions(categoryOptions);
+
+    return [new ActionRowBuilder().addComponents(categorySelect)];
 }
 
 // Function to get all category keys
@@ -574,8 +840,11 @@ function getCategoryInfo(category) {
 module.exports = {
     WIKI_CATEGORIES,
     createWikiEmbed,
-    createCategoryOverviewEmbed, 
+    createWikiNavigation,
+    createCategoryOverviewEmbed,
+    createCategoryNavigation,
     createMainWikiEmbed,
+    createMainMenuNavigation,
     getCategoryKeys,
     getCategoryInfo
 };

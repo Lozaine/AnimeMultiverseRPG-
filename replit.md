@@ -80,6 +80,9 @@ Preferred communication style: Simple, everyday language.
 - **Detailed Content**: Over 25 sections covering all game mechanics, strategies, and systems
 - **User-Friendly Design**: Rich embeds with proper formatting, examples, and navigation guidance
 - **Separated Help System**: Updated `/help` command as beginner-friendly quick start guide, keeping `/wiki` for comprehensive documentation
+- **Interactive Navigation**: Dropdown menus for category and section selection with previous/next buttons
+- **Comprehensive Content**: In-depth explanations with detailed mechanics, strategies, and advanced tips
+- **Smart Integration**: Full interaction handling with button and dropdown navigation support
 
 #### Wiki Categories & Content
 - **Getting Started**: Character creation, first quest, basic commands for new players

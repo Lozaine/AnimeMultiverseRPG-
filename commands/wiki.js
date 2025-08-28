@@ -1,5 +1,13 @@
 const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
-const { createWikiEmbed, createCategoryOverviewEmbed, createMainWikiEmbed, getCategoryKeys } = require('../utils/wiki');
+const { 
+    createWikiEmbed, 
+    createWikiNavigation, 
+    createCategoryOverviewEmbed, 
+    createCategoryNavigation,
+    createMainWikiEmbed, 
+    createMainMenuNavigation,
+    getCategoryKeys 
+} = require('../utils/wiki');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -22,7 +30,7 @@ module.exports = {
         const category = interaction.options.getString('category');
         
         if (category) {
-            // Show specific wiki category overview
+            // Show specific wiki category overview with navigation
             const categoryEmbed = createCategoryOverviewEmbed(category);
             if (!categoryEmbed) {
                 return interaction.reply({
@@ -33,11 +41,19 @@ module.exports = {
                     ephemeral: true
                 });
             }
-            return interaction.reply({ embeds: [categoryEmbed] });
+            const navigation = createCategoryNavigation(category);
+            return interaction.reply({ 
+                embeds: [categoryEmbed], 
+                components: navigation 
+            });
         }
         
-        // Default wiki home - show all categories
+        // Default wiki home - show all categories with dropdown navigation
         const mainEmbed = createMainWikiEmbed();
-        interaction.reply({ embeds: [mainEmbed] });
+        const navigation = createMainMenuNavigation();
+        interaction.reply({ 
+            embeds: [mainEmbed], 
+            components: navigation 
+        });
     }
 };
