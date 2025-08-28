@@ -1,0 +1,225 @@
+const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
+const { getCharacter, getPlayerInventory, removeItemFromInventory, updateCharacterProgress } = require('../database/database');
+const { FACTIONS } = require('../utils/factions');
+const { createEmbed } = require('../utils/embeds');
+
+module.exports = {
+    data: new SlashCommandBuilder()
+        .setName('use')
+        .setDescription('Use an item from your inventory')
+        .addStringOption(option =>
+            option.setName('item')
+                .setDescription('The item to use')
+                .setRequired(true)
+                .setAutocomplete(true)) // Make sure this is set to true
+        .addIntegerOption(option =>
+            option.setName('quantity')
+                .setDescription('How many to use (default: 1)')
+                .setRequired(false)
+                .setMinValue(1)
+                .setMaxValue(10)),
+    
+    async autocomplete(interaction) {
+        const focusedValue = interaction.options.getFocused();
+        const userId = interaction.user.id;
+        
+        try {
+            console.log(`[AUTOCOMPLETE] User ${userId} searching for: "${focusedValue}"`);
+            
+            // Check if user has a character first
+            const character = await getCharacter(userId);
+            if (!character) {
+                console.log(`[AUTOCOMPLETE] No character found for user ${userId}`);
+                return await interaction.respond([]);
+            }
+            
+            const inventory = await getPlayerInventory(userId);
+            console.log(`[AUTOCOMPLETE] Inventory items found: ${inventory.length}`);
+            
+            if (!inventory || inventory.length === 0) {
+                console.log(`[AUTOCOMPLETE] Empty inventory for user ${userId}`);
+                return await interaction.respond([]);
+            }
+            
+            const usableItems = inventory.filter(item => 
+                ['food', 'healing', 'potion', 'consumable', 'boost'].includes(item.item_type)
+            );
+            console.log(`[AUTOCOMPLETE] Usable items: ${usableItems.length}`);
+            console.log(`[AUTOCOMPLETE] Usable items:`, usableItems.map(i => `${i.item_name} (${i.item_type}) x${i.quantity}`));
+            
+            // Filter by what the user is typing
+            const filtered = usableItems.filter(item => 
+                item.item_name.toLowerCase().includes(focusedValue.toLowerCase())
+            );
+            
+            console.log(`[AUTOCOMPLETE] Filtered items: ${filtered.length}`);
+            
+            const choices = filtered
+                .slice(0, 25) // Discord limit
+                .map(item => ({
+                    name: `${item.item_name} (x${item.quantity}) - ${item.item_type}`,
+                    value: item.item_name
+                }));
+            
+            console.log(`[AUTOCOMPLETE] Choices returned: ${choices.length}`);
+            
+            await interaction.respond(choices);
+            
+        } catch (error) {
+            console.error('[AUTOCOMPLETE] Error:', error);
+            try {
+                await interaction.respond([]);
+            } catch (respondError) {
+                console.error('[AUTOCOMPLETE] Failed to respond with empty array:', respondError);
+            }
+        }
+    },
+    
+    async execute(interaction) {
+        const userId = interaction.user.id;
+        const itemName = interaction.options.getString('item');
+        const quantity = interaction.options.getInteger('quantity') || 1;
+        
+        try {
+            const character = await getCharacter(userId);
+            
+            if (!character) {
+                const embed = createEmbed('No Character Found', 
+                    'You don\'t have a character yet! Use `/create` to create one.', 
+                    '#ff6b6b');
+                return interaction.reply({ embeds: [embed] });
+            }
+
+            // Get the specific item from inventory
+            const inventory = await getPlayerInventory(userId);
+            const item = inventory.find(inv => inv.item_name === itemName);
+            
+            if (!item) {
+                const embed = createEmbed('Item Not Found', 
+                    `You don't have "${itemName}" in your inventory.`, 
+                    '#ff6b6b');
+                return interaction.reply({ embeds: [embed] });
+            }
+            
+            if (item.quantity < quantity) {
+                const embed = createEmbed('Not Enough Items', 
+                    `You only have ${item.quantity} of "${itemName}".`, 
+                    '#ff6b6b');
+                return interaction.reply({ embeds: [embed] });
+            }
+            
+            // Check if item is usable
+            const usableTypes = ['food', 'healing', 'potion', 'consumable', 'boost'];
+            if (!usableTypes.includes(item.item_type)) {
+                const embed = createEmbed('Item Not Usable', 
+                    `"${itemName}" cannot be used. It's a ${item.item_type} item.`, 
+                    '#ff6b6b');
+                return interaction.reply({ embeds: [embed] });
+            }
+            
+            // Apply item effects
+            let effectsApplied = [];
+            let newHp = character.hp;
+            let newExp = character.experience;
+            let newGold = character.gold;
+            
+            for (let i = 0; i < quantity; i++) {
+                // Parse item effects from description
+                const description = item.item_description.toLowerCase();
+                
+                // HP restoration
+                if (description.includes('restores') && description.includes('hp')) {
+                    const hpMatch = description.match(/restores (\d+) hp/);
+                    if (hpMatch) {
+                        const hpRestore = parseInt(hpMatch[1]);
+                        const hpRestored = Math.min(hpRestore, character.max_hp - newHp);
+                        newHp = Math.min(newHp + hpRestore, character.max_hp);
+                        effectsApplied.push(`+${hpRestore} HP${hpRestored < hpRestore ? ' (max HP reached)' : ''}`);
+                    }
+                }
+                
+                // MP restoration (for future use)
+                if (description.includes('mp')) {
+                    const mpMatch = description.match(/(\d+) mp/);
+                    if (mpMatch) {
+                        const mpRestore = parseInt(mpMatch[1]);
+                        effectsApplied.push(`+${mpRestore} MP`);
+                    }
+                }
+                
+                // XP bonus
+                if (description.includes('xp') || description.includes('experience')) {
+                    const xpMatch = description.match(/\+(\d+) xp/);
+                    if (xpMatch) {
+                        const xpBonus = parseInt(xpMatch[1]);
+                        newExp += xpBonus;
+                        effectsApplied.push(`+${xpBonus} XP`);
+                    }
+                }
+                
+                // Temporary effects (display only for now)
+                if (description.includes('boost') || description.includes('temporary')) {
+                    effectsApplied.push('Temporary effect applied');
+                }
+            }
+            
+            // Remove items from inventory
+            const removeResult = await removeItemFromInventory(userId, itemName, quantity);
+            
+            if (!removeResult.success) {
+                const embed = createEmbed('Use Item Error', 
+                    removeResult.message, 
+                    '#ff6b6b');
+                return interaction.reply({ embeds: [embed] });
+            }
+            
+            // Update character with new stats
+            await updateCharacterProgress(userId, newExp, newGold, character.level, newHp);
+            
+            // Create success embed
+            const faction = FACTIONS[character.faction];
+            const embed = new EmbedBuilder()
+                .setColor(faction.color)
+                .setTitle('✨ Item Used Successfully!')
+                .setDescription(`You used **${quantity}x ${itemName}**`)
+                .addFields([
+                    { 
+                        name: '💊 Effects Applied', 
+                        value: effectsApplied.length > 0 ? effectsApplied.join('\n') : 'No immediate effects', 
+                        inline: false 
+                    },
+                    { 
+                        name: '❤️ Current HP', 
+                        value: `${newHp}/${character.max_hp}`, 
+                        inline: true 
+                    },
+                    { 
+                        name: '📦 Remaining', 
+                        value: `${removeResult.remaining}x ${itemName}`, 
+                        inline: true 
+                    }
+                ])
+                .setFooter({ text: 'Cross Realm Chronicles • Item Usage' })
+                .setTimestamp();
+            
+            if (newExp > character.experience) {
+                embed.addFields([
+                    { 
+                        name: '📈 Experience', 
+                        value: `${character.experience} → ${newExp} (+${newExp - character.experience})`, 
+                        inline: true 
+                    }
+                ]);
+            }
+            
+            interaction.reply({ embeds: [embed] });
+
+        } catch (error) {
+            console.error('Use item error:', error);
+            const embed = createEmbed('Use Item Error', 
+                'An error occurred while using the item. Please try again.', 
+                '#ff6b6b');
+            interaction.reply({ embeds: [embed] });
+        }
+    }
+};

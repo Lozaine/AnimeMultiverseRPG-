@@ -11,7 +11,7 @@ module.exports = {
             option.setName('item')
                 .setDescription('The item to use')
                 .setRequired(true)
-                .setAutocomplete(true))
+                .setAutocomplete(true)) // Make sure this is set to true
         .addIntegerOption(option =>
             option.setName('quantity')
                 .setDescription('How many to use (default: 1)')
@@ -26,28 +26,52 @@ module.exports = {
         try {
             console.log(`[AUTOCOMPLETE] User ${userId} searching for: "${focusedValue}"`);
             
+            // Check if user has a character first
+            const character = await getCharacter(userId);
+            if (!character) {
+                console.log(`[AUTOCOMPLETE] No character found for user ${userId}`);
+                return await interaction.respond([]);
+            }
+            
             const inventory = await getPlayerInventory(userId);
             console.log(`[AUTOCOMPLETE] Inventory items found: ${inventory.length}`);
             
+            if (!inventory || inventory.length === 0) {
+                console.log(`[AUTOCOMPLETE] Empty inventory for user ${userId}`);
+                return await interaction.respond([]);
+            }
+            
             const usableItems = inventory.filter(item => 
-                ['food', 'healing', 'potion', 'consumable'].includes(item.item_type)
+                ['food', 'healing', 'potion', 'consumable', 'boost'].includes(item.item_type)
             );
             console.log(`[AUTOCOMPLETE] Usable items: ${usableItems.length}`);
-            console.log(`[AUTOCOMPLETE] Usable items:`, usableItems.map(i => `${i.item_name} (${i.item_type})`));
+            console.log(`[AUTOCOMPLETE] Usable items:`, usableItems.map(i => `${i.item_name} (${i.item_type}) x${i.quantity}`));
             
-            const choices = usableItems
-                .filter(item => item.item_name.toLowerCase().includes(focusedValue.toLowerCase()))
-                .slice(0, 25)
+            // Filter by what the user is typing
+            const filtered = usableItems.filter(item => 
+                item.item_name.toLowerCase().includes(focusedValue.toLowerCase())
+            );
+            
+            console.log(`[AUTOCOMPLETE] Filtered items: ${filtered.length}`);
+            
+            const choices = filtered
+                .slice(0, 25) // Discord limit
                 .map(item => ({
-                    name: `${item.item_name} (x${item.quantity})`,
+                    name: `${item.item_name} (x${item.quantity}) - ${item.item_type}`,
                     value: item.item_name
                 }));
             
             console.log(`[AUTOCOMPLETE] Choices returned: ${choices.length}`);
+            
             await interaction.respond(choices);
+            
         } catch (error) {
-            console.error('Autocomplete error:', error);
-            await interaction.respond([]);
+            console.error('[AUTOCOMPLETE] Error:', error);
+            try {
+                await interaction.respond([]);
+            } catch (respondError) {
+                console.error('[AUTOCOMPLETE] Failed to respond with empty array:', respondError);
+            }
         }
     },
     
@@ -85,7 +109,7 @@ module.exports = {
             }
             
             // Check if item is usable
-            const usableTypes = ['food', 'healing', 'potion', 'consumable'];
+            const usableTypes = ['food', 'healing', 'potion', 'consumable', 'boost'];
             if (!usableTypes.includes(item.item_type)) {
                 const embed = createEmbed('Item Not Usable', 
                     `"${itemName}" cannot be used. It's a ${item.item_type} item.`, 
