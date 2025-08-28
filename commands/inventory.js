@@ -1,5 +1,5 @@
-const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
-const { getCharacter, getPlayerInventory } = require('../database/database');
+const { EmbedBuilder, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
+const { getCharacter, getPlayerInventory, usePlayerItem } = require('../database/database');
 const { FACTIONS } = require('../utils/factions');
 const { createEmbed } = require('../utils/embeds');
 
@@ -38,54 +38,105 @@ module.exports = {
                         inline: false 
                     }
                 ]);
-            } else {
-                // Group items by type
-                const itemsByType = {};
-                inventory.forEach(item => {
-                    if (!itemsByType[item.item_type]) {
-                        itemsByType[item.item_type] = [];
-                    }
-                    itemsByType[item.item_type].push(item);
-                });
+                return interaction.reply({ embeds: [embed] });
+            }
 
-                // Display items by category
-                const typeEmojis = {
-                    'food': '🍽️',
-                    'healing': '💊',
-                    'material': '⚒️',
-                    'currency': '💰',
-                    'boost': '⚡',
-                    'weapon': '⚔️',
-                    'armor': '🛡️'
-                };
-
-                for (const [type, items] of Object.entries(itemsByType)) {
-                    const typeEmoji = typeEmojis[type] || '📦';
-                    const itemList = items.map(item => 
-                        `${item.item_name} x${item.quantity}\n*${item.item_description}*`
-                    ).join('\n\n');
-                    
-                    embed.addFields([
-                        { 
-                            name: `${typeEmoji} ${type.charAt(0).toUpperCase() + type.slice(1)} Items`, 
-                            value: itemList, 
-                            inline: false 
-                        }
-                    ]);
+            // Group items by type
+            const itemsByType = {};
+            inventory.forEach(item => {
+                if (!itemsByType[item.item_type]) {
+                    itemsByType[item.item_type] = [];
                 }
+                itemsByType[item.item_type].push(item);
+            });
 
-                // Add summary
-                const totalItems = inventory.reduce((sum, item) => sum + item.quantity, 0);
+            // Display items by category
+            const typeEmojis = {
+                'food': '🍽️',
+                'healing': '💊',
+                'material': '⚒️',
+                'currency': '💰',
+                'boost': '⚡',
+                'weapon': '⚔️',
+                'armor': '🛡️'
+            };
+
+            for (const [type, items] of Object.entries(itemsByType)) {
+                const typeEmoji = typeEmojis[type] || '📦';
+                const itemList = items.map(item => 
+                    `${item.item_name} x${item.quantity}\n*${item.item_description}*`
+                ).join('\n\n');
+                
                 embed.addFields([
                     { 
-                        name: '📊 Inventory Summary', 
-                        value: `Total items: ${totalItems}/100\nItem types: ${Object.keys(itemsByType).length}\nUsable items: ${inventory.filter(item => ['food', 'healing', 'potion', 'consumable'].includes(item.item_type)).length}`, 
+                        name: `${typeEmoji} ${type.charAt(0).toUpperCase() + type.slice(1)} Items`, 
+                        value: itemList, 
                         inline: false 
                     }
                 ]);
             }
 
-            interaction.reply({ embeds: [embed] });
+            // Add summary
+            const totalItems = inventory.reduce((sum, item) => sum + item.quantity, 0);
+            embed.addFields([
+                { 
+                    name: '📊 Inventory Summary', 
+                    value: `Total items: ${totalItems}/100\nItem types: ${Object.keys(itemsByType).length}\nUsable items: ${inventory.filter(item => ['food', 'healing', 'boost'].includes(item.item_type)).length}`, 
+                    inline: false 
+                }
+            ]);
+
+            // Create interactive components
+            const components = [];
+            const usableItems = inventory.filter(item => ['food', 'healing', 'boost'].includes(item.item_type));
+            
+            if (usableItems.length > 0) {
+                // Create select menu for item usage (up to 25 items can be shown)
+                const selectMenuOptions = usableItems.slice(0, 25).map(item => ({
+                    label: `${item.item_name} (x${item.quantity})`,
+                    description: item.item_description.substring(0, 100),
+                    value: `use_${item.item_name.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${userId}`,
+                    emoji: typeEmojis[item.item_type] || '📦'
+                }));
+
+                const selectMenu = new StringSelectMenuBuilder()
+                    .setCustomId(`inventory_use_${userId}`)
+                    .setPlaceholder('Choose an item to use...')
+                    .addOptions(selectMenuOptions);
+
+                const selectRow = new ActionRowBuilder().addComponents(selectMenu);
+                components.push(selectRow);
+
+                // Add quick action buttons for common items
+                if (usableItems.length <= 5) {
+                    const buttonRow = new ActionRowBuilder();
+                    usableItems.slice(0, 5).forEach(item => {
+                        const button = new ButtonBuilder()
+                            .setCustomId(`quick_use_${item.item_name.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${userId}`)
+                            .setLabel(`Use ${item.item_name}`)
+                            .setStyle(ButtonStyle.Secondary)
+                            .setEmoji(typeEmojis[item.item_type] || '📦');
+                        buttonRow.addComponents(button);
+                    });
+                    components.push(buttonRow);
+                }
+
+                // Add utility buttons
+                const utilityRow = new ActionRowBuilder()
+                    .addComponents(
+                        new ButtonBuilder()
+                            .setCustomId(`refresh_inventory_${userId}`)
+                            .setLabel('🔄 Refresh')
+                            .setStyle(ButtonStyle.Primary),
+                        new ButtonBuilder()
+                            .setCustomId(`sort_inventory_${userId}`)
+                            .setLabel('📊 Sort by Type')
+                            .setStyle(ButtonStyle.Secondary)
+                    );
+                components.push(utilityRow);
+            }
+
+            interaction.reply({ embeds: [embed], components: components });
 
         } catch (error) {
             console.error('Inventory view error:', error);

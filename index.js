@@ -305,6 +305,75 @@ client.on('interactionCreate', async interaction => {
                 }
             }
             
+            // Handle inventory button interactions
+            if (interaction.customId.startsWith('quick_use_') || 
+                interaction.customId.startsWith('refresh_inventory_') || 
+                interaction.customId.startsWith('sort_inventory_')) {
+                
+                const parts = interaction.customId.split('_');
+                const buttonUserId = parts[parts.length - 1];
+                
+                // Check if the button interaction is from the original user
+                if (buttonUserId !== userId) {
+                    return interaction.reply({
+                        content: '❌ You can only interact with your own inventory buttons!',
+                        flags: [4096] // EPHEMERAL flag
+                    });
+                }
+                
+                if (interaction.customId.startsWith('quick_use_')) {
+                    // Extract item name from button ID
+                    const itemName = parts.slice(2, -1).join('_').replace(/_/g, ' ');
+                    
+                    // Show modal for quantity input
+                    const { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } = require('discord.js');
+                    
+                    const modal = new ModalBuilder()
+                        .setCustomId(`use_item_modal_${itemName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${userId}`)
+                        .setTitle(`Use ${itemName}`);
+                    
+                    const quantityInput = new TextInputBuilder()
+                        .setCustomId('quantity')
+                        .setLabel('Quantity (1-10)')
+                        .setStyle(TextInputStyle.Short)
+                        .setPlaceholder('1')
+                        .setValue('1')
+                        .setRequired(true)
+                        .setMinLength(1)
+                        .setMaxLength(2);
+                    
+                    const actionRow = new ActionRowBuilder().addComponents(quantityInput);
+                    modal.addComponents(actionRow);
+                    
+                    return interaction.showModal(modal);
+                    
+                } else if (interaction.customId.startsWith('refresh_inventory_')) {
+                    // Refresh inventory display
+                    const inventoryCommand = client.commands.get('inventory');
+                    if (inventoryCommand) {
+                        await inventoryCommand.execute(interaction);
+                    } else {
+                        return interaction.reply({
+                            content: '❌ Inventory refresh failed!',
+                            flags: [4096]
+                        });
+                    }
+                    
+                } else if (interaction.customId.startsWith('sort_inventory_')) {
+                    // For now, just refresh (could implement different sorting later)
+                    const inventoryCommand = client.commands.get('inventory');
+                    if (inventoryCommand) {
+                        await inventoryCommand.execute(interaction);
+                    } else {
+                        return interaction.reply({
+                            content: '❌ Inventory sort failed!',
+                            flags: [4096]
+                        });
+                    }
+                }
+                return;
+            }
+            
             // Handle other button interactions (none currently)
             return interaction.reply({ 
                 content: '❌ This button interaction is not currently supported!', 
@@ -313,6 +382,139 @@ client.on('interactionCreate', async interaction => {
             
         } catch (error) {
             console.error('Button interaction error:', error);
+            
+            const errorMessage = '❌ There was an error processing your request!';
+            
+            if (interaction.replied || interaction.deferred) {
+                await interaction.followUp({ content: errorMessage, flags: [4096] });
+            } else {
+                await interaction.reply({ content: errorMessage, flags: [4096] });
+            }
+        }
+    }
+    
+    // Handle string select menu interactions
+    else if (interaction.isStringSelectMenu()) {
+        try {
+            const userId = interaction.user.id;
+            
+            // Handle inventory item selection
+            if (interaction.customId.startsWith('inventory_use_')) {
+                const selectUserId = interaction.customId.split('_')[2];
+                
+                // Check if the select menu interaction is from the original user
+                if (selectUserId !== userId) {
+                    return interaction.reply({
+                        content: '❌ You can only interact with your own inventory!',
+                        flags: [4096] // EPHEMERAL flag
+                    });
+                }
+                
+                // Extract item name from selected value
+                const selectedValue = interaction.values[0];
+                const parts = selectedValue.split('_');
+                const itemName = parts.slice(1, -1).join('_').replace(/_/g, ' ');
+                
+                // Show modal for quantity input
+                const { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } = require('discord.js');
+                
+                const modal = new ModalBuilder()
+                    .setCustomId(`use_item_modal_${itemName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${userId}`)
+                    .setTitle(`Use ${itemName}`);
+                
+                const quantityInput = new TextInputBuilder()
+                    .setCustomId('quantity')
+                    .setLabel('Quantity (1-10)')
+                    .setStyle(TextInputStyle.Short)
+                    .setPlaceholder('1')
+                    .setValue('1')
+                    .setRequired(true)
+                    .setMinLength(1)
+                    .setMaxLength(2);
+                
+                const actionRow = new ActionRowBuilder().addComponents(quantityInput);
+                modal.addComponents(actionRow);
+                
+                return interaction.showModal(modal);
+            }
+            
+            // Handle other select menu interactions (none currently)
+            return interaction.reply({ 
+                content: '❌ This select menu interaction is not currently supported!', 
+                flags: [4096] // EPHEMERAL flag
+            });
+            
+        } catch (error) {
+            console.error('Select menu interaction error:', error);
+            
+            const errorMessage = '❌ There was an error processing your request!';
+            
+            if (interaction.replied || interaction.deferred) {
+                await interaction.followUp({ content: errorMessage, flags: [4096] });
+            } else {
+                await interaction.reply({ content: errorMessage, flags: [4096] });
+            }
+        }
+    }
+    
+    // Handle modal submit interactions
+    else if (interaction.isModalSubmit()) {
+        try {
+            const userId = interaction.user.id;
+            
+            // Handle item usage modal
+            if (interaction.customId.startsWith('use_item_modal_')) {
+                const parts = interaction.customId.split('_');
+                const modalUserId = parts[parts.length - 1];
+                
+                // Check if the modal interaction is from the original user
+                if (modalUserId !== userId) {
+                    return interaction.reply({
+                        content: '❌ You can only use your own items!',
+                        flags: [4096] // EPHEMERAL flag
+                    });
+                }
+                
+                const itemName = parts.slice(3, -1).join('_').replace(/_/g, ' ');
+                const quantity = parseInt(interaction.fields.getTextInputValue('quantity'));
+                
+                // Validate quantity
+                if (isNaN(quantity) || quantity < 1 || quantity > 10) {
+                    return interaction.reply({
+                        content: '❌ Please enter a valid quantity between 1 and 10!',
+                        flags: [4096]
+                    });
+                }
+                
+                // Use the item
+                const { usePlayerItem } = require('./database/database');
+                const result = await usePlayerItem(userId, itemName, quantity);
+                
+                if (result.success) {
+                    const { createEmbed } = require('./utils/embeds');
+                    const embed = createEmbed(
+                        `✅ Used ${itemName}`,
+                        `Successfully used ${quantity}x ${itemName}\n${result.message}`,
+                        '#10b981'
+                    );
+                    
+                    return interaction.reply({ embeds: [embed], flags: [4096] });
+                } else {
+                    return interaction.reply({
+                        content: `❌ ${result.message}`,
+                        flags: [4096]
+                    });
+                }
+            }
+            
+            // Handle other modal interactions (none currently)
+            return interaction.reply({ 
+                content: '❌ This modal interaction is not currently supported!', 
+                flags: [4096] // EPHEMERAL flag
+            });
+            
+        } catch (error) {
+            console.error('Modal submit interaction error:', error);
             
             const errorMessage = '❌ There was an error processing your request!';
             
