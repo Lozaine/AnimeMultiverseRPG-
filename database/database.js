@@ -288,6 +288,108 @@ async function removeItemFromInventory(userId, itemName, quantity = 1) {
     });
 }
 
+// Use player item function
+async function usePlayerItem(userId, itemName, quantity = 1) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            // Get character and item data
+            const character = await getCharacter(userId);
+            const inventory = await getPlayerInventory(userId);
+            const item = inventory.find(inv => inv.item_name === itemName);
+            
+            if (!character) {
+                resolve({ success: false, message: 'Character not found!' });
+                return;
+            }
+            
+            if (!item) {
+                resolve({ success: false, message: `You don't have "${itemName}" in your inventory.` });
+                return;
+            }
+            
+            if (item.quantity < quantity) {
+                resolve({ success: false, message: `You only have ${item.quantity} of "${itemName}".` });
+                return;
+            }
+            
+            // Check if item is usable
+            const usableTypes = ['food', 'healing', 'potion', 'consumable'];
+            if (!usableTypes.includes(item.item_type)) {
+                resolve({ success: false, message: `"${itemName}" cannot be used. It's a ${item.item_type} item.` });
+                return;
+            }
+            
+            // Apply item effects
+            let effectsApplied = [];
+            let newHp = character.hp;
+            let newExp = character.experience;
+            let newGold = character.gold;
+            
+            for (let i = 0; i < quantity; i++) {
+                // Parse item effects from description
+                const description = item.item_description.toLowerCase();
+                
+                // HP restoration
+                if (description.includes('restores') && description.includes('hp')) {
+                    const hpMatch = description.match(/restores (\d+) hp/);
+                    if (hpMatch) {
+                        const hpRestore = parseInt(hpMatch[1]);
+                        const oldHp = newHp;
+                        newHp = Math.min(newHp + hpRestore, character.max_hp);
+                        const actualRestore = newHp - oldHp;
+                        if (actualRestore > 0) {
+                            effectsApplied.push(`+${actualRestore} HP`);
+                        }
+                    }
+                }
+                
+                // XP boost
+                if (description.includes('xp') || description.includes('experience')) {
+                    const xpMatch = description.match(/(\d+) (?:xp|experience)/);
+                    if (xpMatch) {
+                        const xpGain = parseInt(xpMatch[1]);
+                        newExp += xpGain;
+                        effectsApplied.push(`+${xpGain} XP`);
+                    }
+                }
+                
+                // Gold boost
+                if (description.includes('gold') || description.includes('coins')) {
+                    const goldMatch = description.match(/(\d+) (?:gold|coins)/);
+                    if (goldMatch) {
+                        const goldGain = parseInt(goldMatch[1]);
+                        newGold += goldGain;
+                        effectsApplied.push(`+${goldGain} Gold`);
+                    }
+                }
+            }
+            
+            // Remove items from inventory
+            const removeResult = await removeItemFromInventory(userId, itemName, quantity);
+            if (!removeResult.success) {
+                resolve({ success: false, message: removeResult.message });
+                return;
+            }
+            
+            // Update character stats
+            await updateCharacterProgress(userId, newExp, newGold, character.level, newHp);
+            
+            // Create success message
+            let message = '';
+            if (effectsApplied.length > 0) {
+                message = effectsApplied.join(', ');
+            } else {
+                message = 'Item used successfully!';
+            }
+            
+            resolve({ success: true, message: message });
+            
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
 // Close database connection
 function closeDatabase() {
     db.close((err) => {
@@ -308,5 +410,6 @@ module.exports = {
     addItemToInventory,
     getPlayerInventory,
     removeItemFromInventory,
+    usePlayerItem,
     closeDatabase
 };
