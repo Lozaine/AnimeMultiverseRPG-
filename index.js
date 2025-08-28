@@ -26,7 +26,7 @@ for (const file of commandFiles) {
 }
 
 // Bot ready event
-client.once('ready', async () => {
+client.once('clientReady', async () => {
     console.log(`✅ Cross Realm Chronicles bot is online as ${client.user.tag}!`);
     
     // Initialize database

@@ -22,6 +22,7 @@ async function initializeDatabase() {
                 CREATE TABLE IF NOT EXISTS characters (
                     user_id TEXT PRIMARY KEY,
                     name TEXT NOT NULL,
+                    character_name TEXT NOT NULL,
                     faction TEXT NOT NULL,
                     level INTEGER DEFAULT 1,
                     experience INTEGER DEFAULT 0,
@@ -44,6 +45,7 @@ async function initializeDatabase() {
                     reject(err);
                 } else {
                     // Add columns for existing characters if they don't exist
+                    db.run(`ALTER TABLE characters ADD COLUMN character_name TEXT DEFAULT 'Unnamed'`, () => {});
                     db.run(`ALTER TABLE characters ADD COLUMN hp INTEGER DEFAULT 100`, () => {});
                     db.run(`ALTER TABLE characters ADD COLUMN max_hp INTEGER DEFAULT 100`, () => {});
                     db.run(`ALTER TABLE characters ADD COLUMN atk INTEGER DEFAULT 20`, () => {});
@@ -74,14 +76,14 @@ async function initializeDatabase() {
 }
 
 // Create a new character
-async function createCharacter(userId, name, faction) {
+async function createCharacter(userId, name, characterName, faction) {
     return new Promise((resolve, reject) => {
         const query = `
-            INSERT INTO characters (user_id, name, faction)
-            VALUES (?, ?, ?)
+            INSERT INTO characters (user_id, name, character_name, faction)
+            VALUES (?, ?, ?, ?)
         `;
         
-        db.run(query, [userId, name, faction], function(err) {
+        db.run(query, [userId, name, characterName, faction], function(err) {
             if (err) {
                 reject(err);
             } else {

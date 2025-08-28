@@ -58,7 +58,8 @@ Preferred communication style: Simple, everyday language.
 - **Component Interactions**: Full support for buttons, select menus, and modal interactions
 
 ### Database Schema
-- **Characters Table**: Stores user_id, name, faction, level, experience, gold, hp, max_hp, atk, completed quests, and faction-specific attributes
+- **Characters Table**: Stores user_id, name, character_name, faction, level, experience, gold, hp, max_hp, atk, completed quests, and faction-specific attributes
+- **Character Identity**: Separate fields for Discord username (name) and in-game character name (character_name)
 - **Timestamp Tracking**: Created_at and updated_at fields for character lifecycle management
 - **Combat Stats**: HP (current health), max_hp (maximum health), atk (attack power) fields for battle mechanics
 
@@ -73,6 +74,26 @@ Preferred communication style: Simple, everyday language.
 For detailed development history, see [CHANGELOG.md](./CHANGELOG.md) which tracks all changes, features, and technical decisions during development phases.
 
 ## Recent Changes
+
+### Character Names & Discord.js Fixes Implementation (Phase 2 - Extended)
+**Date**: August 28, 2025
+
+#### Character Name System
+- **Database Enhancement**: Added `character_name` field to characters table for custom character names
+- **Create Command Update**: Enhanced `/create` command to accept optional `character_name` parameter
+- **Flexible Naming**: Players can specify custom character names or default to Discord username
+- **Profile Integration**: Character profiles now display custom character names in titles and descriptions
+- **Backward Compatibility**: Existing characters maintain their original names through migration
+
+#### Discord.js Modernization
+- **Deprecation Fix**: Updated `ready` event to `clientReady` to resolve Discord.js v14 deprecation warning
+- **Future-Proof Code**: Bot now uses modern Discord.js v14 event handling without warnings
+- **Clean Console Output**: Eliminated deprecation warnings for better development experience
+
+#### Database Migration
+- **Schema Update**: Added `character_name TEXT NOT NULL` column with 'Unnamed' default for existing characters
+- **Migration Safety**: Automatic column addition during database initialization
+- **Data Integrity**: No data loss during character name implementation
 
 ### Environment Migration & System Fixes Complete (Phase 2)
 **Date**: August 28, 2025
@@ -104,13 +125,16 @@ For detailed development history, see [CHANGELOG.md](./CHANGELOG.md) which track
 
 #### System Status
 - ✅ Discord bot fully operational (Cross Realm Chronicles#3267)
-- ✅ All slash commands registered and functional
+- ✅ All slash commands registered and functional including enhanced `/create` command
+- ✅ Character name system fully implemented with custom naming support
+- ✅ Discord.js v14 deprecation warnings eliminated with `clientReady` event
 - ✅ Autocomplete system working correctly for `/use` command
 - ✅ Interactive inventory system operational
 - ✅ Item usage system with proper effect parsing functional
 - ✅ Character reset system with complete data deletion functional
 - ✅ Combat and quest systems fully functional
-- ✅ Database connection established and stable
+- ✅ Database connection established and stable with character_name migration
+- ✅ Profile system updated to display custom character names
 - ✅ Code modernized with updated Discord.js v14 syntax
 
 ### Level Progression System Implementation (Phase 1: Foundation)

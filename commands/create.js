@@ -17,7 +17,13 @@ module.exports = {
                     { name: '🥷 Naruto Shinobi', value: 'naruto' },
                     { name: '👁️ Jujutsu Sorcerers', value: 'jujutsu_kaisen' },
                     { name: '⚔️ Demon Slayers', value: 'demon_slayer' }
-                )),
+                ))
+        .addStringOption(option =>
+            option.setName('character_name')
+                .setDescription('Your character\'s name')
+                .setRequired(false)
+                .setMinLength(2)
+                .setMaxLength(25)),
     async execute(interaction) {
         const userId = interaction.user.id;
         
@@ -31,8 +37,9 @@ module.exports = {
                 return interaction.reply({ embeds: [embed] });
             }
 
-            // Get faction choice from interaction
+            // Get faction choice and character name from interaction
             const factionChoice = interaction.options.getString('faction');
+            const characterName = interaction.options.getString('character_name');
             
             // If no faction specified, show faction selection
             if (!factionChoice) {
@@ -42,7 +49,7 @@ module.exports = {
                 }).join('\n\n');
 
                 const embed = createEmbed('🌟 Choose Your Faction', 
-                    `Welcome to Cross Realm Chronicles! Choose your faction:\n\n${factionList}\n\nUse: \`/create faction:[your_choice]\``, 
+                    `Welcome to Cross Realm Chronicles! Choose your faction:\n\n${factionList}\n\nUse: \`/create faction:[your_choice] character_name:[your_name]\``, 
                     '#4f46e5');
                 
                 return interaction.reply({ embeds: [embed] });
@@ -58,8 +65,11 @@ module.exports = {
 
             const selectedFaction = FACTIONS[factionChoice];
 
+            // Use provided character name or default to Discord username
+            const finalCharacterName = characterName || interaction.user.username;
+
             // Create character
-            const character = await createCharacter(userId, interaction.user.username, factionChoice);
+            const character = await createCharacter(userId, interaction.user.username, finalCharacterName, factionChoice);
 
             // Get base stats for level 1
             const baseStats = getBaseStatsForLevel(1);
@@ -70,7 +80,7 @@ module.exports = {
                 .setTitle(`🎉 Character Created Successfully!`)
                 .setDescription(`Welcome to the **${selectedFaction.name}**!`)
                 .addFields([
-                    { name: '👤 Character Name', value: character.name, inline: true },
+                    { name: '👤 Character Name', value: character.character_name, inline: true },
                     { name: '⚔️ Faction', value: `${selectedFaction.emoji} ${selectedFaction.name}`, inline: true },
                     { name: '⭐ Level', value: character.level.toString(), inline: true },
                     { name: '🎯 Experience', value: `${character.experience}/100`, inline: true },

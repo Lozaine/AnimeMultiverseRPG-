@@ -30,7 +30,7 @@ module.exports = {
 
             const embed = new EmbedBuilder()
                 .setColor(faction.color)
-                .setTitle(`${faction.emoji} ${character.name}'s Profile`)
+                .setTitle(`${faction.emoji} ${character.character_name || character.name}'s Profile`)
                 .setDescription(`**${faction.name}** Warrior`)
                 .addFields([
                     { name: '⭐ Level', value: character.level.toString(), inline: true },
