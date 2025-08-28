@@ -81,21 +81,21 @@ module.exports = {
             embed.addFields([
                 { 
                     name: '📊 Inventory Summary', 
-                    value: `Total items: ${totalItems}/100\nItem types: ${Object.keys(itemsByType).length}\nUsable items: ${inventory.filter(item => ['food', 'healing', 'boost'].includes(item.item_type)).length}`, 
+                    value: `Total items: ${totalItems}/100\nItem types: ${Object.keys(itemsByType).length}\nUsable items: ${inventory.filter(item => ['food', 'healing', 'potion', 'consumable'].includes(item.item_type)).length}`, 
                     inline: false 
                 }
             ]);
 
             // Create interactive components
             const components = [];
-            const usableItems = inventory.filter(item => ['food', 'healing', 'boost'].includes(item.item_type));
+            const usableItems = inventory.filter(item => ['food', 'healing', 'potion', 'consumable'].includes(item.item_type));
             
             if (usableItems.length > 0) {
                 // Create select menu for item usage (up to 25 items can be shown)
                 const selectMenuOptions = usableItems.slice(0, 25).map(item => ({
                     label: `${item.item_name} (x${item.quantity})`,
                     description: item.item_description.substring(0, 100),
-                    value: `use_${item.item_name.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${userId}`,
+                    value: item.item_name, // Use exact item name, not transformed
                     emoji: typeEmojis[item.item_type] || '📦'
                 }));
 
@@ -106,20 +106,6 @@ module.exports = {
 
                 const selectRow = new ActionRowBuilder().addComponents(selectMenu);
                 components.push(selectRow);
-
-                // Add quick action buttons for common items
-                if (usableItems.length <= 5) {
-                    const buttonRow = new ActionRowBuilder();
-                    usableItems.slice(0, 5).forEach(item => {
-                        const button = new ButtonBuilder()
-                            .setCustomId(`quick_use_${item.item_name.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${userId}`)
-                            .setLabel(`Use ${item.item_name}`)
-                            .setStyle(ButtonStyle.Secondary)
-                            .setEmoji(typeEmojis[item.item_type] || '📦');
-                        buttonRow.addComponents(button);
-                    });
-                    components.push(buttonRow);
-                }
 
                 // Add utility buttons
                 const utilityRow = new ActionRowBuilder()

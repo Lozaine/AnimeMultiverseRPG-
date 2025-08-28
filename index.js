@@ -306,8 +306,7 @@ client.on('interactionCreate', async interaction => {
             }
             
             // Handle inventory button interactions
-            if (interaction.customId.startsWith('quick_use_') || 
-                interaction.customId.startsWith('refresh_inventory_') || 
+            if (interaction.customId.startsWith('refresh_inventory_') || 
                 interaction.customId.startsWith('sort_inventory_')) {
                 
                 const parts = interaction.customId.split('_');
@@ -321,33 +320,7 @@ client.on('interactionCreate', async interaction => {
                     });
                 }
                 
-                if (interaction.customId.startsWith('quick_use_')) {
-                    // Extract item name from button ID
-                    const itemName = parts.slice(2, -1).join('_').replace(/_/g, ' ');
-                    
-                    // Show modal for quantity input
-                    const { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } = require('discord.js');
-                    
-                    const modal = new ModalBuilder()
-                        .setCustomId(`use_item_modal_${itemName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${userId}`)
-                        .setTitle(`Use ${itemName}`);
-                    
-                    const quantityInput = new TextInputBuilder()
-                        .setCustomId('quantity')
-                        .setLabel('Quantity (1-10)')
-                        .setStyle(TextInputStyle.Short)
-                        .setPlaceholder('1')
-                        .setValue('1')
-                        .setRequired(true)
-                        .setMinLength(1)
-                        .setMaxLength(2);
-                    
-                    const actionRow = new ActionRowBuilder().addComponents(quantityInput);
-                    modal.addComponents(actionRow);
-                    
-                    return interaction.showModal(modal);
-                    
-                } else if (interaction.customId.startsWith('refresh_inventory_')) {
+                if (interaction.customId.startsWith('refresh_inventory_')) {
                     // Refresh inventory display
                     const inventoryCommand = client.commands.get('inventory');
                     if (inventoryCommand) {
@@ -410,16 +383,14 @@ client.on('interactionCreate', async interaction => {
                     });
                 }
                 
-                // Extract item name from selected value
-                const selectedValue = interaction.values[0];
-                const parts = selectedValue.split('_');
-                const itemName = parts.slice(1, -1).join('_').replace(/_/g, ' ');
+                // Extract item name from selected value - now it's the exact item name
+                const itemName = interaction.values[0];
                 
                 // Show modal for quantity input
                 const { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } = require('discord.js');
                 
                 const modal = new ModalBuilder()
-                    .setCustomId(`use_item_modal_${itemName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${userId}`)
+                    .setCustomId(`use_item_modal_${Buffer.from(itemName).toString('base64')}_${userId}`)
                     .setTitle(`Use ${itemName}`);
                 
                 const quantityInput = new TextInputBuilder()
@@ -475,7 +446,9 @@ client.on('interactionCreate', async interaction => {
                     });
                 }
                 
-                const itemName = parts.slice(3, -1).join('_').replace(/_/g, ' ');
+                // Decode item name from base64
+                const encodedItemName = parts.slice(3, -1).join('_');
+                const itemName = Buffer.from(encodedItemName, 'base64').toString('utf8');
                 const quantity = parseInt(interaction.fields.getTextInputValue('quantity'));
                 
                 // Validate quantity
