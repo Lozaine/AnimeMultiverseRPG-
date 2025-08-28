@@ -54,8 +54,21 @@ client.once('ready', async () => {
     client.user.setActivity('⚔️ Cross Realm Chronicles | Use slash commands', { type: 'PLAYING' });
 });
 
-// Interaction handler (slash commands and buttons)
+// Interaction handler (slash commands, autocomplete, and buttons)
 client.on('interactionCreate', async interaction => {
+    // Handle autocomplete interactions
+    if (interaction.isAutocomplete()) {
+        const command = client.commands.get(interaction.commandName);
+        if (!command || !command.autocomplete) return;
+
+        try {
+            await command.autocomplete(interaction);
+        } catch (error) {
+            console.error('Autocomplete error:', error);
+        }
+        return;
+    }
+    
     // Handle slash commands
     if (interaction.isChatInputCommand()) {
         const command = client.commands.get(interaction.commandName);
