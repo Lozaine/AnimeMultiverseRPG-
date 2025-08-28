@@ -183,14 +183,16 @@ client.on('interactionCreate', async interaction => {
                             itemReceived = rollForItem(quest, character.level);
                             if (itemReceived) {
                                 // Add item to inventory
-                                await addItemToInventory(userId, itemReceived.name, itemReceived.description, itemReceived.type, 1, 'combat');
+                                const inventoryResult = await addItemToInventory(userId, itemReceived.name, itemReceived.description, itemReceived.type, 1, 'combat');
                                 
-                                // Handle special item effects for immediate rewards
-                                if (itemReceived.type === 'currency') {
-                                    questCoins += 10;
-                                }
-                                if (itemReceived.type === 'boost') {
-                                    questXp += 3;
+                                // Handle special item effects for immediate rewards (only if item was added successfully)
+                                if (!inventoryResult.inventoryFull) {
+                                    if (itemReceived.type === 'currency') {
+                                        questCoins += 10;
+                                    }
+                                    if (itemReceived.type === 'boost') {
+                                        questXp += 3;
+                                    }
                                 }
                             }
                         } else {

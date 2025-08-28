@@ -171,39 +171,57 @@ async function getAllCharacters() {
 // Add item to player inventory
 async function addItemToInventory(userId, itemName, itemDescription, itemType, quantity = 1, obtainedFrom = 'quest') {
     return new Promise((resolve, reject) => {
-        // First check if item already exists in inventory
-        const checkQuery = `SELECT * FROM inventory WHERE user_id = ? AND item_name = ?`;
+        // First check total inventory count (100 item limit)
+        const countQuery = `SELECT SUM(quantity) as total FROM inventory WHERE user_id = ?`;
         
-        db.get(checkQuery, [userId, itemName], (err, existingItem) => {
+        db.get(countQuery, [userId], (err, result) => {
             if (err) {
                 reject(err);
                 return;
             }
             
-            if (existingItem) {
-                // Item exists, update quantity
-                const updateQuery = `UPDATE inventory SET quantity = quantity + ? WHERE user_id = ? AND item_name = ?`;
-                db.run(updateQuery, [quantity, userId, itemName], function(err) {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve({ updated: true, newQuantity: existingItem.quantity + quantity });
+            const currentTotal = result.total || 0;
+            
+            // Check if item already exists in inventory
+            const checkQuery = `SELECT * FROM inventory WHERE user_id = ? AND item_name = ?`;
+            
+            db.get(checkQuery, [userId, itemName], (err, existingItem) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                
+                if (existingItem) {
+                    // Item exists, update quantity (always allow stacking existing items)
+                    const updateQuery = `UPDATE inventory SET quantity = quantity + ? WHERE user_id = ? AND item_name = ?`;
+                    db.run(updateQuery, [quantity, userId, itemName], function(err) {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve({ updated: true, newQuantity: existingItem.quantity + quantity, inventoryFull: false });
+                        }
+                    });
+                } else {
+                    // New item - check inventory limit
+                    if (currentTotal + quantity > 100) {
+                        resolve({ success: false, message: 'Inventory is full! Maximum 100 items allowed.', inventoryFull: true });
+                        return;
                     }
-                });
-            } else {
-                // New item, insert it
-                const insertQuery = `
-                    INSERT INTO inventory (user_id, item_name, item_description, item_type, quantity, obtained_from)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                `;
-                db.run(insertQuery, [userId, itemName, itemDescription, itemType, quantity, obtainedFrom], function(err) {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve({ updated: false, newQuantity: quantity });
-                    }
-                });
-            }
+                    
+                    // Insert new item
+                    const insertQuery = `
+                        INSERT INTO inventory (user_id, item_name, item_description, item_type, quantity, obtained_from)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                    `;
+                    db.run(insertQuery, [userId, itemName, itemDescription, itemType, quantity, obtainedFrom], function(err) {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve({ updated: false, newQuantity: quantity, inventoryFull: false });
+                        }
+                    });
+                }
+            });
         });
     });
 }

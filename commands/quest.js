@@ -81,15 +81,17 @@ module.exports = {
                     // Handle item rewards first
                     if (itemReceived) {
                         // Add item to inventory
-                        await addItemToInventory(userId, itemReceived.name, itemReceived.description, itemReceived.type, 1, 'quest');
+                        const inventoryResult = await addItemToInventory(userId, itemReceived.name, itemReceived.description, itemReceived.type, 1, 'quest');
                         
-                        // Handle special item effects for immediate rewards
-                        if (itemReceived.type === 'currency') {
-                            coinsGained += 10; // Extra coins from coin pouch
-                        }
-                        
-                        if (itemReceived.type === 'boost') {
-                            xpGained += 3; // Bonus XP
+                        // Handle special item effects for immediate rewards (only if item was added successfully)
+                        if (!inventoryResult.inventoryFull) {
+                            if (itemReceived.type === 'currency') {
+                                coinsGained += 10; // Extra coins from coin pouch
+                            }
+                            
+                            if (itemReceived.type === 'boost') {
+                                xpGained += 3; // Bonus XP
+                            }
                         }
                     }
                     

@@ -79,7 +79,7 @@ module.exports = {
                 embed.addFields([
                     { 
                         name: '📊 Inventory Summary', 
-                        value: `Total items: ${totalItems}\nItem types: ${Object.keys(itemsByType).length}`, 
+                        value: `Total items: ${totalItems}/100\nItem types: ${Object.keys(itemsByType).length}\nUsable items: ${inventory.filter(item => ['food', 'healing', 'potion', 'consumable'].includes(item.item_type)).length}`, 
                         inline: false 
                     }
                 ]);
