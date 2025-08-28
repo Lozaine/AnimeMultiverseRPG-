@@ -279,7 +279,7 @@ module.exports = {
                     { 
                         name: '🆙 LEVEL UP!', 
                         value: `You are now level ${levelUpData.newLevel}!\n` +
-                               `+${levelUpData.hpGained} HP (${levelUpData.newStats.maxHp} total)\n` +
+                               `+${levelUpData.hpGained} HP (${levelUpData.newStats.max_hp} total)\n` +
                                `+${levelUpData.atkGained} ATK (${levelUpData.newStats.atk} total)\n` +
                                `+${levelUpData.defGained} DEF (${levelUpData.newStats.def} total)\n` +
                                `+${levelUpData.spdGained} SPD (${levelUpData.newStats.spd} total)`, 
