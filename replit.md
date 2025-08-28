@@ -2,7 +2,7 @@
 
 ## Overview
 
-Cross Realm Chronicles is a Discord bot that provides a multiverse anime RPG experience. Players can create characters, choose from four different anime factions (One Piece Pirates, Naruto Shinobi, Jujutsu Sorcerers, and Demon Slayers), complete faction-specific quests, and progress through levels. The bot features character creation, profile management, quest systems, and faction-based gameplay mechanics with unique abilities and perks for each anime universe.
+Cross Realm Chronicles is a Discord bot offering a multiverse anime RPG experience within Discord. Players can create characters aligned with one of four anime factions (One Piece Pirates, Naruto Shinobi, Jujutsu Sorcerers, Demon Slayers), engage in faction-specific quests, and advance through a progressive leveling system. The bot integrates character creation, profile management, a comprehensive quest system, and faction-based gameplay mechanics featuring unique abilities and perks tailored to each anime universe.
 
 ## User Preferences
 
@@ -11,191 +11,57 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### Bot Framework
-- **Discord.js v14**: Modern Discord bot framework with slash command support and interaction handling
-- **Slash Command System**: Global slash commands with autocomplete, validation, and modern Discord UX
-- **Command Handler**: File-based command system that dynamically loads and registers slash commands from the `/commands` directory
-- **Event-Driven Architecture**: Uses Discord.js interaction events for slash command handling and bot lifecycle management
-- **Autocomplete Integration**: Full autocomplete support for inventory item selection with real-time filtering
-- **Interaction Handler**: Comprehensive interaction processing for slash commands, buttons, select menus, and modals
+- **Discord.js v14**: Utilizes a modern Discord bot framework for slash commands and interaction handling.
+- **Slash Command System**: Supports global slash commands with autocomplete, validation, and contemporary Discord UX.
+- **Command Handler**: Employs a file-based system for dynamic loading and registration of commands.
+- **Event-Driven Architecture**: Leverages Discord.js interaction events for command processing and bot lifecycle.
+- **Interaction Handler**: Comprehensive processing for slash commands, buttons, select menus, and modals.
 
 ### Database Layer
-- **SQLite3**: Local file-based database for character data persistence
-- **Single Table Design**: Characters table stores all player data including faction-specific attributes
-- **Async/Promise Pattern**: Database operations wrapped in promises for consistent async handling
-- **Migration Ready**: Dynamic schema updates with backward compatibility for existing characters
-- **Production Environment**: Stable database connection established in standard Replit environment
+- **SQLite3**: Uses a local file-based database for character data persistence.
+- **Single Table Design**: A `characters` table stores all player data, including faction-specific attributes.
+- **Async/Promise Pattern**: Database operations are promise-based for consistent asynchronous handling.
+- **Migration Ready**: Supports dynamic schema updates with backward compatibility.
 
 ### Character System
-- **Faction-Based Gameplay**: Four distinct anime factions with unique abilities, perks, and quest types
-- **Progressive Leveling**: Experience-based level system with increasing XP requirements (Level 1 → 100 XP, Level 2 → 200 XP, Level 3 → 300 XP, etc.)
-- **Combat Stats**: HP and ATK stats that increase with each level up (+10 HP, +2 ATK per level)
-- **Level-Up Notifications**: Rich embed notifications showing stat gains and new totals
-- **Flexible Attributes**: Dynamic character attributes that vary by faction (Devil Fruits, Chakra Nature, Cursed Techniques, Breathing Styles)
+- **Faction-Based Gameplay**: Features four distinct anime factions, each with unique abilities, perks, and quest types.
+- **Progressive Leveling**: An experience-based system with increasing XP requirements and stat gains (+10 HP, +2 ATK per level).
+- **Combat Stats**: Includes HP and ATK stats that scale with level.
+- **Flexible Attributes**: Dynamic character attributes vary by faction (e.g., Devil Fruits, Chakra Nature).
+- **Custom Character Names**: Allows players to set custom in-game character names separate from their Discord username.
 
 ### Quest System
-- **Faction-Specific Quests**: Each faction has unique quest types that match their anime theme
-- **Level Gating**: Quests locked behind level requirements to provide progression goals
-- **Risk/Reward Mechanics**: Success/failure outcomes with different rewards and narrative responses
+- **Faction-Specific Quests**: Unique quest types themed to each anime faction.
+- **Level Gating**: Quests are locked by level requirements.
+- **Risk/Reward Mechanics**: Outcomes include success/failure with varying rewards.
+- **Quest Bonus System**: Factions receive different XP, coin, and item bonuses based on quest types.
 
 ### Utility Modules
-- **Embed System**: Standardized Discord embed creation with consistent styling and color schemes
-- **Faction Configuration**: Centralized faction data including abilities, colors, and progression trees
-- **Quest Configuration**: Structured quest data with level requirements and reward systems
-- **Level Progression System**: Comprehensive leveling utilities including XP calculations, stat scaling, and level-up detection
-- **Item Usage System**: Advanced pattern recognition for item effects with MP, HP, XP, and Gold restoration
+- **Embed System**: Standardized Discord embed creation for consistent styling.
+- **Configuration Modules**: Centralized configuration for faction data, quest data, and level progression.
+- **Level Progression System**: Handles XP calculations, stat scaling, and level-up detection.
+- **Item Usage System**: Advanced pattern recognition for item effects, supporting MP, HP, XP, and Gold restoration.
+
+### Enemy System
+- **Advanced Enemy System**: Diverse enemies with unique combat styles (Tank, Agile, Aggressive, etc.) and special abilities.
+- **Dynamic Scaling**: Combat style-aware stat scaling for enemies based on archetype.
+- **Weakness/Resistance System**: Enemies have specific vulnerabilities and resistances.
 
 ## External Dependencies
 
 ### Core Dependencies
-- **discord.js**: Discord API interaction and bot functionality
-- **sqlite3**: Local SQLite database for data persistence
+- **discord.js**: For Discord API interaction and bot functionality.
+- **sqlite3**: For local SQLite database persistence.
 
 ### Discord API Integration
-- **Gateway Intents**: Guilds, GuildMessages, and MessageContent for bot functionality
-- **Embed System**: Rich message formatting using Discord's embed system
-- **Activity Status**: Bot presence and activity display
-- **Autocomplete API**: Real-time inventory item suggestions for enhanced user experience
-- **Component Interactions**: Full support for buttons, select menus, and modal interactions
+- **Gateway Intents**: Utilizes Guilds, GuildMessages, and MessageContent.
+- **Embed System**: For rich message formatting.
+- **Autocomplete API**: Provides real-time suggestions for user input.
+- **Component Interactions**: Full support for buttons, select menus, and modal interactions.
 
 ### Database Schema
-- **Characters Table**: Stores user_id, name, character_name, faction, level, experience, gold, hp, max_hp, atk, completed quests, and faction-specific attributes
-- **Character Identity**: Separate fields for Discord username (name) and in-game character name (character_name)
-- **Timestamp Tracking**: Created_at and updated_at fields for character lifecycle management
-- **Combat Stats**: HP (current health), max_hp (maximum health), atk (attack power) fields for battle mechanics
+- **Characters Table**: Stores `user_id`, `name`, `character_name`, `faction`, `level`, `experience`, `gold`, `hp`, `max_hp`, `atk`, `completed_quests`, and faction-specific attributes. Includes `created_at` and `updated_at` timestamps.
 
 ### File System Integration
-- **Command Loading**: Dynamic command discovery and loading from filesystem
-- **Database File**: Local SQLite file storage in `/database` directory
-- **Level Progression Module**: `/utils/levelProgression.js` - Contains all leveling calculations and stat management
-
-## Documentation
-
-### Changelog
-For detailed development history, see [CHANGELOG.md](./CHANGELOG.md) which tracks all changes, features, and technical decisions during development phases.
-
-## Recent Changes
-
-### Enhanced Enemy System Implementation (Phase 2 - Extended)
-**Date**: August 28, 2025
-
-#### Advanced Enemy System
-- **Expanded Enemy Pool**: 15 diverse enemies with unique combat styles and special abilities
-- **Combat Style System**: Tank, Agile, Aggressive, Defensive, Evasive, Swarm, Erratic, and Hit-and-Run styles
-- **Special Abilities**: Each enemy has unique abilities like Pack Howl, Web Shot, Tusked Charge, and Phase
-- **Dynamic Scaling**: Combat style-aware stat scaling that adjusts HP, ATK, DEF, and SPD based on enemy archetype
-- **Enhanced Encounter Rates**: Quest category-specific encounter rates with level-based modifications
-
-#### Enemy Categories & Habitats
-- **Forest/Nature Creatures**: Forest Goblin, Wild Wolf, Cave Spider, Angry Boar, Marsh Slime
-- **Humanoid Enemies**: Bandit Thief, Rogue Merchant, Corrupted Guard
-- **Magical/Mystical**: Will-o'-Wisp, Animated Scarecrow
-- **Constructed/Artificial**: Training Dummy Golem, Broken Automaton
-- **Flying/Aerial**: Cave Bat Swarm, Carrion Crow
-
-#### Combat Enhancements
-- **Weakness/Resistance System**: Enemies have specific vulnerabilities and resistances
-- **Special Ability System**: Probability-based special attacks with turn-count scaling
-- **Enhanced Critical Hit System**: Combat style-aware critical hit calculations
-- **Difficulty Rating**: Automated 1-5 difficulty scale based on stats and abilities
-
-### Character Names & Discord.js Fixes Implementation (Phase 2 - Extended)
-**Date**: August 28, 2025
-
-#### Character Name System
-- **Database Enhancement**: Added `character_name` field to characters table for custom character names
-- **Create Command Update**: Enhanced `/create` command to accept optional `character_name` parameter
-- **Flexible Naming**: Players can specify custom character names or default to Discord username
-- **Profile Integration**: Character profiles now display custom character names in titles and descriptions
-- **Backward Compatibility**: Existing characters maintain their original names through migration
-
-#### Discord.js Modernization
-- **Deprecation Fix**: Updated `ready` event to `clientReady` to resolve Discord.js v14 deprecation warning
-- **Future-Proof Code**: Bot now uses modern Discord.js v14 event handling without warnings
-- **Clean Console Output**: Eliminated deprecation warnings for better development experience
-
-#### Database Migration
-- **Schema Update**: Added `character_name TEXT NOT NULL` column with 'Unnamed' default for existing characters
-- **Migration Safety**: Automatic column addition during database initialization
-- **Data Integrity**: No data loss during character name implementation
-
-### Environment Migration & System Fixes Complete (Phase 2)
-**Date**: August 28, 2025
-
-#### Migration Success
-- Successfully migrated Discord RPG bot from Replit Agent to standard Replit environment
-- All existing functionality preserved during migration process
-- Database integrity maintained with zero data loss
-- Package dependencies properly configured for Node.js environment
-
-#### Critical Fixes Applied
-- **Autocomplete System**: Added missing autocomplete interaction handler in main application file
-- **Button Interaction Error**: Fixed undefined property access error in inventory command
-- **Use Command Enhancement**: Enhanced `/use` command autocomplete with improved validation and error handling
-- **Interaction Security**: Maintained user-specific interaction restrictions during migration
-
-#### Item Usage System Overhaul
-- **Pattern Recognition**: Comprehensive regex patterns for case-insensitive item effect parsing
-- **MP System**: Full Magic Points tracking and restoration support
-- **Multiple Effect Support**: Items can now properly apply HP, MP, XP, and Gold effects simultaneously
-- **Level Integration**: Complete level up handling with stat bonuses during item usage
-- **Quest Compatibility**: All quest reward items now function correctly with their described effects
-
-#### Character Reset & Code Maintenance
-- **Character Reset System**: Complete `/reset` command with destructive action confirmation and database cleanup
-- **Safety Measures**: User-specific authorization, detailed warning embeds, and transactional data deletion
-- **Fresh Start Capability**: Players can completely reset and recreate characters from scratch
-- **Code Modernization**: Updated deprecated `ephemeral: true` syntax to modern `flags: [4096]` approach
-
-#### System Status
-- ✅ Discord bot fully operational (Cross Realm Chronicles#3267)
-- ✅ All slash commands registered and functional including enhanced `/create` command
-- ✅ Character name system fully implemented with custom naming support
-- ✅ Enhanced enemy system with 15+ unique enemies and special abilities operational
-- ✅ Combat style system with Tank/Agile/Aggressive/Defensive/Evasive mechanics functional
-- ✅ Dynamic enemy scaling with weakness/resistance system active
-- ✅ Discord.js v14 deprecation warnings eliminated with `clientReady` event
-- ✅ Autocomplete system working correctly for `/use` command
-- ✅ Interactive inventory system operational
-- ✅ Item usage system with proper effect parsing functional
-- ✅ Character reset system with complete data deletion functional
-- ✅ Quest-specific encounter rates with level scaling active
-- ✅ Database connection established and stable with character_name migration
-- ✅ Profile system updated to display custom character names
-- ✅ Code modernized with updated Discord.js v14 syntax
-
-### Level Progression System Implementation (Phase 1: Foundation)
-**Date**: August 27, 2025
-
-#### XP Curve System
-- Implemented dynamic XP requirements: Level 1 → 100 XP, Level 2 → 200 XP, Level 3 → 300 XP, etc.
-- Created comprehensive level progression utilities in `/utils/levelProgression.js`
-- Added functions for XP calculations, level detection, and progress tracking
-
-#### Combat Stats System
-- Added comprehensive combat stats to character database schema: HP, ATK, DEF, SPD, XP
-- Base stats: Level 1 starts with 100 HP, 20 ATK, 10 DEF, 15 SPD
-- Level-up bonuses: +10 HP, +2 ATK, +1 DEF, +1 SPD per level
-- Automatic stat scaling based on character level
-- XP field added for future alternative experience tracking
-
-#### Enhanced Level-Up Experience
-- Rich embed notifications showing all stat gains
-- Detailed level-up information (HP, ATK, DEF, SPD gained with new totals)
-- Updated profile command to display all combat stats and accurate XP progress
-- Level progress percentage display in character profiles
-- Character creation shows complete stat overview
-
-#### Database Migration
-- Added hp, max_hp, atk, def, spd, and xp columns to characters table
-- Backward compatibility with existing characters (default values applied)
-- Dynamic database schema updates during initialization
-- Complete stat tracking system implementation
-
-#### Button Interaction Security
-- Implemented user-specific button restrictions for all quest interactions
-- Button custom IDs now include original user ID for authorization
-- Prevents other users from interfering with someone's quest progress
-- Enhanced ephemeral error embeds for unauthorized access attempts
-- Error messages are visually appealing with tips for proper usage
-- Applied to both quest selection buttons and repeat quest buttons
-- Only the unauthorized user sees the error message (ephemeral)
+- **Command Loading**: Dynamic command discovery from the filesystem.
+- **Database File**: Local SQLite file stored in the `/database` directory.
