@@ -1,5 +1,5 @@
 const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
-const { getCharacter, updateCharacterProgress } = require('../database/database');
+const { getCharacter, updateCharacterProgress, addItemToInventory } = require('../database/database');
 const { FACTIONS } = require('../utils/factions');
 const { getRandomPhase1Quest, calculatePhase1SuccessRate, rollForItem } = require('../utils/quests');
 const { getRandomEnemyForCategory, scaleEnemyToLevel, shouldTriggerEnemyEncounter } = require('../utils/enemies');
@@ -78,18 +78,19 @@ module.exports = {
                     // Roll for bonus item
                     itemReceived = rollForItem(quest, character.level);
                     
-                    // Successful quest - full rewards
-                    const newExp = character.experience + xpGained;
-                    const newGold = character.gold + coinsGained;
-                    
-                    // Handle extra coin pouch item
-                    if (itemReceived && itemReceived.type === 'currency') {
-                        coinsGained += 10; // Extra coins from coin pouch
-                    }
-                    
-                    // Handle XP boost token
-                    if (itemReceived && itemReceived.type === 'boost') {
-                        xpGained += 3; // Bonus XP
+                    // Handle item rewards first
+                    if (itemReceived) {
+                        // Add item to inventory
+                        await addItemToInventory(userId, itemReceived.name, itemReceived.description, itemReceived.type, 1, 'quest');
+                        
+                        // Handle special item effects for immediate rewards
+                        if (itemReceived.type === 'currency') {
+                            coinsGained += 10; // Extra coins from coin pouch
+                        }
+                        
+                        if (itemReceived.type === 'boost') {
+                            xpGained += 3; // Bonus XP
+                        }
                     }
                     
                     const finalNewExp = character.experience + xpGained;

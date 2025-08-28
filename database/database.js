@@ -50,7 +50,23 @@ async function initializeDatabase() {
                     db.run(`ALTER TABLE characters ADD COLUMN xp INTEGER DEFAULT 0`, () => {});
                     db.run(`ALTER TABLE characters ADD COLUMN def INTEGER DEFAULT 10`, () => {});
                     db.run(`ALTER TABLE characters ADD COLUMN spd INTEGER DEFAULT 15`, () => {});
-                    resolve();
+                    
+                    // Create inventory table
+                    db.run(`
+                        CREATE TABLE IF NOT EXISTS inventory (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            user_id TEXT NOT NULL,
+                            item_name TEXT NOT NULL,
+                            item_description TEXT NOT NULL,
+                            item_type TEXT NOT NULL,
+                            quantity INTEGER DEFAULT 1,
+                            obtained_from TEXT DEFAULT 'quest',
+                            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                            FOREIGN KEY (user_id) REFERENCES characters (user_id)
+                        )
+                    `, () => {
+                        resolve();
+                    });
                 }
             });
         });
@@ -152,6 +168,108 @@ async function getAllCharacters() {
     });
 }
 
+// Add item to player inventory
+async function addItemToInventory(userId, itemName, itemDescription, itemType, quantity = 1, obtainedFrom = 'quest') {
+    return new Promise((resolve, reject) => {
+        // First check if item already exists in inventory
+        const checkQuery = `SELECT * FROM inventory WHERE user_id = ? AND item_name = ?`;
+        
+        db.get(checkQuery, [userId, itemName], (err, existingItem) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+            
+            if (existingItem) {
+                // Item exists, update quantity
+                const updateQuery = `UPDATE inventory SET quantity = quantity + ? WHERE user_id = ? AND item_name = ?`;
+                db.run(updateQuery, [quantity, userId, itemName], function(err) {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve({ updated: true, newQuantity: existingItem.quantity + quantity });
+                    }
+                });
+            } else {
+                // New item, insert it
+                const insertQuery = `
+                    INSERT INTO inventory (user_id, item_name, item_description, item_type, quantity, obtained_from)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                `;
+                db.run(insertQuery, [userId, itemName, itemDescription, itemType, quantity, obtainedFrom], function(err) {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve({ updated: false, newQuantity: quantity });
+                    }
+                });
+            }
+        });
+    });
+}
+
+// Get player inventory
+async function getPlayerInventory(userId) {
+    return new Promise((resolve, reject) => {
+        const query = `SELECT * FROM inventory WHERE user_id = ? ORDER BY created_at DESC`;
+        
+        db.all(query, [userId], (err, rows) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(rows || []);
+            }
+        });
+    });
+}
+
+// Remove item from inventory (for using items)
+async function removeItemFromInventory(userId, itemName, quantity = 1) {
+    return new Promise((resolve, reject) => {
+        // First check current quantity
+        const checkQuery = `SELECT quantity FROM inventory WHERE user_id = ? AND item_name = ?`;
+        
+        db.get(checkQuery, [userId, itemName], (err, item) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+            
+            if (!item) {
+                resolve({ success: false, message: 'Item not found in inventory' });
+                return;
+            }
+            
+            if (item.quantity < quantity) {
+                resolve({ success: false, message: 'Not enough items in inventory' });
+                return;
+            }
+            
+            if (item.quantity === quantity) {
+                // Remove item completely
+                const deleteQuery = `DELETE FROM inventory WHERE user_id = ? AND item_name = ?`;
+                db.run(deleteQuery, [userId, itemName], function(err) {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve({ success: true, remaining: 0 });
+                    }
+                });
+            } else {
+                // Reduce quantity
+                const updateQuery = `UPDATE inventory SET quantity = quantity - ? WHERE user_id = ? AND item_name = ?`;
+                db.run(updateQuery, [quantity, userId, itemName], function(err) {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve({ success: true, remaining: item.quantity - quantity });
+                    }
+                });
+            }
+        });
+    });
+}
+
 // Close database connection
 function closeDatabase() {
     db.close((err) => {
@@ -169,5 +287,8 @@ module.exports = {
     getCharacter,
     updateCharacterProgress,
     getAllCharacters,
+    addItemToInventory,
+    getPlayerInventory,
+    removeItemFromInventory,
     closeDatabase
 };

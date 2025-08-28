@@ -79,7 +79,7 @@ client.on('interactionCreate', async interaction => {
     // Handle button interactions
     else if (interaction.isButton()) {
         try {
-            const { getCharacter, updateCharacterProgress } = require('./database/database');
+            const { getCharacter, updateCharacterProgress, addItemToInventory } = require('./database/database');
             const { checkLevelUp } = require('./utils/levelProgression');
             const { executePlayerAttack, executeEnemyAttack, createCombatEmbed, createCombatButtons, createVictoryEmbed, createDefeatEmbed, createFleeEmbed } = require('./utils/combat');
             const { getRandomPhase1Quest, calculatePhase1SuccessRate, rollForItem } = require('./utils/quests');
@@ -181,11 +181,17 @@ client.on('interactionCreate', async interaction => {
                         
                         if (questSuccess) {
                             itemReceived = rollForItem(quest, character.level);
-                            if (itemReceived && itemReceived.type === 'currency') {
-                                questCoins += 10;
-                            }
-                            if (itemReceived && itemReceived.type === 'boost') {
-                                questXp += 3;
+                            if (itemReceived) {
+                                // Add item to inventory
+                                await addItemToInventory(userId, itemReceived.name, itemReceived.description, itemReceived.type, 1, 'combat');
+                                
+                                // Handle special item effects for immediate rewards
+                                if (itemReceived.type === 'currency') {
+                                    questCoins += 10;
+                                }
+                                if (itemReceived.type === 'boost') {
+                                    questXp += 3;
+                                }
                             }
                         } else {
                             // Quest partially successful
