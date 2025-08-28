@@ -450,6 +450,34 @@ async function usePlayerItem(userId, itemName, quantity = 1) {
     }
 }
 
+// Delete all character data (for reset functionality)
+async function deleteCharacterData(userId) {
+    return new Promise((resolve, reject) => {
+        db.serialize(() => {
+            // First delete inventory items
+            db.run(`DELETE FROM inventory WHERE user_id = ?`, [userId], (err) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                
+                // Then delete character data
+                db.run(`DELETE FROM characters WHERE user_id = ?`, [userId], function(err) {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve({
+                            success: true,
+                            deletedCharacter: this.changes > 0,
+                            message: this.changes > 0 ? 'Character data deleted successfully' : 'No character data found to delete'
+                        });
+                    }
+                });
+            });
+        });
+    });
+}
+
 // Close database connection
 function closeDatabase() {
     db.close((err) => {
@@ -471,5 +499,6 @@ module.exports = {
     getPlayerInventory,
     removeItemFromInventory,
     usePlayerItem,
+    deleteCharacterData,
     closeDatabase
 };

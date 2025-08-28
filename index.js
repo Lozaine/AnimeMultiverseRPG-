@@ -360,6 +360,15 @@ client.on('interactionCreate', async interaction => {
                 return;
             }
             
+            // Handle reset button interactions
+            if (interaction.customId.startsWith('reset_')) {
+                const resetCommand = client.commands.get('reset');
+                if (resetCommand && resetCommand.handleButtonInteraction) {
+                    await resetCommand.handleButtonInteraction(interaction);
+                    return;
+                }
+            }
+            
             // Handle other button interactions (none currently)
             return interaction.reply({ 
                 content: '❌ This button interaction is not currently supported!', 
