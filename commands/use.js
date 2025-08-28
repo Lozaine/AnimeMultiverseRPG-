@@ -1,7 +1,9 @@
+// FIXED commands/use.js
 const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
 const { getCharacter, getPlayerInventory, removeItemFromInventory, updateCharacterProgress } = require('../database/database');
 const { FACTIONS } = require('../utils/factions');
 const { createEmbed } = require('../utils/embeds');
+const { checkLevelUp } = require('../utils/levelProgression');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -11,7 +13,7 @@ module.exports = {
             option.setName('item')
                 .setDescription('The item to use')
                 .setRequired(true)
-                .setAutocomplete(true)) // Make sure this is set to true
+                .setAutocomplete(true))
         .addIntegerOption(option =>
             option.setName('quantity')
                 .setDescription('How many to use (default: 1)')
@@ -24,54 +26,36 @@ module.exports = {
         const userId = interaction.user.id;
         
         try {
-            console.log(`[AUTOCOMPLETE] User ${userId} searching for: "${focusedValue}"`);
-            
-            // Check if user has a character first
             const character = await getCharacter(userId);
             if (!character) {
-                console.log(`[AUTOCOMPLETE] No character found for user ${userId}`);
                 return await interaction.respond([]);
             }
             
             const inventory = await getPlayerInventory(userId);
-            console.log(`[AUTOCOMPLETE] Inventory items found: ${inventory.length}`);
-            
             if (!inventory || inventory.length === 0) {
-                console.log(`[AUTOCOMPLETE] Empty inventory for user ${userId}`);
                 return await interaction.respond([]);
             }
             
             const usableItems = inventory.filter(item => 
                 ['food', 'healing', 'potion', 'consumable', 'boost'].includes(item.item_type)
             );
-            console.log(`[AUTOCOMPLETE] Usable items: ${usableItems.length}`);
-            console.log(`[AUTOCOMPLETE] Usable items:`, usableItems.map(i => `${i.item_name} (${i.item_type}) x${i.quantity}`));
             
-            // Filter by what the user is typing
             const filtered = usableItems.filter(item => 
                 item.item_name.toLowerCase().includes(focusedValue.toLowerCase())
             );
             
-            console.log(`[AUTOCOMPLETE] Filtered items: ${filtered.length}`);
-            
             const choices = filtered
-                .slice(0, 25) // Discord limit
+                .slice(0, 25)
                 .map(item => ({
                     name: `${item.item_name} (x${item.quantity}) - ${item.item_type}`,
                     value: item.item_name
                 }));
             
-            console.log(`[AUTOCOMPLETE] Choices returned: ${choices.length}`);
-            
             await interaction.respond(choices);
             
         } catch (error) {
             console.error('[AUTOCOMPLETE] Error:', error);
-            try {
-                await interaction.respond([]);
-            } catch (respondError) {
-                console.error('[AUTOCOMPLETE] Failed to respond with empty array:', respondError);
-            }
+            await interaction.respond([]);
         }
     },
     
@@ -119,47 +103,116 @@ module.exports = {
             
             // Apply item effects
             let effectsApplied = [];
-            let newHp = character.hp;
+            let newHp = character.hp || character.max_hp;
+            let newMp = character.mp || 0; // Add MP support
             let newExp = character.experience;
             let newGold = character.gold;
+            let newAtk = character.atk;
+            let newDef = character.def;
+            let newSpd = character.spd;
             
             for (let i = 0; i < quantity; i++) {
-                // Parse item effects from description
+                // Parse item effects from description (case-insensitive)
                 const description = item.item_description.toLowerCase();
                 
-                // HP restoration
-                if (description.includes('restores') && description.includes('hp')) {
-                    const hpMatch = description.match(/restores (\d+) hp/);
+                // HP restoration - improved regex patterns
+                const hpPatterns = [
+                    /restores (\d+) hp/,
+                    /\+(\d+) hp/,
+                    /heals (\d+) hp/,
+                    /(\d+) hp restored/
+                ];
+                
+                for (const pattern of hpPatterns) {
+                    const hpMatch = description.match(pattern);
                     if (hpMatch) {
                         const hpRestore = parseInt(hpMatch[1]);
-                        const hpRestored = Math.min(hpRestore, character.max_hp - newHp);
+                        const oldHp = newHp;
                         newHp = Math.min(newHp + hpRestore, character.max_hp);
-                        effectsApplied.push(`+${hpRestore} HP${hpRestored < hpRestore ? ' (max HP reached)' : ''}`);
+                        const actualRestore = newHp - oldHp;
+                        if (actualRestore > 0) {
+                            effectsApplied.push(`+${actualRestore} HP${actualRestore < hpRestore ? ' (max HP reached)' : ''}`);
+                        }
+                        break;
                     }
                 }
                 
-                // MP restoration (for future use)
-                if (description.includes('mp')) {
-                    const mpMatch = description.match(/(\d+) mp/);
+                // MP restoration - improved patterns
+                const mpPatterns = [
+                    /restores (\d+) mp/,
+                    /\+(\d+) mp/,
+                    /(\d+) mp restored/,
+                    /and (\d+) mp/ // for "restores X HP and Y MP"
+                ];
+                
+                for (const pattern of mpPatterns) {
+                    const mpMatch = description.match(pattern);
                     if (mpMatch) {
                         const mpRestore = parseInt(mpMatch[1]);
+                        newMp += mpRestore;
                         effectsApplied.push(`+${mpRestore} MP`);
+                        break;
                     }
                 }
                 
-                // XP bonus
-                if (description.includes('xp') || description.includes('experience')) {
-                    const xpMatch = description.match(/\+(\d+) xp/);
+                // XP bonus - improved patterns
+                const xpPatterns = [
+                    /\+(\d+) xp/,
+                    /(\d+) xp bonus/,
+                    /grants (\d+) experience/
+                ];
+                
+                for (const pattern of xpPatterns) {
+                    const xpMatch = description.match(pattern);
                     if (xpMatch) {
                         const xpBonus = parseInt(xpMatch[1]);
                         newExp += xpBonus;
                         effectsApplied.push(`+${xpBonus} XP`);
+                        break;
                     }
                 }
                 
-                // Temporary effects (display only for now)
-                if (description.includes('boost') || description.includes('temporary')) {
-                    effectsApplied.push('Temporary effect applied');
+                // Gold bonus
+                const goldPatterns = [
+                    /contains (\d+) extra coins/,
+                    /\+(\d+) coins/,
+                    /(\d+) gold/
+                ];
+                
+                for (const pattern of goldPatterns) {
+                    const goldMatch = description.match(pattern);
+                    if (goldMatch) {
+                        const goldBonus = parseInt(goldMatch[1]);
+                        newGold += goldBonus;
+                        effectsApplied.push(`+${goldBonus} Coins`);
+                        break;
+                    }
+                }
+                
+                // Temporary stat boosts (for future implementation)
+                const statPatterns = [
+                    { pattern: /\+(\d+) temporary (?:atk|attack)/, stat: 'atk', name: 'ATK' },
+                    { pattern: /\+(\d+) temporary (?:def|defense)/, stat: 'def', name: 'DEF' },
+                    { pattern: /\+(\d+) temporary (?:spd|speed)/, stat: 'spd', name: 'SPD' }
+                ];
+                
+                for (const statInfo of statPatterns) {
+                    const statMatch = description.match(statInfo.pattern);
+                    if (statMatch) {
+                        const statBoost = parseInt(statMatch[1]);
+                        // For now, just show the effect (implement temporary boosts later)
+                        effectsApplied.push(`+${statBoost} ${statInfo.name} (temporary)`);
+                        break;
+                    }
+                }
+                
+                // Special item effects
+                if (description.includes('lucky') || description.includes('luck')) {
+                    effectsApplied.push('Lucky effect applied');
+                }
+                
+                if (description.includes('boost') && !effectsApplied.some(e => e.includes('XP'))) {
+                    effectsApplied.push('Boost effect applied');
                 }
             }
             
@@ -173,8 +226,26 @@ module.exports = {
                 return interaction.reply({ embeds: [embed] });
             }
             
+            // Check for level up
+            const levelUpData = checkLevelUp(character.level, character.experience, newExp);
+            
             // Update character with new stats
-            await updateCharacterProgress(userId, newExp, newGold, character.level, newHp);
+            if (levelUpData.leveledUp) {
+                await updateCharacterProgress(
+                    userId, 
+                    newExp, 
+                    newGold, 
+                    levelUpData.newLevel,
+                    newHp,
+                    levelUpData.newStats.maxHp,
+                    levelUpData.newStats.atk,
+                    levelUpData.newStats.def,
+                    levelUpData.newStats.spd,
+                    newExp // Set current XP
+                );
+            } else {
+                await updateCharacterProgress(userId, newExp, newGold, character.level, newHp);
+            }
             
             // Create success embed
             const faction = FACTIONS[character.faction];
@@ -202,11 +273,38 @@ module.exports = {
                 .setFooter({ text: 'Cross Realm Chronicles • Item Usage' })
                 .setTimestamp();
             
+            // Show level up information
+            if (levelUpData.leveledUp) {
+                embed.addFields([
+                    { 
+                        name: '🆙 LEVEL UP!', 
+                        value: `You are now level ${levelUpData.newLevel}!\n` +
+                               `+${levelUpData.hpGained} HP (${levelUpData.newStats.maxHp} total)\n` +
+                               `+${levelUpData.atkGained} ATK (${levelUpData.newStats.atk} total)\n` +
+                               `+${levelUpData.defGained} DEF (${levelUpData.newStats.def} total)\n` +
+                               `+${levelUpData.spdGained} SPD (${levelUpData.newStats.spd} total)`, 
+                        inline: false 
+                    }
+                ]);
+            }
+            
+            // Show experience change if any
             if (newExp > character.experience) {
                 embed.addFields([
                     { 
                         name: '📈 Experience', 
                         value: `${character.experience} → ${newExp} (+${newExp - character.experience})`, 
+                        inline: true 
+                    }
+                ]);
+            }
+            
+            // Show MP if changed
+            if (newMp > (character.mp || 0)) {
+                embed.addFields([
+                    { 
+                        name: '💙 Magic Points', 
+                        value: `${character.mp || 0} → ${newMp} (+${newMp - (character.mp || 0)})`, 
                         inline: true 
                     }
                 ]);

@@ -290,104 +290,164 @@ async function removeItemFromInventory(userId, itemName, quantity = 1) {
 
 // Use player item function
 async function usePlayerItem(userId, itemName, quantity = 1) {
-    return new Promise(async (resolve, reject) => {
-        try {
-            // Get character and item data
-            const character = await getCharacter(userId);
-            const inventory = await getPlayerInventory(userId);
-            const item = inventory.find(inv => inv.item_name === itemName);
-            
-            if (!character) {
-                resolve({ success: false, message: 'Character not found!' });
-                return;
-            }
-            
-            if (!item) {
-                resolve({ success: false, message: `You don't have "${itemName}" in your inventory.` });
-                return;
-            }
-            
-            if (item.quantity < quantity) {
-                resolve({ success: false, message: `You only have ${item.quantity} of "${itemName}".` });
-                return;
-            }
-            
-            // Check if item is usable
-            const usableTypes = ['food', 'healing', 'potion', 'consumable'];
-            if (!usableTypes.includes(item.item_type)) {
-                resolve({ success: false, message: `"${itemName}" cannot be used. It's a ${item.item_type} item.` });
-                return;
-            }
-            
-            // Apply item effects
-            let effectsApplied = [];
-            let newHp = character.hp;
-            let newExp = character.experience;
-            let newGold = character.gold;
-            
-            for (let i = 0; i < quantity; i++) {
-                // Parse item effects from description
-                const description = item.item_description.toLowerCase();
-                
-                // HP restoration
-                if (description.includes('restores') && description.includes('hp')) {
-                    const hpMatch = description.match(/restores (\d+) hp/);
-                    if (hpMatch) {
-                        const hpRestore = parseInt(hpMatch[1]);
-                        const oldHp = newHp;
-                        newHp = Math.min(newHp + hpRestore, character.max_hp);
-                        const actualRestore = newHp - oldHp;
-                        if (actualRestore > 0) {
-                            effectsApplied.push(`+${actualRestore} HP`);
-                        }
-                    }
-                }
-                
-                // XP boost
-                if (description.includes('xp') || description.includes('experience')) {
-                    const xpMatch = description.match(/(\d+) (?:xp|experience)/);
-                    if (xpMatch) {
-                        const xpGain = parseInt(xpMatch[1]);
-                        newExp += xpGain;
-                        effectsApplied.push(`+${xpGain} XP`);
-                    }
-                }
-                
-                // Gold boost
-                if (description.includes('gold') || description.includes('coins')) {
-                    const goldMatch = description.match(/(\d+) (?:gold|coins)/);
-                    if (goldMatch) {
-                        const goldGain = parseInt(goldMatch[1]);
-                        newGold += goldGain;
-                        effectsApplied.push(`+${goldGain} Gold`);
-                    }
-                }
-            }
-            
-            // Remove items from inventory
-            const removeResult = await removeItemFromInventory(userId, itemName, quantity);
-            if (!removeResult.success) {
-                resolve({ success: false, message: removeResult.message });
-                return;
-            }
-            
-            // Update character stats
-            await updateCharacterProgress(userId, newExp, newGold, character.level, newHp);
-            
-            // Create success message
-            let message = '';
-            if (effectsApplied.length > 0) {
-                message = effectsApplied.join(', ');
-            } else {
-                message = 'Item used successfully!';
-            }
-            
-            resolve({ success: true, message: message });
-            
-        } catch (error) {
-            reject(error);
+    try {
+        // Get character first
+        const character = await getCharacter(userId);
+        if (!character) {
+            return { success: false, message: 'Character not found.' };
         }
-    });
+
+        // Get the specific item from inventory
+        const inventory = await getPlayerInventory(userId);
+        const item = inventory.find(inv => inv.item_name === itemName);
+        
+        if (!item) {
+            return { success: false, message: `You don't have "${itemName}" in your inventory.` };
+        }
+        
+        if (item.quantity < quantity) {
+            return { success: false, message: `You only have ${item.quantity} of "${itemName}".` };
+        }
+        
+        // Check if item is usable
+        const usableTypes = ['food', 'healing', 'potion', 'consumable', 'boost'];
+        if (!usableTypes.includes(item.item_type)) {
+            return { success: false, message: `"${itemName}" cannot be used. It's a ${item.item_type} item.` };
+        }
+        
+        // Apply item effects
+        let effectsApplied = [];
+        let newHp = character.hp || character.max_hp;
+        let newMp = character.mp || 0;
+        let newExp = character.experience;
+        let newGold = character.gold;
+        
+        for (let i = 0; i < quantity; i++) {
+            const description = item.item_description.toLowerCase();
+            
+            // HP restoration
+            const hpPatterns = [
+                /restores (\d+) hp/,
+                /\+(\d+) hp/,
+                /heals (\d+) hp/,
+                /(\d+) hp restored/
+            ];
+            
+            for (const pattern of hpPatterns) {
+                const hpMatch = description.match(pattern);
+                if (hpMatch) {
+                    const hpRestore = parseInt(hpMatch[1]);
+                    const oldHp = newHp;
+                    newHp = Math.min(newHp + hpRestore, character.max_hp);
+                    const actualRestore = newHp - oldHp;
+                    if (actualRestore > 0) {
+                        effectsApplied.push(`+${actualRestore} HP`);
+                    }
+                    break;
+                }
+            }
+            
+            // MP restoration
+            const mpPatterns = [
+                /restores (\d+) mp/,
+                /\+(\d+) mp/,
+                /(\d+) mp restored/,
+                /and (\d+) mp/
+            ];
+            
+            for (const pattern of mpPatterns) {
+                const mpMatch = description.match(pattern);
+                if (mpMatch) {
+                    const mpRestore = parseInt(mpMatch[1]);
+                    newMp += mpRestore;
+                    effectsApplied.push(`+${mpRestore} MP`);
+                    break;
+                }
+            }
+            
+            // XP bonus
+            const xpPatterns = [
+                /\+(\d+) xp/,
+                /(\d+) xp bonus/,
+                /grants (\d+) experience/
+            ];
+            
+            for (const pattern of xpPatterns) {
+                const xpMatch = description.match(pattern);
+                if (xpMatch) {
+                    const xpBonus = parseInt(xpMatch[1]);
+                    newExp += xpBonus;
+                    effectsApplied.push(`+${xpBonus} XP`);
+                    break;
+                }
+            }
+            
+            // Gold bonus
+            const goldPatterns = [
+                /contains (\d+) extra coins/,
+                /\+(\d+) coins/,
+                /(\d+) gold/
+            ];
+            
+            for (const pattern of goldPatterns) {
+                const goldMatch = description.match(pattern);
+                if (goldMatch) {
+                    const goldBonus = parseInt(goldMatch[1]);
+                    newGold += goldBonus;
+                    effectsApplied.push(`+${goldBonus} Coins`);
+                    break;
+                }
+            }
+        }
+        
+        // Remove items from inventory
+        const removeResult = await removeItemFromInventory(userId, itemName, quantity);
+        
+        if (!removeResult.success) {
+            return { success: false, message: removeResult.message };
+        }
+        
+        // Check for level up
+        const { checkLevelUp } = require('../utils/levelProgression');
+        const levelUpData = checkLevelUp(character.level, character.experience, newExp);
+        
+        // Update character with new stats
+        if (levelUpData.leveledUp) {
+            await updateCharacterProgress(
+                userId, 
+                newExp, 
+                newGold, 
+                levelUpData.newLevel,
+                newHp,
+                levelUpData.newStats.maxHp,
+                levelUpData.newStats.atk,
+                levelUpData.newStats.def,
+                levelUpData.newStats.spd,
+                newExp
+            );
+        } else {
+            await updateCharacterProgress(userId, newExp, newGold, character.level, newHp);
+        }
+        
+        // Return success with details
+        let message = effectsApplied.length > 0 ? effectsApplied.join('\n') : 'Item used successfully';
+        
+        if (levelUpData.leveledUp) {
+            message += `\n🆙 LEVEL UP! You are now level ${levelUpData.newLevel}!`;
+        }
+        
+        return { 
+            success: true, 
+            message: message,
+            effects: effectsApplied,
+            levelUp: levelUpData.leveledUp ? levelUpData : null,
+            newStats: { hp: newHp, mp: newMp, exp: newExp, gold: newGold }
+        };
+        
+    } catch (error) {
+        console.error('usePlayerItem error:', error);
+        return { success: false, message: 'An error occurred while using the item.' };
+    }
 }
 
 // Close database connection
