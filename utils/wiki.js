@@ -176,6 +176,44 @@ Phase 1 quests are universal, but faction-specific content is coming in future u
         color: '#ea580c'
     },
 
+    inventory: {
+        title: '📦 Inventory & Items Guide',
+        content: `**Inventory System:**
+
+Your inventory can store up to **100 items total**. Items automatically stack when you receive duplicates.
+
+**How to Get Items:**
+• **Quest Rewards** - Complete quests to earn consumables
+• **Combat Victories** - Defeat enemies for bonus items
+• **Item Chance** - Each quest has a % chance to drop items
+
+**Item Types:**
+• **🍽️ Food** - Healing items like Fresh Fish (+10 HP), Boar Meat (+15 HP)
+• **💊 Healing** - Medical items like Healing Herbs (+8 HP, +5 MP)
+• **⚒️ Materials** - Crafting components (for future features)
+• **💰 Currency** - Coin pouches for extra gold
+• **⚡ Boost** - XP bonuses and temporary effects
+
+**Using Items:**
+• \`/inventory\` - View all your stored items by category
+• \`/use <item>\` - Consume an item for its effects
+• \`/use <item> <quantity>\` - Use multiple items at once (max 10)
+
+**Usage Tips:**
+• Items restore HP immediately when used
+• You can use items even at full HP (no waste protection)
+• Healing items won't exceed your maximum HP
+• Item effects are applied instantly
+• Keep track of your inventory space!
+
+**Inventory Management:**
+• Items stack automatically (no duplicates)
+• Total count shows as X/100 in inventory
+• Use consumables to free up space
+• Materials are saved for future crafting systems`,
+        color: '#059669'
+    },
+
     commands: {
         title: '💻 Commands Reference',
         content: `**Essential Commands:**
@@ -184,27 +222,32 @@ Phase 1 quests are universal, but faction-specific content is coming in future u
 • \`/create\` - Create your character and choose faction
 • \`/profile\` - View character stats, level, and progress
 
-**Quest System:**
+**Quest & Adventure:**
 • \`/quest start\` - Begin a random Phase 1 quest
-• More quest options coming in future updates!
+• \`/inventory\` - View your stored items and materials
+• \`/use <item> [quantity]\` - Consume items for healing and effects
 
-**Information:**
-• \`/help\` - Show basic help information
-• \`/help wiki\` - Access this detailed wiki system
+**Information & Help:**
+• \`/help\` - Player manual and command index
+• \`/wiki [section]\` - Access detailed game encyclopedia
 
 **Combat:**
 • Combat uses button interactions during quests
 • **⚔️ Attack** - Fight the enemy
 • **🏃 Flee** - Escape combat safely
 
-**Tips for Commands:**
+**Command Tips:**
 • All commands use Discord's slash command system
 • Type \`/\` to see available commands
-• Commands are case-sensitive
-• Most commands work in any channel where the bot has permissions
+• Use tab completion for easier command entry
+• Commands work in any channel where the bot has permissions
+
+**Advanced Usage:**
+• \`/use\` supports autocomplete - start typing item names
+• \`/wiki section:combat\` for quick section access
+• Most commands show error messages if something goes wrong
 
 **Future Commands:**
-• \`/inventory\` - Manage items and equipment
 • \`/shop\` - Buy items with gold
 • \`/pvp\` - Player vs player combat
 • \`/guild\` - Join or create guilds with other players`,
@@ -217,7 +260,7 @@ function createWikiEmbed(section) {
         return new EmbedBuilder()
             .setColor('#ef4444')
             .setTitle('❌ Wiki Section Not Found')
-            .setDescription('Available sections: gettingStarted, combat, quests, leveling, factions, commands')
+            .setDescription('Available sections: gettingStarted, combat, quests, leveling, factions, inventory, commands')
             .setTimestamp();
     }
 
@@ -226,22 +269,23 @@ function createWikiEmbed(section) {
         .setColor(wikiSection.color)
         .setTitle(wikiSection.title)
         .setDescription(wikiSection.content)
-        .setFooter({ text: 'Cross Realm Chronicles Wiki • Use /help wiki [section] for specific guides' })
+        .setFooter({ text: 'Cross Realm Chronicles Wiki • Use /wiki section:[name] for specific guides' })
         .setTimestamp();
 }
 
 function getWikiSectionsList() {
     return `**📚 Available Wiki Sections:**
 
-• \`gettingStarted\` - New player setup and basics
-• \`combat\` - Enemy encounters and turn-based fighting
-• \`quests\` - Quest system and rewards
-• \`leveling\` - XP system and character progression  
-• \`factions\` - Detailed faction information
-• \`commands\` - Complete command reference
+🌟 \`gettingStarted\` - New player setup and basics
+⚔️ \`combat\` - Enemy encounters and turn-based fighting
+🗺️ \`quests\` - Quest system and rewards
+📈 \`leveling\` - XP system and character progression  
+🏴‍☠️ \`factions\` - Detailed faction information
+📦 \`inventory\` - Items, inventory management, and usage
+💻 \`commands\` - Complete command reference
 
-**Usage:** \`/help wiki [section]\`
-**Example:** \`/help wiki combat\``;
+**Usage:** \`/wiki section:[name]\`
+**Example:** \`/wiki section:inventory\``;
 }
 
 module.exports = {

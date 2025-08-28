@@ -1,58 +1,28 @@
 const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
-const { createWikiEmbed, getWikiSectionsList } = require('../utils/wiki');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('help')
-        .setDescription('Show help information and available commands')
-        .addStringOption(option =>
-            option.setName('wiki')
-                .setDescription('Access detailed wiki guides')
-                .setRequired(false)
-                .addChoices(
-                    { name: '📚 Wiki Home', value: 'home' },
-                    { name: '🌟 Getting Started', value: 'gettingStarted' },
-                    { name: '⚔️ Combat System', value: 'combat' },
-                    { name: '🗺️ Quest System', value: 'quests' },
-                    { name: '📈 Level Progression', value: 'leveling' },
-                    { name: '🏴‍☠️ Faction Details', value: 'factions' },
-                    { name: '💻 Commands Reference', value: 'commands' }
-                )),
+        .setDescription('User guide and command index for Cross Realm Chronicles'),
     async execute(interaction) {
-        const wikiOption = interaction.options.getString('wiki');
-        
-        if (wikiOption) {
-            if (wikiOption === 'home') {
-                // Show wiki section list
-                const embed = new EmbedBuilder()
-                    .setColor('#4f46e5')
-                    .setTitle('📚 Cross Realm Chronicles Wiki')
-                    .setDescription(getWikiSectionsList())
-                    .setFooter({ text: 'Cross Realm Chronicles • Detailed guides for every aspect of the game' })
-                    .setTimestamp();
-                
-                return interaction.reply({ embeds: [embed] });
-            } else {
-                // Show specific wiki section
-                const wikiEmbed = createWikiEmbed(wikiOption);
-                return interaction.reply({ embeds: [wikiEmbed] });
-            }
-        }
-        
-        // Default/basic help command
         const embed = new EmbedBuilder()
             .setColor('#4f46e5')
-            .setTitle('⚔️ Cross Realm Chronicles - Help')
-            .setDescription('Welcome to the multiverse anime RPG! Choose your faction and embark on epic adventures with combat encounters!')
+            .setTitle('📖 Cross Realm Chronicles - Player Manual')
+            .setDescription('Your essential guide to commands and basic gameplay. Use `/wiki` for detailed game mechanics!')
             .addFields([
                 {
-                    name: '🌟 Getting Started',
-                    value: '`/create` - Create your character and choose a faction\n`/profile` - View your character stats and progress',
+                    name: '🚀 Essential Commands',
+                    value: '`/create` - Create your character and choose a faction\n`/profile` - View your character stats and progress\n`/quest start` - Begin your adventure with quests\n`/inventory` - View your collected items\n`/use <item>` - Consume items for healing and effects',
                     inline: false
                 },
                 {
-                    name: '⚔️ Adventure & Combat',
-                    value: '`/quest start` - Start a random Phase 1 quest\n• **30% chance** of enemy encounters during quests!\n• Turn-based combat with Attack/Flee options\n• Defeat enemies for bonus rewards!',
+                    name: '🎮 Quick Start Guide',
+                    value: '1️⃣ Create a character with `/create`\n2️⃣ Choose your anime faction (One Piece, Naruto, etc.)\n3️⃣ Start quests with `/quest start`\n4️⃣ Fight enemies and collect items\n5️⃣ Level up and get stronger!',
+                    inline: false
+                },
+                {
+                    name: '⚔️ Combat Basics',
+                    value: '• 30% chance of enemy encounters during quests\n• Choose **Attack** to fight or **Flee** to escape\n• Victory gives bonus XP and rewards\n• Defeat restores you to 1 HP with small learning XP',
                     inline: false
                 },
                 {
@@ -61,22 +31,17 @@ module.exports = {
                     inline: false
                 },
                 {
-                    name: '🎮 How to Play',
-                    value: '• Create a character with `/create`\n• Start quests to gain XP and gold\n• Fight enemies in turn-based combat\n• Level up to increase your combat stats\n• Higher levels = better quest success rates!',
+                    name: '📦 Inventory System',
+                    value: '• Collect items from quests and combat\n• Store up to 100 items total\n• Use consumables to heal and gain bonuses\n• Items stack automatically for easy management',
                     inline: false
                 },
                 {
-                    name: '📚 Detailed Guides',
-                    value: '`/help wiki` - Access comprehensive guides\n`/help wiki combat` - Learn combat system\n`/help wiki gettingStarted` - New player guide\n`/help wiki leveling` - Level progression info',
-                    inline: false
-                },
-                {
-                    name: '💡 Combat Tips',
-                    value: '• Combat gives bonus XP and gold when you win\n• Flee if low on health to avoid defeat\n• Enemies scale to your level for fair fights\n• Speed affects critical hit chances',
+                    name: '📚 Need More Info?',
+                    value: 'Use `/wiki` to access the complete game encyclopedia with detailed guides on combat, leveling, factions, and more!',
                     inline: false
                 }
             ])
-            .setFooter({ text: 'Cross Realm Chronicles • Use /help wiki for detailed guides' })
+            .setFooter({ text: 'Cross Realm Chronicles • New to the game? Start with /create!' })
             .setTimestamp();
 
         interaction.reply({ embeds: [embed] });
