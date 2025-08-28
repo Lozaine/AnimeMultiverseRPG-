@@ -21,6 +21,11 @@ module.exports = {
         ),
     async execute(interaction) {
         try {
+            // Check if interaction is still valid and not expired
+            if (interaction.replied || interaction.deferred) {
+                return;
+            }
+
             const category = interaction.options.getString('category');
 
             if (category) {
@@ -31,23 +36,34 @@ module.exports = {
                 } else {
                     await interaction.reply({ 
                         content: '❌ Invalid category specified. Use `/wiki` without parameters to see all available categories.',
-                        ephemeral: true 
+                        flags: [4096] // EPHEMERAL flag
                     });
                 }
             } else {
                 // Show main wiki overview
                 const overview = getCategoryOverview();
-                await interaction.reply(overview);
+                if (overview) {
+                    await interaction.reply(overview);
+                } else {
+                    await interaction.reply({
+                        content: '❌ Wiki system is currently unavailable. Please try again later.',
+                        flags: [4096] // EPHEMERAL flag
+                    });
+                }
             }
         } catch (error) {
             console.error('Wiki command error:', error);
 
-            // Check if interaction was already replied to
-            if (!interaction.replied && !interaction.deferred) {
-                await interaction.reply({ 
-                    content: '❌ An error occurred while loading the wiki. Please try again.',
-                    ephemeral: true 
-                });
+            // Only try to reply if we haven't already responded and interaction is still valid
+            try {
+                if (!interaction.replied && !interaction.deferred) {
+                    await interaction.reply({ 
+                        content: '❌ An error occurred while loading the wiki. Please try again.',
+                        flags: [4096] // EPHEMERAL flag
+                    });
+                }
+            } catch (replyError) {
+                console.error('Failed to send error reply:', replyError);
             }
         }
     },

@@ -1,0 +1,35 @@
+Wiki command error: DiscordAPIError[10062]: Unknown interaction
+    at handleErrors (/app/node_modules/@discordjs/rest/dist/index.js:762:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async BurstHandler.runRequest (/app/node_modules/@discordjs/rest/dist/index.js:866:23)
+    at async _REST.request (/app/node_modules/@discordjs/rest/dist/index.js:1307:22)
+    at async ChatInputCommandInteraction.reply (/app/node_modules/discord.js/src/structures/interfaces/InteractionResponses.js:200:22)
+    at async Object.execute (/app/commands/wiki.js:40:17)
+    at async Client.<anonymous> (/app/index.js:84:13) {
+  requestBody: { files: [], json: { type: 4, data: [Object] } },
+  rawError: { message: 'Unknown interaction', code: 10062 },
+  code: 10062,
+  status: 404,
+  method: 'POST',
+  url: 'https://discord.com/api/v10/interactions/1410704824168874024/aW50ZXJhY3Rpb246MTQxMDcwNDgyNDE2ODg3NDAyNDpXdUViYUxITDMwdGZQeXZLdk9FQnQzM2FXSm55cjJGUVlyWktJMXRxWFo1SzFLVmVkSzVhMGNhWjFjUXRjZDl1TFlTT2xZM3RkMzhweWpmNEhqM2c0YmNScXVYbUFmVUJSdlZURnlITkFSUnpudTVwWGVrYTZpcjI2c1NuTmVYeQ/callback?with_response=false';
+}
+(node:1) Warning: Supplying "ephemeral" for interaction response options is deprecated. Utilize flags instead.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Command execution error: DiscordAPIError[40060]: Interaction has already been acknowledged.
+    at handleErrors (/app/node_modules/@discordjs/rest/dist/index.js:762:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async BurstHandler.runRequest (/app/node_modules/@discordjs/rest/dist/index.js:866:23)
+    at async _REST.request (/app/node_modules/@discordjs/rest/dist/index.js:1307:22)
+    at async ChatInputCommandInteraction.reply (/app/node_modules/discord.js/src/structures/interfaces/InteractionResponses.js:200:22)
+    at async Object.execute (/app/commands/wiki.js:47:17)
+    at async Client.<anonymous> (/app/index.js:84:13) {
+  requestBody: { files: [], json: { type: 4, data: [Object] } },
+  rawError: {
+    message: 'Interaction has already been acknowledged.',
+    code: 40060
+  },
+  code: 40060,
+  status: 400,
+  method: 'POST',
+  url: 'https://discord.com/api/v10/interactions/1410704824168874024/aW50ZXJhY3Rpb246MTQxMDcwNDgyNDE2ODg3NDAyNDpXdUViYUxITDMwdGZQeXZLdk9FQnQzM2FXSm55cjJGUVlyWktJMXRxWFo1SzFLVmVkSzVhMGNhWjFjUXRjZDl1TFlTT2xZM3RkMzhweWpmNEhqM2c0YmNScXVYbUFmVUJSdlZURnlITkFSUnpudTVwWGVrYTZpcjI2c1NuTmVYeQ/callback?with_response=false';
+}
