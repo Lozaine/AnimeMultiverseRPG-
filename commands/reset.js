@@ -64,7 +64,7 @@ module.exports = {
             await interaction.reply({ 
                 embeds: [confirmEmbed], 
                 components: [row],
-                ephemeral: true 
+                flags: [4096]
             });
             
         } catch (error) {
@@ -88,7 +88,7 @@ module.exports = {
             const embed = createEmbed('❌ Unauthorized', 
                 'You can only reset your own character!', 
                 '#ff6b6b');
-            return interaction.reply({ embeds: [embed], ephemeral: true });
+            return interaction.reply({ embeds: [embed], flags: [4096] });
         }
         
         try {
