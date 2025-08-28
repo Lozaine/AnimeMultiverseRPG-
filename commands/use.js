@@ -24,10 +24,16 @@ module.exports = {
         const userId = interaction.user.id;
         
         try {
+            console.log(`[AUTOCOMPLETE] User ${userId} searching for: "${focusedValue}"`);
+            
             const inventory = await getPlayerInventory(userId);
+            console.log(`[AUTOCOMPLETE] Inventory items found: ${inventory.length}`);
+            
             const usableItems = inventory.filter(item => 
                 ['food', 'healing', 'potion', 'consumable'].includes(item.item_type)
             );
+            console.log(`[AUTOCOMPLETE] Usable items: ${usableItems.length}`);
+            console.log(`[AUTOCOMPLETE] Usable items:`, usableItems.map(i => `${i.item_name} (${i.item_type})`));
             
             const choices = usableItems
                 .filter(item => item.item_name.toLowerCase().includes(focusedValue.toLowerCase()))
@@ -36,7 +42,8 @@ module.exports = {
                     name: `${item.item_name} (x${item.quantity})`,
                     value: item.item_name
                 }));
-                
+            
+            console.log(`[AUTOCOMPLETE] Choices returned: ${choices.length}`);
             await interaction.respond(choices);
         } catch (error) {
             console.error('Autocomplete error:', error);
