@@ -1,0 +1,68 @@
+// This should be added to your main index.js or interaction handler file
+const { getCategoryOverview, getCategoryMenu, getSectionContent } = require('./utils/wiki.js');
+
+// Add this inside your client.on('interactionCreate') event handler
+client.on('interactionCreate', async interaction => {
+    // ... existing code ...
+
+    // Handle wiki interactions
+    if (interaction.isStringSelectMenu()) {
+        if (interaction.customId === 'wiki_category_select') {
+            const categoryKey = interaction.values[0];
+            const categoryMenu = getCategoryMenu(categoryKey);
+            
+            if (categoryMenu) {
+                await interaction.update(categoryMenu);
+            } else {
+                await interaction.reply({ 
+                    content: '❌ Invalid category selected.',
+                    ephemeral: true 
+                });
+            }
+        }
+        else if (interaction.customId.startsWith('wiki_section_select_')) {
+            const categoryKey = interaction.customId.replace('wiki_section_select_', '');
+            const sectionInfo = interaction.values[0]; // format: "categoryKey_sectionIndex"
+            const [, sectionIndexStr] = sectionInfo.split('_');
+            const sectionIndex = parseInt(sectionIndexStr);
+            
+            const sectionContent = getSectionContent(categoryKey, sectionIndex);
+            
+            if (sectionContent) {
+                await interaction.update(sectionContent);
+            } else {
+                await interaction.reply({ 
+                    content: '❌ Invalid section selected.',
+                    ephemeral: true 
+                });
+            }
+        }
+    }
+    
+    if (interaction.isButton()) {
+        if (interaction.customId === 'wiki_back_to_categories') {
+            const overview = getCategoryOverview();
+            await interaction.update(overview);
+        }
+        else if (interaction.customId.startsWith('wiki_back_to_category_')) {
+            const categoryKey = interaction.customId.replace('wiki_back_to_category_', '');
+            const categoryMenu = getCategoryMenu(categoryKey);
+            
+            if (categoryMenu) {
+                await interaction.update(categoryMenu);
+            }
+        }
+        else if (interaction.customId.startsWith('wiki_section_')) {
+            // Handle navigation between sections (Previous/Next buttons)
+            const parts = interaction.customId.split('_');
+            const categoryKey = parts[2];
+            const sectionIndex = parseInt(parts[3]);
+            
+            const sectionContent = getSectionContent(categoryKey, sectionIndex);
+            
+            if (sectionContent) {
+                await interaction.update(sectionContent);
+            }
+        }
+    }
+});

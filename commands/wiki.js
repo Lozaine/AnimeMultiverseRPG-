@@ -1,21 +1,13 @@
-const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
-const { 
-    createWikiEmbed, 
-    createWikiNavigation, 
-    createCategoryOverviewEmbed, 
-    createCategoryNavigation,
-    createMainWikiEmbed, 
-    createMainMenuNavigation,
-    getCategoryKeys 
-} = require('../utils/wiki');
+const { SlashCommandBuilder } = require('discord.js');
+const { getCategoryOverview, getCategoryMenu, getSectionContent } = require('../utils/wiki.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('wiki')
-        .setDescription('Access the Cross Realm Chronicles game encyclopedia')
+        .setDescription('Access the comprehensive Cross Realm Chronicles game guide')
         .addStringOption(option =>
             option.setName('category')
-                .setDescription('Choose a wiki category to view')
+                .setDescription('Choose a specific wiki category to view')
                 .setRequired(false)
                 .addChoices(
                     { name: '🚀 Getting Started', value: 'getting_started' },
@@ -25,35 +17,38 @@ module.exports = {
                     { name: '🎯 Quest System', value: 'quests' },
                     { name: '🎒 Items & Inventory', value: 'items' },
                     { name: '💻 Command Reference', value: 'commands' }
-                )),
+                )
+        ),
     async execute(interaction) {
-        const category = interaction.options.getString('category');
-        
-        if (category) {
-            // Show specific wiki category overview with navigation
-            const categoryEmbed = createCategoryOverviewEmbed(category);
-            if (!categoryEmbed) {
-                return interaction.reply({
-                    embeds: [new EmbedBuilder()
-                        .setTitle('❌ Category Not Found')
-                        .setDescription('Sorry, that wiki category doesn\'t exist.')
-                        .setColor('#ff6b6b')],
-                    ephemeral: true
+        try {
+            const category = interaction.options.getString('category');
+
+            if (category) {
+                // Show specific category menu
+                const categoryMenu = getCategoryMenu(category);
+                if (categoryMenu) {
+                    await interaction.reply(categoryMenu);
+                } else {
+                    await interaction.reply({ 
+                        content: '❌ Invalid category specified. Use `/wiki` without parameters to see all available categories.',
+                        ephemeral: true 
+                    });
+                }
+            } else {
+                // Show main wiki overview
+                const overview = getCategoryOverview();
+                await interaction.reply(overview);
+            }
+        } catch (error) {
+            console.error('Wiki command error:', error);
+
+            // Check if interaction was already replied to
+            if (!interaction.replied && !interaction.deferred) {
+                await interaction.reply({ 
+                    content: '❌ An error occurred while loading the wiki. Please try again.',
+                    ephemeral: true 
                 });
             }
-            const navigation = createCategoryNavigation(category);
-            return interaction.reply({ 
-                embeds: [categoryEmbed], 
-                components: navigation 
-            });
         }
-        
-        // Default wiki home - show all categories with dropdown navigation
-        const mainEmbed = createMainWikiEmbed();
-        const navigation = createMainMenuNavigation();
-        interaction.reply({ 
-            embeds: [mainEmbed], 
-            components: navigation 
-        });
-    }
+    },
 };

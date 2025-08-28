@@ -3,6 +3,9 @@ const fs = require('fs');
 const path = require('path');
 const { initializeDatabase } = require('./database/database');
 
+// Load environment variables
+require('dotenv').config();
+
 // Create Discord client
 const client = new Client({
     intents: [
@@ -53,6 +56,9 @@ client.once('clientReady', async () => {
     // Set bot activity
     client.user.setActivity('⚔️ Cross Realm Chronicles | Use slash commands', { type: 'PLAYING' });
 });
+
+// Add wiki utility functions import at top level
+const { getCategoryOverview, getCategoryMenu, getSectionContent } = require('./utils/wiki.js');
 
 // Interaction handler (slash commands, autocomplete, and buttons)
 client.on('interactionCreate', async interaction => {
@@ -409,20 +415,47 @@ client.on('interactionCreate', async interaction => {
                         const mainEmbed = createMainWikiEmbed();
                         const navigation = createMainMenuNavigation();
                         
-                        await interaction.update({
-                            embeds: [mainEmbed],
-                            components: navigation
-                        });
+                        if (!interaction.replied && !interaction.deferred) {
+                            await interaction.update({
+                                embeds: [mainEmbed],
+                                components: navigation
+                            });
+                        }
                     } else if (interaction.customId.startsWith('wiki_category_')) {
                         // Show category overview
                         const category = interaction.customId.replace('wiki_category_', '');
                         const categoryEmbed = createCategoryOverviewEmbed(category);
                         const navigation = createCategoryNavigation(category);
                         
-                        await interaction.update({
-                            embeds: [categoryEmbed],
-                            components: navigation
-                        });
+                        if (!interaction.replied && !interaction.deferred) {
+                            await interaction.update({
+                                embeds: [categoryEmbed],
+                                components: navigation
+                            });
+                        }
+                    } else if (interaction.customId === 'wiki_back_to_categories') {
+                        const overview = getCategoryOverview();
+                        if (!interaction.replied && !interaction.deferred) {
+                            await interaction.update(overview);
+                        }
+                    } else if (interaction.customId.startsWith('wiki_back_to_category_')) {
+                        const categoryKey = interaction.customId.replace('wiki_back_to_category_', '');
+                        const categoryMenu = getCategoryMenu(categoryKey);
+                        
+                        if (categoryMenu && !interaction.replied && !interaction.deferred) {
+                            await interaction.update(categoryMenu);
+                        }
+                    } else if (interaction.customId.startsWith('wiki_section_')) {
+                        // Handle navigation between sections (Previous/Next buttons)
+                        const parts = interaction.customId.split('_');
+                        const categoryKey = parts[2];
+                        const sectionIndex = parseInt(parts[3]);
+                        
+                        const sectionContent = getSectionContent(categoryKey, sectionIndex);
+                        
+                        if (sectionContent && !interaction.replied && !interaction.deferred) {
+                            await interaction.update(sectionContent);
+                        }
                     } else if (interaction.customId.startsWith('wiki_prev_') || interaction.customId.startsWith('wiki_next_')) {
                         // Handle previous/next navigation
                         const parts = interaction.customId.split('_');
@@ -440,17 +473,21 @@ client.on('interactionCreate', async interaction => {
                         const sectionEmbed = createWikiEmbed(category, newSection);
                         const navigation = createWikiNavigation(category, newSection);
                         
-                        await interaction.update({
-                            embeds: [sectionEmbed],
-                            components: navigation
-                        });
+                        if (!interaction.replied && !interaction.deferred) {
+                            await interaction.update({
+                                embeds: [sectionEmbed],
+                                components: navigation
+                            });
+                        }
                     }
                 } catch (error) {
                     console.error('Wiki button navigation error:', error);
-                    await interaction.reply({
-                        content: '❌ An error occurred while navigating the wiki.',
-                        ephemeral: true
-                    });
+                    if (!interaction.replied && !interaction.deferred) {
+                        await interaction.reply({
+                            content: '❌ An error occurred while navigating the wiki.',
+                            ephemeral: true
+                        });
+                    }
                 }
                 return;
             }
@@ -488,7 +525,35 @@ client.on('interactionCreate', async interaction => {
             } = require('./utils/wiki');
             
             try {
-                if (interaction.customId === 'wiki_main_categories') {
+                if (interaction.customId === 'wiki_category_select') {
+                    const categoryKey = interaction.values[0];
+                    const categoryMenu = getCategoryMenu(categoryKey);
+                    
+                    if (categoryMenu && !interaction.replied && !interaction.deferred) {
+                        await interaction.update(categoryMenu);
+                    } else if (!interaction.replied && !interaction.deferred) {
+                        await interaction.reply({ 
+                            content: '❌ Invalid category selected.',
+                            ephemeral: true 
+                        });
+                    }
+                } else if (interaction.customId.startsWith('wiki_section_select_')) {
+                    const categoryKey = interaction.customId.replace('wiki_section_select_', '');
+                    const sectionInfo = interaction.values[0]; // format: "categoryKey_sectionIndex"
+                    const [, sectionIndexStr] = sectionInfo.split('_');
+                    const sectionIndex = parseInt(sectionIndexStr);
+                    
+                    const sectionContent = getSectionContent(categoryKey, sectionIndex);
+                    
+                    if (sectionContent && !interaction.replied && !interaction.deferred) {
+                        await interaction.update(sectionContent);
+                    } else if (!interaction.replied && !interaction.deferred) {
+                        await interaction.reply({ 
+                            content: '❌ Invalid section selected.',
+                            ephemeral: true 
+                        });
+                    }
+                } else if (interaction.customId === 'wiki_main_categories') {
                     // Main category selection
                     const selectedValue = interaction.values[0];
                     const category = selectedValue.replace('wiki_category_', '');
@@ -496,10 +561,12 @@ client.on('interactionCreate', async interaction => {
                     const categoryEmbed = createCategoryOverviewEmbed(category);
                     const navigation = createCategoryNavigation(category);
                     
-                    await interaction.update({
-                        embeds: [categoryEmbed],
-                        components: navigation
-                    });
+                    if (!interaction.replied && !interaction.deferred) {
+                        await interaction.update({
+                            embeds: [categoryEmbed],
+                            components: navigation
+                        });
+                    }
                 } else if (interaction.customId.startsWith('wiki_section_')) {
                     // Section selection within a category
                     const selectedValue = interaction.values[0];
@@ -510,17 +577,21 @@ client.on('interactionCreate', async interaction => {
                     const sectionEmbed = createWikiEmbed(category, sectionIndex);
                     const navigation = createWikiNavigation(category, sectionIndex);
                     
-                    await interaction.update({
-                        embeds: [sectionEmbed],
-                        components: navigation
-                    });
+                    if (!interaction.replied && !interaction.deferred) {
+                        await interaction.update({
+                            embeds: [sectionEmbed],
+                            components: navigation
+                        });
+                    }
                 }
             } catch (error) {
                 console.error('Wiki navigation error:', error);
-                await interaction.reply({
-                    content: '❌ An error occurred while navigating the wiki.',
-                    ephemeral: true
-                });
+                if (!interaction.replied && !interaction.deferred) {
+                    await interaction.reply({
+                        content: '❌ An error occurred while navigating the wiki.',
+                        ephemeral: true
+                    });
+                }
             }
             return;
         }
