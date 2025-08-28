@@ -607,210 +607,194 @@ Access this comprehensive help system
 • **combat** - Battle mechanics and enemies  
 • **progression** - Leveling and abilities
 • **quests** - Quest system guide
-• **items** - Inventory and item management
-• **commands** - This command reference
+• **items** - Inventory and equipment
+• **commands** - Complete command reference
 
-**Command Tips:**
-• All commands work in any Discord channel where the bot is present
-• Use tab completion for faster command entry
-• Most commands provide helpful error messages if something goes wrong`
+**\`/help\`**
+Quick start guide for new players
+• Essential commands overview
+• Beginner-friendly introduction
+• Links to full wiki system`
             }
         ]
     }
 };
 
-// Function to create wiki embed with navigation
-function createWikiEmbed(category, sectionIndex = 0) {
-    const cat = WIKI_CATEGORIES[category];
-    if (!cat) return null;
-
-    const section = cat.sections[sectionIndex];
-    if (!section) return null;
-
-    const embed = new EmbedBuilder()
-        .setTitle(`${cat.title} - ${section.name}`)
-        .setDescription(section.content)
-        .setColor('#4a90e2')
-        .setFooter({ 
-            text: `Page ${sectionIndex + 1}/${cat.sections.length} | Cross Realm Chronicles Wiki` 
-        })
-        .setTimestamp();
-
-    return embed;
-}
-
-// Function to create navigation components
-function createWikiNavigation(category, currentSection = 0) {
-    const cat = WIKI_CATEGORIES[category];
-    if (!cat) return [];
-
-    const components = [];
-
-    // Section selection dropdown
-    if (cat.sections.length > 1) {
-        const sectionOptions = cat.sections.map((section, index) => ({
-            label: section.name,
-            value: `wiki_section_${category}_${index}`,
-            description: section.content.substring(0, 100).replace(/\*\*/g, '').trim() + '...',
-            default: index === currentSection
-        }));
-
-        const sectionSelect = new StringSelectMenuBuilder()
-            .setCustomId(`wiki_section_${category}`)
-            .setPlaceholder('Select a section to read about...')
-            .addOptions(sectionOptions);
-
-        components.push(new ActionRowBuilder().addComponents(sectionSelect));
-    }
-
-    // Navigation buttons
-    const buttons = [];
+// Format long content strings to prevent Discord embed limits
+function formatWikiContent(content) {
+    // Discord embed description has a 4096 character limit
+    const MAX_LENGTH = 4000;
     
-    // Previous section button
-    if (currentSection > 0) {
-        buttons.push(
-            new ButtonBuilder()
-                .setCustomId(`wiki_prev_${category}_${currentSection}`)
-                .setLabel('◀ Previous')
-                .setStyle(ButtonStyle.Secondary)
-        );
+    if (content.length <= MAX_LENGTH) {
+        return content;
     }
-
-    // Back to category button
-    buttons.push(
-        new ButtonBuilder()
-            .setCustomId(`wiki_category_${category}`)
-            .setLabel('📚 Category Overview')
-            .setStyle(ButtonStyle.Primary)
-    );
-
-    // Next section button
-    if (currentSection < cat.sections.length - 1) {
-        buttons.push(
-            new ButtonBuilder()
-                .setCustomId(`wiki_next_${category}_${currentSection}`)
-                .setLabel('Next ▶')
-                .setStyle(ButtonStyle.Secondary)
-        );
-    }
-
-    // Main menu button
-    buttons.push(
-        new ButtonBuilder()
-            .setCustomId('wiki_main_menu')
-            .setLabel('🏠 Main Menu')
-            .setStyle(ButtonStyle.Success)
-    );
-
-    if (buttons.length > 0) {
-        components.push(new ActionRowBuilder().addComponents(buttons));
-    }
-
-    return components;
+    
+    // Truncate and add continuation indicator
+    const truncated = content.substring(0, MAX_LENGTH - 100);
+    const lastNewline = truncated.lastIndexOf('\n');
+    
+    return truncated.substring(0, lastNewline) + '\n\n*... (content continues in next section)*';
 }
 
-// Function to create category overview embed
-function createCategoryOverviewEmbed(category) {
-    const cat = WIKI_CATEGORIES[category];
-    if (!cat) return null;
-
-    let sectionList = cat.sections.map((section, index) => 
-        `**${index + 1}.** ${section.name}\n*${section.content.substring(0, 80).replace(/\*\*/g, '').trim()}...*`
-    ).join('\n\n');
-
-    const embed = new EmbedBuilder()
-        .setTitle(cat.title)
-        .setDescription(`${cat.description}\n\n**Available Sections:**\n\n${sectionList}`)
-        .setColor('#4a90e2')
-        .setFooter({ text: 'Use the dropdown menu below to jump to any section' })
-        .setTimestamp();
-
-    return embed;
-}
-
-// Function to create category navigation
-function createCategoryNavigation(category) {
-    const cat = WIKI_CATEGORIES[category];
-    if (!cat) return [];
-
-    const components = [];
-
-    // Section selection dropdown for category overview
-    const sectionOptions = cat.sections.map((section, index) => ({
-        label: section.name,
-        value: `wiki_section_${category}_${index}`,
-        description: section.content.substring(0, 100).replace(/\*\*/g, '').trim() + '...'
-    }));
-
-    const sectionSelect = new StringSelectMenuBuilder()
-        .setCustomId(`wiki_section_${category}`)
-        .setPlaceholder('Select a section to explore in detail...')
-        .addOptions(sectionOptions);
-
-    components.push(new ActionRowBuilder().addComponents(sectionSelect));
-
-    // Main menu button
-    const mainMenuButton = new ButtonBuilder()
-        .setCustomId('wiki_main_menu')
-        .setLabel('🏠 Back to Main Menu')
-        .setStyle(ButtonStyle.Success);
-
-    components.push(new ActionRowBuilder().addComponents(mainMenuButton));
-
-    return components;
-}
-
-// Function to create main wiki menu embed
-function createMainWikiEmbed() {
-    let categoryList = Object.entries(WIKI_CATEGORIES).map(([key, cat]) => 
-        `${cat.title}\n*${cat.description}*`
-    ).join('\n\n');
+// Get category overview
+function getCategoryOverview() {
+    const categoryOverviews = Object.entries(WIKI_CATEGORIES).map(([key, category]) => {
+        return `**${category.title}**\n${category.description}`;
+    }).join('\n\n');
 
     const embed = new EmbedBuilder()
         .setTitle('📚 Cross Realm Chronicles - Complete Game Encyclopedia')
-        .setDescription(`Welcome to your comprehensive guide for mastering Cross Realm Chronicles! This wiki contains everything you need to become a legendary adventurer across the anime multiverse.\n\n**Available Categories:**\n\n${categoryList}\n\n*Select any category below to begin exploring detailed guides, strategies, and game mechanics.*`)
-        .setColor('#4a90e2')
-        .setFooter({ text: 'Cross Realm Chronicles Wiki • Your complete adventure companion' })
-        .setTimestamp();
+        .setDescription(`Welcome to the comprehensive Cross Realm Chronicles wiki! This encyclopedia contains everything you need to master the multiverse anime RPG experience.
 
-    return embed;
+**📋 Available Categories:**
+
+${categoryOverviews}
+
+**🔍 How to Navigate:**
+• Use the dropdown menu below to select a category
+• Each category contains multiple detailed sections
+• Use the Previous/Next buttons to navigate between sections
+• All information is organized for easy reference
+
+**💡 Pro Tip:** Bookmark sections you reference frequently by noting their category and section names!`)
+        .setColor(0x00AE86)
+        .setFooter({ text: 'Cross Realm Chronicles Wiki • Select a category to begin exploring!' });
+
+    const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId('wiki_category_select')
+        .setPlaceholder('📂 Choose a wiki category to explore...')
+        .addOptions(
+            Object.entries(WIKI_CATEGORIES).map(([key, category]) => ({
+                label: category.title,
+                value: key,
+                description: category.description.length > 100 
+                    ? category.description.substring(0, 97) + '...' 
+                    : category.description
+            }))
+        );
+
+    const row = new ActionRowBuilder().addComponents(selectMenu);
+
+    return {
+        embeds: [embed],
+        components: [row]
+    };
 }
 
-// Function to create main menu navigation
-function createMainMenuNavigation() {
-    const categoryOptions = Object.entries(WIKI_CATEGORIES).map(([key, cat]) => ({
-        label: cat.title.replace(/[^\w\s]/g, '').trim(),
-        value: `wiki_category_${key}`,
-        description: cat.description,
-        emoji: cat.title.split(' ')[0] // Extract emoji from title
-    }));
+// Get specific category with section selection
+function getCategoryMenu(categoryKey) {
+    const category = WIKI_CATEGORIES[categoryKey];
+    if (!category) return null;
 
-    const categorySelect = new StringSelectMenuBuilder()
-        .setCustomId('wiki_main_categories')
-        .setPlaceholder('🔍 Choose a category to explore...')
-        .addOptions(categoryOptions);
+    const sectionList = category.sections.map((section, index) => {
+        return `**${index + 1}.** ${section.name}`;
+    }).join('\n');
 
-    return [new ActionRowBuilder().addComponents(categorySelect)];
+    const embed = new EmbedBuilder()
+        .setTitle(`${category.title} - Section Menu`)
+        .setDescription(`${category.description}
+
+**📑 Available Sections:**
+
+${sectionList}
+
+**🔍 Navigation Instructions:**
+• Use the dropdown menu below to select a section
+• Each section contains detailed information and examples
+• Use the "← Back to Categories" button to return to the main menu
+• Navigate between sections using Previous/Next buttons`)
+        .setColor(0x00AE86)
+        .setFooter({ text: `Cross Realm Chronicles Wiki • ${category.title}` });
+
+    const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId(`wiki_section_select_${categoryKey}`)
+        .setPlaceholder('📄 Choose a section to read...')
+        .addOptions(
+            category.sections.map((section, index) => ({
+                label: section.name,
+                value: `${categoryKey}_${index}`,
+                description: `Section ${index + 1} of ${category.sections.length}`
+            }))
+        );
+
+    const backButton = new ButtonBuilder()
+        .setCustomId('wiki_back_to_categories')
+        .setLabel('← Back to Categories')
+        .setStyle(ButtonStyle.Secondary);
+
+    const row1 = new ActionRowBuilder().addComponents(selectMenu);
+    const row2 = new ActionRowBuilder().addComponents(backButton);
+
+    return {
+        embeds: [embed],
+        components: [row1, row2]
+    };
 }
 
-// Function to get all category keys
-function getCategoryKeys() {
-    return Object.keys(WIKI_CATEGORIES);
-}
+// Get specific section content
+function getSectionContent(categoryKey, sectionIndex) {
+    const category = WIKI_CATEGORIES[categoryKey];
+    if (!category || !category.sections[sectionIndex]) return null;
 
-// Function to get category info
-function getCategoryInfo(category) {
-    return WIKI_CATEGORIES[category] || null;
+    const section = category.sections[sectionIndex];
+    const formattedContent = formatWikiContent(section.content);
+
+    const embed = new EmbedBuilder()
+        .setTitle(`${category.title} - ${section.name}`)
+        .setDescription(formattedContent)
+        .setColor(0x00AE86)
+        .setFooter({ 
+            text: `Cross Realm Chronicles Wiki • ${category.title} • Section ${sectionIndex + 1} of ${category.sections.length}` 
+        });
+
+    // Navigation buttons
+    const backButton = new ButtonBuilder()
+        .setCustomId(`wiki_back_to_category_${categoryKey}`)
+        .setLabel('← Back to Sections')
+        .setStyle(ButtonStyle.Secondary);
+
+    const homeButton = new ButtonBuilder()
+        .setCustomId('wiki_back_to_categories')
+        .setLabel('🏠 Categories')
+        .setStyle(ButtonStyle.Primary);
+
+    const components = [backButton, homeButton];
+
+    // Previous section button
+    if (sectionIndex > 0) {
+        const prevButton = new ButtonBuilder()
+            .setCustomId(`wiki_section_${categoryKey}_${sectionIndex - 1}`)
+            .setLabel('⬅️ Previous')
+            .setStyle(ButtonStyle.Secondary);
+        components.unshift(prevButton);
+    }
+
+    // Next section button
+    if (sectionIndex < category.sections.length - 1) {
+        const nextButton = new ButtonBuilder()
+            .setCustomId(`wiki_section_${categoryKey}_${sectionIndex + 1}`)
+            .setLabel('Next ➡️')
+            .setStyle(ButtonStyle.Secondary);
+        components.push(nextButton);
+    }
+
+    // Discord has a limit of 5 components per row, so we may need multiple rows
+    const rows = [];
+    for (let i = 0; i < components.length; i += 5) {
+        const row = new ActionRowBuilder().addComponents(components.slice(i, i + 5));
+        rows.push(row);
+    }
+
+    return {
+        embeds: [embed],
+        components: rows
+    };
 }
 
 module.exports = {
     WIKI_CATEGORIES,
-    createWikiEmbed,
-    createWikiNavigation,
-    createCategoryOverviewEmbed,
-    createCategoryNavigation,
-    createMainWikiEmbed,
-    createMainMenuNavigation,
-    getCategoryKeys,
-    getCategoryInfo
+    getCategoryOverview,
+    getCategoryMenu,
+    getSectionContent,
+    formatWikiContent
 };
