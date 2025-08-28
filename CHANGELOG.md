@@ -88,6 +88,14 @@ The following quest reward items now function correctly with proper pattern reco
 - **Pure Water**: "Restores 5 HP and 3 MP" → Applies +5 HP, +3 MP restoration
 - **XP Boost Token**: "+3 XP bonus" → Correctly grants +3 XP
 - **Extra Coin Pouch**: "Contains 10 extra coins" → Adds +10 coins to character
+
+#### Character Reset & Code Maintenance
+- ✅ **Character Reset System**: Complete `/reset` command with destructive action confirmation
+- ✅ **Database Cleanup**: Full character and inventory data deletion with transactional safety
+- ✅ **Safety Measures**: User-specific authorization and detailed warning embeds
+- ✅ **Fresh Start Capability**: Players can completely reset and recreate characters
+- ✅ **Ephemeral Deprecation Fix**: Updated all `ephemeral: true` to modern `flags: [4096]` approach
+
   - Quick-action buttons for inventories with 5 or fewer items
   - Smart quantity input modals with validation (1-10 items per use)
   - Refresh and sort utility buttons for inventory management
@@ -112,6 +120,12 @@ The following quest reward items now function correctly with proper pattern reco
   - Detailed descriptions and usage notes for all 18+ implemented items
   - Information about where to find specific items and quest rewards
   - Clear distinction between consumable and non-consumable items
+
+#### Files Modified
+- `commands/reset.js` - New character reset command with confirmation system
+- `commands/use.js` - Complete rewrite with enhanced pattern matching, MP support, and level integration
+- `database/database.js` - Enhanced usePlayerItem function and deleteCharacterData for reset functionality
+- `index.js` - Added reset button interaction handler and updated ephemeral syntax
 
 #### Changed
 - **Inventory Command Enhancement**
