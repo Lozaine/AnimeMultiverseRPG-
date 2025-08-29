@@ -1,3 +1,7 @@
+Here is the updated code for lozaine/animemultiverserpg-/AnimeMultiverseRPG--0df27e09e9f6fb472e41a1b815ac6ab2b9f1ff41/database/database.js:
+
+JavaScript
+
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
@@ -33,7 +37,7 @@ async function initializeDatabase() {
                     atk INTEGER DEFAULT 20,
                     def INTEGER DEFAULT 10,
                     spd INTEGER DEFAULT 15,
-                    faction_quest_progress INTEGER DEFAULT 0,
+                    faction_quest_progress INTEGER DEFAULT 0, -- ADD THIS LINE
                     devil_fruit TEXT,
                     chakra_nature TEXT,
                     cursed_technique TEXT,
@@ -53,8 +57,8 @@ async function initializeDatabase() {
                     db.run(`ALTER TABLE characters ADD COLUMN xp INTEGER DEFAULT 0`, () => {});
                     db.run(`ALTER TABLE characters ADD COLUMN def INTEGER DEFAULT 10`, () => {});
                     db.run(`ALTER TABLE characters ADD COLUMN spd INTEGER DEFAULT 15`, () => {});
-                    db.run(`ALTER TABLE characters ADD COLUMN faction_quest_progress INTEGER DEFAULT 0`, () => {});
-                    
+                    db.run(`ALTER TABLE characters ADD COLUMN faction_quest_progress INTEGER DEFAULT 0`, () => {}); // ADD THIS LINE
+
                     // Create inventory table
                     db.run(`
                         CREATE TABLE IF NOT EXISTS inventory (
@@ -142,7 +146,7 @@ async function updateCharacterProgress(userId, experience, gold, level, hp = nul
             query += `, xp = ?`;
             params.push(xp);
         }
-        if (factionQuestProgress !== null) {
+        if (factionQuestProgress !== null) { // ADD THIS BLOCK
             query += `, faction_quest_progress = ?`;
             params.push(factionQuestProgress);
         }
