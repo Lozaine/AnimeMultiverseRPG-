@@ -1,7 +1,16 @@
-const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
+const { 
+    EmbedBuilder, 
+    SlashCommandBuilder,
+    TextDisplayBuilder,
+    ContainerBuilder,
+    SectionBuilder,
+    SeparatorBuilder,
+    SeparatorSpacingSize,
+    MessageFlags 
+} = require('discord.js');
 const { createCharacter, getCharacter } = require('../database/database');
 const { FACTIONS } = require('../utils/factions');
-const { createEmbed } = require('../utils/embeds');
+const { createEmbed, createErrorContainer, createSuccessContainer } = require('../utils/embeds');
 const { getBaseStatsForLevel } = require('../utils/levelProgression');
 
 module.exports = {
@@ -31,10 +40,12 @@ module.exports = {
             // Check if user already has a character
             const existingCharacter = await getCharacter(userId);
             if (existingCharacter) {
-                const embed = createEmbed('Character Already Exists', 
-                    `You already have a character! Use \`/profile\` to view your character.`, 
-                    '#ff6b6b');
-                return interaction.reply({ embeds: [embed] });
+                const errorContainer = createErrorContainer('Character Already Exists', 
+                    'You already have a character! Use `/profile` to view your character.');
+                return interaction.reply({ 
+                    components: [errorContainer], 
+                    flags: MessageFlags.IsComponentsV2 
+                });
             }
 
             // Get faction choice and character name from interaction
@@ -48,11 +59,33 @@ module.exports = {
                     return `**${index + 1}. ${faction.name}** ${faction.emoji}\n${faction.description}\n**Perk:** ${faction.perk}`;
                 }).join('\n\n');
 
-                const embed = createEmbed('🌟 Choose Your Faction', 
-                    `Welcome to Cross Realm Chronicles! Choose your faction:\n\n${factionList}\n\nUse: \`/create faction:[your_choice] character_name:[your_name]\``, 
-                    '#4f46e5');
+                const titleDisplay = new TextDisplayBuilder()
+                    .setContent(`# 🌟 Choose Your Faction\nWelcome to Cross Realm Chronicles! Choose your faction:`);
+
+                const factionsDisplay = new TextDisplayBuilder()
+                    .setContent(factionList);
+
+                const instructionsDisplay = new TextDisplayBuilder()
+                    .setContent(`*Use: \`/create faction:[your_choice] character_name:[your_name]\`*`);
+
+                const factionContainer = new ContainerBuilder()
+                    .setAccentColor(0x4f46e5)
+                    .addTextDisplayComponents(titleDisplay)
+                    .addSeparatorComponents(
+                        new SeparatorBuilder()
+                            .setDivider(true)
+                            .setSpacing(SeparatorSpacingSize.Medium)
+                    )
+                    .addTextDisplayComponents(factionsDisplay)
+                    .addSeparatorComponents(
+                        new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
+                    )
+                    .addTextDisplayComponents(instructionsDisplay);
                 
-                return interaction.reply({ embeds: [embed] });
+                return interaction.reply({ 
+                    components: [factionContainer], 
+                    flags: MessageFlags.IsComponentsV2 
+                });
             }
 
             // Validate faction choice

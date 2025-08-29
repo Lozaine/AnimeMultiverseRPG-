@@ -1,7 +1,16 @@
-const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
+const { 
+    EmbedBuilder, 
+    SlashCommandBuilder,
+    TextDisplayBuilder,
+    ContainerBuilder,
+    SectionBuilder,
+    SeparatorBuilder,
+    SeparatorSpacingSize,
+    MessageFlags 
+} = require('discord.js');
 const { getCharacter } = require('../database/database');
 const { FACTIONS } = require('../utils/factions');
-const { createEmbed } = require('../utils/embeds');
+const { createEmbed, createErrorContainer } = require('../utils/embeds');
 const { getExpRequiredForLevel, getExpProgressInLevel, getLevelProgress } = require('../utils/levelProgression');
 
 module.exports = {
@@ -15,10 +24,12 @@ module.exports = {
             const character = await getCharacter(userId);
             
             if (!character) {
-                const embed = createEmbed('No Character Found', 
-                    'You don\'t have a character yet! Use `/create` to create one.', 
-                    '#ff6b6b');
-                return interaction.reply({ embeds: [embed] });
+                const errorContainer = createErrorContainer('No Character Found', 
+                    'You don\'t have a character yet! Use `/create` to create one.');
+                return interaction.reply({ 
+                    components: [errorContainer], 
+                    flags: MessageFlags.IsComponentsV2 
+                });
             }
 
             const faction = FACTIONS[character.faction];
@@ -28,48 +39,103 @@ module.exports = {
             const levelProgress = getLevelProgress(character.level, character.experience);
             const completedQuests = character.completed_quests ? character.completed_quests.split(',').length : 0;
 
-            const embed = new EmbedBuilder()
-                .setColor(faction.color)
-                .setTitle(`${faction.emoji} ${character.character_name || character.name}'s Profile`)
-                .setDescription(`**${faction.name}** Warrior`)
-                .addFields([
-                    { name: '⭐ Level', value: character.level.toString(), inline: true },
-                    { name: '🎯 Experience', value: `${expInCurrentLevel}/${expForCurrentLevel} (${levelProgress}%)`, inline: true },
-                    { name: '📈 Next Level', value: `${expToNext} XP needed`, inline: true },
-                    { name: '❤️ Health', value: `${character.hp || 100}/${character.max_hp || 100}`, inline: true },
-                    { name: '⚔️ Attack', value: `${character.atk || 20}`, inline: true },
-                    { name: '🛡️ Defense', value: `${character.def || 10}`, inline: true },
-                    { name: '💨 Speed', value: `${character.spd || 15}`, inline: true },
-                    { name: '💰 Gold', value: character.gold.toString(), inline: true },
-                    { name: '🏆 Quests Completed', value: completedQuests.toString(), inline: true },
-                    { name: '🏴‍☠️ Faction', value: `${faction.emoji} ${faction.name}`, inline: true },
-                    { name: '📊 Total XP', value: character.experience.toString(), inline: true },
-                    { name: '📊 Current XP', value: `${character.xp || character.experience}`, inline: true },
-                    { name: '🎁 Faction Perk', value: faction.perk, inline: false },
-                    { name: '💪 Special Ability', value: faction.startingAbility, inline: false }
-                ])
-                .setFooter({ text: `Created on ${new Date(character.created_at).toDateString()}` })
-                .setTimestamp();
+            // Create the character profile using Components V2
+            const titleDisplay = new TextDisplayBuilder()
+                .setContent(`# ${faction.emoji} ${character.character_name || character.name}'s Profile\n**${faction.name}** Warrior`);
 
-            // Add faction-specific stats
+            // Basic stats section
+            const basicStatsSection = new SectionBuilder()
+                .addTextDisplayComponents(
+                    new TextDisplayBuilder().setContent(`## 📊 Character Stats`),
+                    new TextDisplayBuilder().setContent(
+                        `**⭐ Level:** ${character.level} | **🎯 Experience:** ${expInCurrentLevel}/${expForCurrentLevel} (${levelProgress}%)\n` +
+                        `**📈 Next Level:** ${expToNext} XP needed | **💰 Gold:** ${character.gold}\n` +
+                        `**🏆 Quests Completed:** ${completedQuests}`
+                    )
+                );
+
+            // Combat stats
+            const combatStatsDisplay = new TextDisplayBuilder()
+                .setContent(
+                    `## ⚔️ Combat Stats\n\n` +
+                    `**❤️ Health:** ${character.hp || 100}/${character.max_hp || 100}\n` +
+                    `**⚔️ Attack:** ${character.atk || 20} | **🛡️ Defense:** ${character.def || 10} | **💨 Speed:** ${character.spd || 15}`
+                );
+
+            // Faction info
+            const factionInfoDisplay = new TextDisplayBuilder()
+                .setContent(
+                    `## ${faction.emoji} ${faction.name} Information\n\n` +
+                    `**🎁 Faction Perk:** ${faction.perk}\n\n` +
+                    `**💪 Special Ability:** ${faction.startingAbility}`
+                );
+
+            // Faction-specific stats
+            let factionSpecificDisplay = null;
             if (character.faction === 'one_piece' && character.devil_fruit) {
-                embed.addFields([{ name: '🍎 Devil Fruit', value: character.devil_fruit, inline: true }]);
+                factionSpecificDisplay = new TextDisplayBuilder()
+                    .setContent(`## 🍎 Devil Fruit Powers\n**${character.devil_fruit}**`);
             } else if (character.faction === 'naruto' && character.chakra_nature) {
-                embed.addFields([{ name: '🌀 Chakra Nature', value: character.chakra_nature, inline: true }]);
+                factionSpecificDisplay = new TextDisplayBuilder()
+                    .setContent(`## 🌀 Chakra Nature\n**${character.chakra_nature}**`);
             } else if (character.faction === 'jujutsu_kaisen' && character.cursed_technique) {
-                embed.addFields([{ name: '👁️ Cursed Technique', value: character.cursed_technique, inline: true }]);
+                factionSpecificDisplay = new TextDisplayBuilder()
+                    .setContent(`## 👁️ Cursed Technique\n**${character.cursed_technique}**`);
             } else if (character.faction === 'demon_slayer' && character.breathing_style) {
-                embed.addFields([{ name: '🌬️ Breathing Style', value: character.breathing_style, inline: true }]);
+                factionSpecificDisplay = new TextDisplayBuilder()
+                    .setContent(`## 🌬️ Breathing Style\n**${character.breathing_style}**`);
             }
 
-            interaction.reply({ embeds: [embed] });
+            // Footer info
+            const footerDisplay = new TextDisplayBuilder()
+                .setContent(`*Character created on ${new Date(character.created_at).toDateString()}*`);
+
+            // Build the container
+            const profileContainer = new ContainerBuilder()
+                .setAccentColor(parseInt(faction.color.replace('#', ''), 16))
+                .addTextDisplayComponents(titleDisplay)
+                .addSeparatorComponents(
+                    new SeparatorBuilder()
+                        .setDivider(true)
+                        .setSpacing(SeparatorSpacingSize.Medium)
+                )
+                .addSectionComponents(basicStatsSection)
+                .addSeparatorComponents(
+                    new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
+                )
+                .addTextDisplayComponents(combatStatsDisplay)
+                .addSeparatorComponents(
+                    new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
+                )
+                .addTextDisplayComponents(factionInfoDisplay);
+
+            if (factionSpecificDisplay) {
+                profileContainer
+                    .addSeparatorComponents(
+                        new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
+                    )
+                    .addTextDisplayComponents(factionSpecificDisplay);
+            }
+
+            profileContainer
+                .addSeparatorComponents(
+                    new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
+                )
+                .addTextDisplayComponents(footerDisplay);
+
+            interaction.reply({ 
+                components: [profileContainer], 
+                flags: MessageFlags.IsComponentsV2 
+            });
 
         } catch (error) {
             console.error('Profile view error:', error);
-            const embed = createEmbed('Profile Error', 
-                'An error occurred while retrieving your profile. Please try again.', 
-                '#ff6b6b');
-            interaction.reply({ embeds: [embed] });
+            const errorContainer = createErrorContainer('Profile Error', 
+                'An error occurred while retrieving your profile. Please try again.');
+            interaction.reply({ 
+                components: [errorContainer], 
+                flags: MessageFlags.IsComponentsV2 
+            });
         }
     }
 };

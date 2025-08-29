@@ -1,4 +1,12 @@
-const { EmbedBuilder } = require('discord.js');
+const { 
+    EmbedBuilder, 
+    TextDisplayBuilder, 
+    ContainerBuilder, 
+    SectionBuilder, 
+    SeparatorBuilder, 
+    SeparatorSpacingSize,
+    MessageFlags 
+} = require('discord.js');
 
 // Create a standard embed with consistent styling
 function createEmbed(title, description, color = '#4f46e5') {
@@ -27,6 +35,59 @@ function createInfoEmbed(title, description) {
 // Create a warning embed
 function createWarningEmbed(title, description) {
     return createEmbed(title, description, '#fbbf24');
+}
+
+// === NEW COMPONENTS V2 HELPERS ===
+
+// Create a standard Components V2 container
+function createComponentsV2Container(title, description, color = 0x4f46e5) {
+    const titleDisplay = new TextDisplayBuilder()
+        .setContent(`# ${title}\n${description}`);
+
+    return new ContainerBuilder()
+        .setAccentColor(color)
+        .addTextDisplayComponents(titleDisplay);
+}
+
+// Create an error container (Components V2)
+function createErrorContainer(title, description) {
+    return createComponentsV2Container(title, description, 0xff6b6b);
+}
+
+// Create a success container (Components V2)
+function createSuccessContainer(title, description) {
+    return createComponentsV2Container(title, description, 0x00ff00);
+}
+
+// Create an info container (Components V2)
+function createInfoContainer(title, description) {
+    return createComponentsV2Container(title, description, 0x4f46e5);
+}
+
+// Create a warning container (Components V2)
+function createWarningContainer(title, description) {
+    return createComponentsV2Container(title, description, 0xfbbf24);
+}
+
+// Create a character container with faction styling (Components V2)
+function createCharacterContainer(character, faction) {
+    const titleDisplay = new TextDisplayBuilder()
+        .setContent(`# ${faction.emoji} ${character.character_name || character.name}\n**${faction.name}** - Level ${character.level}`);
+
+    const statsDisplay = new TextDisplayBuilder()
+        .setContent(
+            `**⭐ Level:** ${character.level}\n` +
+            `**🎯 Experience:** ${character.experience}\n` +
+            `**💰 Gold:** ${character.gold}`
+        );
+
+    return new ContainerBuilder()
+        .setAccentColor(parseInt(faction.color.replace('#', ''), 16))
+        .addTextDisplayComponents(titleDisplay)
+        .addSeparatorComponents(
+            new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
+        )
+        .addTextDisplayComponents(statsDisplay);
 }
 
 // Create a character embed with faction styling
@@ -61,6 +122,27 @@ function createQuestEmbed(quest, faction) {
     return embed;
 }
 
+// Create a quest container (Components V2)
+function createQuestContainer(quest, faction) {
+    const titleDisplay = new TextDisplayBuilder()
+        .setContent(`# ${faction.emoji} ${quest.title || quest.name}\n${quest.description}`);
+
+    const rewardsDisplay = new TextDisplayBuilder()
+        .setContent(
+            `**⭐ Level Required:** ${quest.levelRequirement || quest.levelReq || 1}\n` +
+            `**🎯 Experience Reward:** ${quest.reward?.experience || quest.xpReward || 0}\n` +
+            `**💰 Gold Reward:** ${quest.reward?.gold || quest.coinReward || 0}`
+        );
+
+    return new ContainerBuilder()
+        .setAccentColor(parseInt(faction.color.replace('#', ''), 16))
+        .addTextDisplayComponents(titleDisplay)
+        .addSeparatorComponents(
+            new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
+        )
+        .addTextDisplayComponents(rewardsDisplay);
+}
+
 module.exports = {
     createEmbed,
     createErrorEmbed,
@@ -68,5 +150,14 @@ module.exports = {
     createInfoEmbed,
     createWarningEmbed,
     createCharacterEmbed,
-    createQuestEmbed
+    createQuestEmbed,
+    // Components V2 exports
+    createComponentsV2Container,
+    createErrorContainer,
+    createSuccessContainer,
+    createInfoContainer,
+    createWarningContainer,
+    createCharacterContainer,
+    createQuestContainer,
+    MessageFlags
 };
