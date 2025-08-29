@@ -87,7 +87,7 @@ function createComponentsV2Container(title, description, color = 0x4f46e5, optio
         container.addSeparatorComponents(
             new SeparatorBuilder()
                 .setDivider(true)
-                .setSpacing(SeparatorSpacingSize.Medium)
+                                    .setSpacing(SeparatorSpacingSize.Large)
         );
     }
 
@@ -211,7 +211,7 @@ function createCharacterContainer(character, faction, options = {}) {
         .addSeparatorComponents(
             new SeparatorBuilder()
                 .setDivider(true)
-                .setSpacing(SeparatorSpacingSize.Medium)
+                .setSpacing(SeparatorSpacingSize.Large)
         );
 
     // Basic stats section

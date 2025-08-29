@@ -153,7 +153,7 @@ module.exports = {
             .addSeparatorComponents(
                 new SeparatorBuilder()
                     .setDivider(true)
-                    .setSpacing(SeparatorSpacingSize.Medium)
+                    .setSpacing(SeparatorSpacingSize.Large)
             )
             .addSectionComponents(progressSection)
             .addSeparatorComponents(
@@ -174,7 +174,7 @@ module.exports = {
             profileContainer.addSeparatorComponents(
                 new SeparatorBuilder()
                     .setDivider(true)
-                    .setSpacing(SeparatorSpacingSize.Medium)
+                    .setSpacing(SeparatorSpacingSize.Large)
             );
 
             // Faction-specific abilities section
