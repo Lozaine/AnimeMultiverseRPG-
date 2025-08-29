@@ -579,20 +579,73 @@ client.on('interactionCreate', async interaction => {
             if (interaction.customId.startsWith('randomquest_reroll_')) {
                 const buttonUserId = interaction.customId.split('_')[2];
                 if (interaction.user.id !== buttonUserId) {
-                    return interaction.reply({ content: '❌ This is not your quest!', ephemeral: true });
+                    return interaction.reply({ content: '❌ This is not your quest!', flags: [4096] });
                 }
                 
-                // Reroll by calling the random quest subcommand
-                const factionquestCommand = client.commands.get('factionquest');
-                if (factionquestCommand) {
-                    // Create a fake interaction for the random subcommand
-                    const mockInteraction = {
-                        ...interaction,
-                        options: {
-                            getSubcommand: () => 'random'
-                        }
+                try {
+                    // Get character data for reroll
+                    const character = await getCharacter(buttonUserId);
+                    if (!character) {
+                        return interaction.update({
+                            embeds: [createEmbed('Error', 'Character not found!', '#ff6b6b')],
+                            components: []
+                        });
+                    }
+                    
+                    // Import the required functions
+                    const { generateRandomQuest } = require('./utils/factionQuests');
+                    const { FACTIONS } = require('./utils/factions');
+                    const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+                    
+                    // Generate new random quest
+                    const difficulty = Math.random() < 0.3 ? character.level + 1 : Math.max(1, character.level - 1);
+                    const randomQuest = generateRandomQuest(character.faction, Math.min(difficulty, 8));
+                    
+                    // Add faction-specific flavor
+                    const factionFlavors = {
+                        one_piece: "While sailing the Grand Line,",
+                        naruto: "During a covert mission,",
+                        jujutsu_kaisen: "While investigating cursed energy,",
+                        demon_slayer: "On your demon hunting patrol,"
                     };
-                    await factionquestCommand.execute(mockInteraction);
+                    const factionFlavor = factionFlavors[character.faction] || "On your adventure,";
+                    randomQuest.description = `${factionFlavor} ${randomQuest.description}`;
+                    
+                    // Create new embed
+                    const embed = new EmbedBuilder()
+                        .setColor(FACTIONS[character.faction].color)
+                        .setTitle(`🎲 ${randomQuest.title}`)
+                        .setDescription(randomQuest.description)
+                        .addFields(
+                            { name: '⭐ XP Reward', value: `${randomQuest.rewards.xp}`, inline: true },
+                            { name: '💰 Coin Reward', value: `${randomQuest.rewards.coins}`, inline: true },
+                            { name: '🎁 Item Chance', value: `${randomQuest.itemChance}%`, inline: true },
+                            { name: '💪 Difficulty', value: '⭐'.repeat(randomQuest.difficulty), inline: true }
+                        )
+                        .setFooter({ text: 'Random quests provide variety and extra rewards' });
+                    
+                    // Create buttons
+                    const acceptButton = new ButtonBuilder()
+                        .setCustomId(`randomquest_accept_${buttonUserId}_${Date.now()}`)
+                        .setLabel('Accept Mission')
+                        .setStyle(ButtonStyle.Success);
+                    
+                    const rerollButton = new ButtonBuilder()
+                        .setCustomId(`randomquest_reroll_${buttonUserId}`)
+                        .setLabel('🎲 Reroll Quest')
+                        .setStyle(ButtonStyle.Secondary);
+                    
+                    const row = new ActionRowBuilder().addComponents(acceptButton, rerollButton);
+                    
+                    // Update the interaction with new quest
+                    await interaction.update({ embeds: [embed], components: [row] });
+                    
+                } catch (error) {
+                    console.error('Reroll quest error:', error);
+                    await interaction.update({
+                        embeds: [createEmbed('Error', 'Failed to reroll quest. Please try again.', '#ff6b6b')],
+                        components: []
+                    });
                 }
                 return;
             }
