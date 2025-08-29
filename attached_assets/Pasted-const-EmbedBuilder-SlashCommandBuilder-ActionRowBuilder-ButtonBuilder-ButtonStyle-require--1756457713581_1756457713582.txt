@@ -1,0 +1,64 @@
+const { EmbedBuilder, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { getCharacter, updateCharacterProgress, addItemToInventory } = require('../database/database');
+const { FACTION_QUESTS } = require('../utils/factionQuests');
+const { FACTIONS } = require('../utils/factions');
+const { createEmbed } = require('../utils/embeds');
+const { checkLevelUp } = require('../utils/levelProgression');
+
+module.exports = {
+    data: new SlashCommandBuilder()
+        .setName('factionquest')
+        .setDescription('Continue your faction\'s unique story arc.'),
+
+    async execute(interaction) {
+        const userId = interaction.user.id;
+        try {
+            const character = await getCharacter(userId);
+            if (!character) {
+                return interaction.reply({ embeds: [createEmbed('No Character Found', 'You must create a character with `/create` first!', '#ff6b6b')], ephemeral: true });
+            }
+
+            const factionQuests = FACTION_QUESTS[character.faction];
+            if (!factionQuests) {
+                return interaction.reply({ embeds: [createEmbed('Error', 'No faction quests found for your faction.', '#ff6b6b')], ephemeral: true });
+            }
+
+            const questProgress = character.faction_quest_progress || 0;
+
+            if (questProgress >= factionQuests.length) {
+                const completedEmbed = new EmbedBuilder()
+                    .setColor(FACTIONS[character.faction].color)
+                    .setTitle('📜 Saga Complete!')
+                    .setDescription('You have completed your faction\'s current story arc. Congratulations on your journey! More adventures will be added in the future.')
+                    .setFooter({ text: 'Cross Realm Chronicles • Faction Quests' });
+                return interaction.reply({ embeds: [completedEmbed] });
+            }
+
+            const currentQuest = factionQuests[questProgress];
+
+            const embed = new EmbedBuilder()
+                .setColor(FACTIONS[character.faction].color)
+                .setTitle(`Faction Quest: ${currentQuest.title}`)
+                .setDescription(currentQuest.description)
+                .addFields(
+                    { name: '⭐ XP Reward', value: `${currentQuest.rewards.xp}`, inline: true },
+                    { name: '💰 Coin Reward', value: `${currentQuest.rewards.coins}`, inline: true },
+                    { name: '🎁 Item Chance', value: `${currentQuest.itemChance}%`, inline: true }
+                )
+                .setFooter({ text: `Part ${questProgress + 1} of ${factionQuests.length} in your saga.` });
+
+            const acceptButton = new ButtonBuilder()
+                .setCustomId(`factionquest_accept_${userId}_${questProgress}`)
+                .setLabel('Accept Mission')
+                .setStyle(ButtonStyle.Success);
+            
+            const row = new ActionRowBuilder().addComponents(acceptButton);
+
+            await interaction.reply({ embeds: [embed], components: [row] });
+
+        } catch (error) {
+            console.error('Faction quest error:', error);
+            await interaction.reply({ embeds: [createEmbed('Error', 'An error occurred while fetching your faction quest.', '#ff6b6b')], ephemeral: true });
+        }
+    }
+};
