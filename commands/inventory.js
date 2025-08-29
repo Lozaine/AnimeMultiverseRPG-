@@ -61,7 +61,7 @@ module.exports = {
                     .addSeparatorComponents(
                         new SeparatorBuilder()
                             .setDivider(true)
-                            .setSpacing(SeparatorSpacingSize.Medium)
+                            .setSpacing('medium')
                     )
                     .addTextDisplayComponents(emptyDisplay);
 
@@ -163,15 +163,15 @@ module.exports = {
                 .addSeparatorComponents(
                     new SeparatorBuilder()
                         .setDivider(true)
-                        .setSpacing(SeparatorSpacingSize.Medium)
+                        .setSpacing('medium')
                 )
                 .addTextDisplayComponents(itemsDisplay)
                 .addSeparatorComponents(
-                    new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Medium)
+                    new SeparatorBuilder().setSpacing('medium')
                 )
                 .addSectionComponents(summarySection)
                 .addSeparatorComponents(
-                    new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
+                    new SeparatorBuilder().setSpacing('small')
                 )
                 .addTextDisplayComponents(categoriesDisplay);
 

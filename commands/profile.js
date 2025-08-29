@@ -97,15 +97,15 @@ module.exports = {
                 .addSeparatorComponents(
                     new SeparatorBuilder()
                         .setDivider(true)
-                        .setSpacing(SeparatorSpacingSize.Medium)
+                        .setSpacing('medium')
                 )
                 .addSectionComponents(basicStatsSection)
                 .addSeparatorComponents(
-                    new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
+                    new SeparatorBuilder().setSpacing('small')
                 )
                 .addTextDisplayComponents(combatStatsDisplay)
                 .addSeparatorComponents(
-                    new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
+                    new SeparatorBuilder().setSpacing('small')
                 )
                 .addTextDisplayComponents(factionInfoDisplay);
 
@@ -119,7 +119,7 @@ module.exports = {
 
             profileContainer
                 .addSeparatorComponents(
-                    new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
+                    new SeparatorBuilder().setSpacing('small')
                 )
                 .addTextDisplayComponents(footerDisplay);
 
