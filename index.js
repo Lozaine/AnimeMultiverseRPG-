@@ -398,6 +398,15 @@ client.on('interactionCreate', async interaction => {
                 }
             }
             
+            // Handle help button interactions
+            if (interaction.customId.startsWith('help_')) {
+                const helpCommand = client.commands.get('help');
+                if (helpCommand && helpCommand.handleButtonInteraction) {
+                    await helpCommand.handleButtonInteraction(interaction);
+                    return;
+                }
+            }
+            
             // Handle wiki navigation button interactions
             if (interaction.customId.startsWith('wiki_')) {
                 const { 

@@ -1,0 +1,323 @@
+const { EmbedBuilder, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+
+// Getting Started content sections
+const GETTING_STARTED_SECTIONS = [
+    {
+        name: 'Creating Your Character',
+        content: `**Character Creation Guide**
+
+Use \`/create <faction> [character_name]\` to begin your journey in Cross Realm Chronicles!
+
+**📋 Faction Selection Process:**
+When creating your character, you'll choose from four distinct anime universes, each offering unique gameplay experiences:
+
+🏴‍☠️ **One Piece Pirates** 
+- **Philosophy:** Freedom, adventure, and the pursuit of dreams
+- **Playstyle:** Exploration-focused with treasure hunting mechanics
+- **Special Features:** Devil Fruit powers, crew dynamics, and naval adventures
+- **Starting Benefits:** +5 HP, +3 ATK, +2 DEF, +5 SPD
+- **Unique Mechanics:** Pirate's Intuition (+15% item find, +10% crit chance)
+
+🥷 **Naruto Shinobi**
+- **Philosophy:** Protecting your village and mastering ninja arts
+- **Playstyle:** Balanced approach with stealth and tactical advantages
+- **Special Features:** Chakra manipulation, elemental jutsu, and clan abilities
+- **Starting Benefits:** +4 HP, +4 ATK, +3 DEF, +8 SPD
+- **Unique Mechanics:** Basic Chakra Control (+3 all stats, +20% stealth)
+
+👁️ **Jujutsu Sorcerers**
+- **Philosophy:** Exorcising curses and protecting humanity from supernatural threats
+- **Playstyle:** High-risk, high-reward combat with powerful techniques
+- **Special Features:** Cursed energy manipulation, domain expansion, reverse techniques
+- **Starting Benefits:** +3 HP, +6 ATK, +4 DEF, +6 SPD
+- **Unique Mechanics:** Cursed Energy Manipulation (+25% vs cursed enemies)
+
+⚔️ **Demon Slayers**
+- **Philosophy:** Dedication to protecting humanity through swordsmanship mastery
+- **Playstyle:** Combat-focused with disciplined training progression
+- **Special Features:** Breathing techniques, enhanced blade techniques, demon detection
+- **Starting Benefits:** +6 HP, +7 ATK, +5 DEF, +4 SPD
+- **Unique Mechanics:** Basic Breathing Technique (+4 ATK, +3 DEF, +15% stamina)
+
+**🎭 Character Naming System:**
+- **Custom Names:** Create unique character identities separate from Discord usernames
+- **Examples:** \`/create one_piece "Monkey D. Adventure"\`, \`/create naruto "Shadow Clone Master"\`
+- **Default Option:** Omit character name to use your Discord username
+- **Name Rules:** Can include spaces, special characters, and up to 32 characters
+- **Immersion Factor:** Your character name appears in all game interactions and profiles
+
+**⚡ Post-Creation Tips:**
+- Your faction choice is permanent - choose wisely based on your preferred playstyle
+- Starting equipment and abilities are immediately available after creation
+- Each faction has different XP and reward multipliers for various quest types
+- You can view detailed faction information anytime with \`/wiki category:factions\`
+- Your character begins at Level 1 with 100 XP needed to reach Level 2`
+    },
+    {
+        name: 'Your First Quest Adventure',
+        content: `**The Quest System - Your Path to Power**
+
+After character creation, use \`/quest\` to begin your adventure! The quest system is your primary source of growth, rewards, and exciting experiences.
+
+**🎯 Quest Basics:**
+- Quests are generated based on your level and faction
+- Success rates depend on your stats and faction bonuses
+- Each quest type offers different rewards and challenges
+- Higher levels unlock more rewarding quest types
+
+**📊 Main Quest Categories:**
+
+🌿 **Gathering** - Resource collection adventures
+- Best for: One Piece Pirates (treasure hunting bonus)
+- Rewards: Crafting materials, moderate XP (50-150), gold (20-60)
+
+⚔️ **Hunting** - Combat-focused missions  
+- Best for: Demon Slayers & Jujutsu Sorcerers (combat bonus)
+- Rewards: High XP (100-300), combat experience, rare drops
+
+📦 **Delivery** - Transportation missions
+- Best for: Naruto Shinobi & One Piece Pirates (speed/navigation)
+- Rewards: Consistent XP (75-200), relationship building
+
+🛡️ **Protection** - Guardian missions
+- Best for: All factions (especially Shinobi & Demon Slayers)
+- Rewards: High XP (120-250), community standing
+
+🏋️ **Training** - Skill development missions
+- Best for: All factions (ability unlocking)
+- Rewards: Massive XP (150-400), stat improvements
+
+**💡 Quest Tips:**
+- Your faction gets bonuses on preferred quest types
+- Combat encounters can happen during quests
+- Failed quests still give reduced rewards
+- Use \`/quest\` repeatedly to keep growing stronger!
+
+**🎮 Your First Quest Strategy:**
+1. **Start Simple:** Begin with Errand or Gathering quests to understand mechanics
+2. **Faction Focus:** Choose quest types that align with your faction's bonuses
+3. **Risk Management:** Balance safe quests with challenging ones for optimal growth
+4. **Equipment Check:** Use items from your starting equipment to enhance success rates
+5. **Experience Tracking:** Monitor XP gains to plan your leveling progression efficiently`
+    },
+    {
+        name: 'Essential Commands Mastery',
+        content: `**Complete Command Reference for New Players**
+
+Master these essential commands to excel in Cross Realm Chronicles!
+
+**🎮 Core Gameplay Commands:**
+
+**\`/create <faction> [character_name]\`**
+Start your adventure! Choose your faction and optional custom name.
+• Factions: \`one_piece\`, \`naruto\`, \`jujutsu_kaisen\`, \`demon_slayer\`
+• Example: \`/create demon_slayer "Tanjiro Kamado"\`
+• This choice is permanent!
+
+**\`/profile [user]\`**
+View character stats, level, experience, and equipment.
+• See your progression and faction abilities
+• Can view other players' profiles
+• Updates in real-time
+
+**\`/quest\`**
+Go on adventures to earn XP, gold, and items!
+• Quest difficulty scales with your level
+• Faction bonuses apply to preferred quest types
+• Potential enemy encounters in dangerous missions
+
+**⚔️ Inventory & Items:**
+
+**\`/inventory [page]\`**
+Access your item collection with organized categories.
+• Shows consumables, equipment, and quest items
+• Interactive dropdown for quick item usage
+• 12 items per page with pagination
+
+**\`/use <item> [quantity]\`**
+Consume items from your inventory.
+• Auto-complete suggests available items
+• Healing potions, stat boosters, and more
+
+**📚 Information Commands:**
+
+**\`/wiki [category]\`**
+Access comprehensive game guides and help.
+• Categories: factions, combat, progression, quests, items, commands
+• Interactive navigation with detailed explanations
+
+**Command Tips:**
+• Use tab completion for faster entry
+• All commands work in any channel
+• Error messages guide you if something goes wrong`
+    }
+];
+
+module.exports = {
+    data: new SlashCommandBuilder()
+        .setName('help')
+        .setDescription('Complete beginner guide for new Cross Realm Chronicles players'),
+    
+    async execute(interaction) {
+        try {
+            // Check if this is a navigation button interaction
+            if (interaction.isButton && interaction.isButton()) {
+                return await this.handleButtonInteraction(interaction);
+            }
+
+            // Show the main help overview
+            const embed = new EmbedBuilder()
+                .setColor('#00d4aa')
+                .setTitle('🎮 Cross Realm Chronicles - Complete Beginner Guide')
+                .setDescription('**Welcome to Cross Realm Chronicles!**\n\nThis comprehensive guide will teach you everything you need to start your anime multiverse adventure. Navigate through the sections below to master the game mechanics.\n\n**Use `/wiki` for detailed game mechanics after you understand the basics!**')
+                .addFields([
+                    {
+                        name: '🚀 Quick Start (3 Easy Steps)',
+                        value: '**1.** `/create <faction>` - Pick your anime faction and create your character\n**2.** `/quest` - Go on your first adventure to earn XP and gold\n**3.** `/profile` - Check your progress and see how strong you\'ve become!',
+                        inline: false
+                    },
+                    {
+                        name: '🌟 Choose Your Faction',
+                        value: '🏴‍☠️ **One Piece Pirates** - Adventure-loving pirates with treasure hunting skills\n🥷 **Naruto Shinobi** - Stealthy shinobi with chakra techniques\n👁️ **Jujutsu Sorcerers** - Powerful sorcerers with cursed energy\n⚔️ **Demon Slayers** - Skilled warriors with breathing techniques',
+                        inline: false
+                    },
+                    {
+                        name: '⚡ Essential Commands',
+                        value: '`/quest` - Start adventures to level up\n`/inventory` - See what items you have\n`/use <item>` - Use potions and tools\n`/profile` - View your character stats',
+                        inline: true
+                    },
+                    {
+                        name: '📱 Quick Tips',
+                        value: '• Each faction is good at different quest types\n• Use items to heal and boost your character\n• Combat can happen during quests - be ready!\n• Level up to unlock new faction abilities',
+                        inline: true
+                    },
+                    {
+                        name: '📖 Detailed Guide Sections',
+                        value: 'Use the navigation buttons below to explore:\n**1.** Creating Your Character\n**2.** Your First Quest Adventure\n**3.** Essential Commands Mastery',
+                        inline: false
+                    },
+                    {
+                        name: '🎯 Your First Goal',
+                        value: 'Create a character, complete 3-5 quests, and reach level 3 to unlock your first faction ability. Good luck, adventurer!',
+                        inline: false
+                    }
+                ])
+                .setFooter({ text: 'Cross Realm Chronicles • Navigate with buttons below or use /wiki for advanced mechanics' })
+                .setTimestamp();
+
+            // Navigation buttons
+            const navigationRow = new ActionRowBuilder()
+                .addComponents(
+                    new ButtonBuilder()
+                        .setCustomId('help_section_0')
+                        .setLabel('1️⃣ Character Creation')
+                        .setStyle(ButtonStyle.Primary),
+                    new ButtonBuilder()
+                        .setCustomId('help_section_1')
+                        .setLabel('2️⃣ Quest Adventure')
+                        .setStyle(ButtonStyle.Primary),
+                    new ButtonBuilder()
+                        .setCustomId('help_section_2')
+                        .setLabel('3️⃣ Commands Guide')
+                        .setStyle(ButtonStyle.Primary)
+                );
+
+            await interaction.reply({ 
+                embeds: [embed], 
+                components: [navigationRow] 
+            });
+
+        } catch (error) {
+            console.error('Help command error:', error);
+            
+            if (!interaction.replied && !interaction.deferred) {
+                await interaction.reply({ 
+                    content: '❌ An error occurred while loading the help guide. Please try again.',
+                    ephemeral: true
+                });
+            }
+        }
+    },
+
+    async handleButtonInteraction(interaction) {
+        try {
+            if (interaction.customId === 'help_main_menu') {
+                // Return to main help menu
+                return await this.execute(interaction);
+            }
+
+            if (interaction.customId.startsWith('help_section_')) {
+                const sectionIndex = parseInt(interaction.customId.replace('help_section_', ''));
+                const section = GETTING_STARTED_SECTIONS[sectionIndex];
+                
+                if (!section) {
+                    return await interaction.reply({
+                        content: '❌ Invalid section requested.',
+                        ephemeral: true
+                    });
+                }
+
+                // Create section embed
+                const sectionEmbed = new EmbedBuilder()
+                    .setColor('#00d4aa')
+                    .setTitle(`🎮 Cross Realm Chronicles - ${section.name}`)
+                    .setDescription(section.content)
+                    .setFooter({ 
+                        text: `Cross Realm Chronicles Help • Section ${sectionIndex + 1} of ${GETTING_STARTED_SECTIONS.length}` 
+                    })
+                    .setTimestamp();
+
+                // Navigation buttons
+                const components = [];
+                const navigationButtons = [];
+
+                // Previous section button
+                if (sectionIndex > 0) {
+                    navigationButtons.push(
+                        new ButtonBuilder()
+                            .setCustomId(`help_section_${sectionIndex - 1}`)
+                            .setLabel('⬅️ Previous')
+                            .setStyle(ButtonStyle.Secondary)
+                    );
+                }
+
+                // Main menu button
+                navigationButtons.push(
+                    new ButtonBuilder()
+                        .setCustomId('help_main_menu')
+                        .setLabel('🏠 Main Menu')
+                        .setStyle(ButtonStyle.Primary)
+                );
+
+                // Next section button
+                if (sectionIndex < GETTING_STARTED_SECTIONS.length - 1) {
+                    navigationButtons.push(
+                        new ButtonBuilder()
+                            .setCustomId(`help_section_${sectionIndex + 1}`)
+                            .setLabel('Next ➡️')
+                            .setStyle(ButtonStyle.Secondary)
+                    );
+                }
+
+                const navigationRow = new ActionRowBuilder().addComponents(navigationButtons);
+
+                if (!interaction.replied && !interaction.deferred) {
+                    await interaction.update({ 
+                        embeds: [sectionEmbed], 
+                        components: [navigationRow] 
+                    });
+                }
+            }
+
+        } catch (error) {
+            console.error('Help button interaction error:', error);
+            
+            if (!interaction.replied && !interaction.deferred) {
+                await interaction.reply({
+                    content: '❌ An error occurred while navigating the help guide.',
+                    ephemeral: true
+                });
+            }
+        }
+    }
+};
