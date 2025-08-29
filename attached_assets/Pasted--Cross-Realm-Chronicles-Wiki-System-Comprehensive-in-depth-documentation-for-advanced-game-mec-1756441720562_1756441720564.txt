@@ -1,0 +1,1487 @@
+// Cross Realm Chronicles Wiki System
+// Comprehensive in-depth documentation for advanced game mechanics
+
+const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+
+const WIKI_CATEGORIES = {
+    factions: {
+        title: '⚡ Faction Guide',
+        description: 'Master your chosen faction\'s unique abilities and playstyle',
+        sections: [
+            {
+                name: '🏴‍☠️ One Piece Pirates',
+                content: `**Theme:** Adventure, Freedom, Treasure Hunting
+**Starting Ability:** Pirate's Intuition (+15% item find rate, +10% crit chance)
+
+**Stat Bonuses:** +5 HP, +3 ATK, +2 DEF, +5 SPD
+**Best Quest Types:** Gathering, Delivery, Hunting
+
+**Progressive Abilities:**
+• **Lv 3:** Sea Legs - Immunity to water debuffs
+• **Lv 7:** Treasure Sense - Enhanced item discovery
+• **Lv 12:** Haki Awakening - Observation and Armament Haki
+• **Lv 18:** Devil Fruit Resonance - Enhanced Devil Fruit powers
+• **Lv 25:** Conqueror's Will - Intimidate weaker enemies
+
+**Starting Equipment:**
+🗡️ Cutlass, 🧥 Pirate Coat, 🧭 Navigator's Compass
+🍖 Sea King Meat (2x), 🗺️ Treasure Map Fragment (1x)
+
+**Advanced Mechanics:**
+**Treasure Hunter's Instinct:** Pirates have a unique relationship with valuable items and hidden treasures. This manifests as:
+- +15% base item discovery rate on all quests
+- Special "treasure sense" during exploration quests
+- Ability to detect hidden treasure caches in quest descriptions
+- Enhanced critical hit rate (+10%) representing unpredictable fighting style
+
+**Maritime Mastery:** Pirates excel in water-based environments and navigation:
+- Complete immunity to water-based debuffs and environmental hazards
+- Enhanced success rates on delivery quests involving sea travel
+- Special naval combat bonuses when facing sea-based enemies
+
+**Devil Fruit Compatibility:** As pirates progress, they develop compatibility with supernatural powers:
+- Level 18+ unlocks Devil Fruit power integration
+- Unique Devil Fruit abilities based on character personality and playstyle
+- Trade-offs between different Devil Fruit categories (Paramecia, Zoan, Logia)
+- Advanced users can "awaken" their Devil Fruit for exponential power growth`
+            },
+            {
+                name: '🥷 Naruto Shinobi',
+                content: `**Theme:** Stealth, Ninjutsu, Village Protection
+**Starting Ability:** Basic Chakra Control (+3 all stats, +20% stealth success)
+
+**Stat Bonuses:** +4 HP, +4 ATK, +3 DEF, +8 SPD
+**Best Quest Types:** Protection, Training, Delivery
+
+**Progressive Abilities:**
+• **Lv 4:** Shadow Clone Technique - Double training XP
+• **Lv 8:** Elemental Affinity - Master Fire/Water/Earth/Wind/Lightning
+• **Lv 13:** Advanced Ninjutsu - Enhanced stealth and jutsu combinations
+• **Lv 19:** Sage Mode Training - +35% all combat stats
+• **Lv 28:** Tailed Beast Partnership - Massive power boost
+
+**Starting Equipment:**
+🗡️ Kunai Set, 🥋 Ninja Gear, 📜 Chakra Paper
+💊 Soldier Pill (3x), 💨 Smoke Bomb (2x)
+
+**Advanced Mechanics:**
+**Chakra System:** Shinobi possess an internal energy system that affects all abilities:
+- Chakra pool increases with level and determines technique usage
+- Perfect chakra control grants +3 to all base stats
+- Elemental chakra nature determines jutsu effectiveness
+- Advanced practitioners can combine multiple elements
+
+**Stealth and Infiltration:** Masters of covert operations:
+- +20% base stealth success rate on all stealth-based activities
+- Ability to avoid combat encounters through superior stealth
+- Information gathering bonuses during protection and delivery quests
+- Shadow Clone training allows double XP gain from training activities
+
+**Village Loyalty System:** Shinobi strength comes from their village connections:
+- Protection quest bonuses reflect duty to protect civilians
+- Access to village-specific techniques and equipment
+- Potential for promotion within village hierarchy
+- Special collaboration bonuses when multiple shinobi work together
+
+**Sage Arts Mastery:** High-level shinobi can tap into natural energy:
+- Sage Mode grants +35% to all combat statistics
+- Enhanced perception allows prediction of enemy attacks
+- Natural energy manipulation for environmental advantages
+- Risk/reward system - improper sage training can be dangerous`
+            },
+            {
+                name: '👁️ Jujutsu Sorcerers',
+                content: `**Theme:** Supernatural Combat, Cursed Energy, Exorcism  
+**Starting Ability:** Cursed Energy Manipulation (+25% vs cursed enemies)
+
+**Stat Bonuses:** +3 HP, +6 ATK, +4 DEF, +6 SPD
+**Best Quest Types:** Hunting, Protection, Training
+
+**Progressive Abilities:**
+• **Lv 5:** Cursed Technique Development - Unique personal ability
+• **Lv 9:** Reverse Cursed Technique - Healing and curse removal
+• **Lv 15:** Simple Domain - Defensive barrier technique
+• **Lv 22:** Domain Expansion - Personal domain space
+• **Lv 30:** Maximum Technique - Ultimate technique mastery
+
+**Starting Equipment:**
+⚔️ Cursed Tool (Basic), 👔 Sorcerer Uniform, 👁️ Cursed Energy Detector
+💉 Cursed Energy Serum (2x), 🛡️ Protective Charm (1x)
+
+**Advanced Mechanics:**
+**Cursed Energy Fundamentals:** The core power system of all sorcerer abilities:
+- Cursed energy is generated from negative emotions and spiritual pressure
+- +25% damage bonus against cursed spirits and supernatural enemies
+- Ability to see and interact with normally invisible cursed spirits
+- Energy efficiency improves with level and training
+
+**Cursed Technique Development:** Each sorcerer develops a unique supernatural ability:
+- Personal cursed techniques reflect character personality and experiences
+- Techniques evolve and grow stronger through practice and understanding
+- Advanced practitioners can develop "Maximum" versions of their techniques
+- Some techniques have hereditary or clan-based variations
+
+**Domain Theory:** The pinnacle of jujutsu sorcery:
+- Simple Domain creates basic defensive barriers
+- Full Domain Expansion creates a personal reality space
+- Inside a domain, the user's cursed technique becomes "sure-hit"
+- Domain battles involve complex interactions between competing realities
+
+**Reverse Cursed Technique:** Advanced healing and energy manipulation:
+- Convert negative cursed energy into positive healing energy
+- Remove curses and debuffs from self and allies
+- Extremely difficult technique requiring precise energy control
+- Masters can heal others and even reverse fatal injuries`
+            },
+            {
+                name: '⚔️ Demon Slayers',
+                content: `**Theme:** Swordsmanship, Breathing Techniques, Demon Hunting
+**Starting Ability:** Basic Breathing Technique (+4 ATK, +3 DEF, +15% stamina)
+
+**Stat Bonuses:** +6 HP, +7 ATK, +5 DEF, +4 SPD  
+**Best Quest Types:** Hunting, Training, Protection
+
+**Progressive Abilities:**
+• **Lv 4:** Breathing Style Mastery - Choose Water/Thunder/Flame/Stone/Wind
+• **Lv 8:** Enhanced Blade Techniques - Advanced swordsmanship
+• **Lv 14:** Demon Slayer Mark - +50% all physical stats
+• **Lv 20:** See-Through World - Enemy weakness detection
+• **Lv 26:** Breathing Style Evolution - Create unique techniques
+
+**Starting Equipment:**
+⚔️ Nichirin Blade, 🥋 Demon Slayer Corps Uniform, 📿 Warding Charm
+💊 Recovery Pill (2x), 🌅 Sunlight Essence (1x)
+
+**Advanced Mechanics:**
+**Breathing Technique Mastery:** The foundation of all Demon Slayer combat abilities:
+- Precise breathing patterns enhance physical capabilities beyond human limits
+- +4 ATK, +3 DEF, and +15% stamina efficiency from proper breathing
+- Each breathing style has unique forms and combat applications
+- Advanced practitioners can maintain enhanced breathing constantly
+
+**Nichirin Blade Specialization:** Demon Slayers wield specially forged anti-demon weapons:
+- Nichirin blades change color based on wielder's breathing style
+- Enhanced effectiveness against supernatural and demonic enemies
+- Blade techniques become more powerful with increased swordsmanship skill
+- Master swordsmiths can create personalized blade variations
+
+**Demon Slayer Mark System:** Physical manifestation of peak human potential:
+- Appears as unique tattoo-like markings during intense combat
+- +50% increase to all physical statistics while active
+- Unlocks access to "See-Through World" enhanced perception
+- Comes with significant physical costs and potential health risks
+
+**Corps Structure and Mission System:** Demon Slayers operate within organized hierarchy:
+- Mission assignments based on skill rank (Mizunoto to Hashira)
+- Access to Corps resources, including specialized equipment and training
+- Collaboration bonuses when working with other Corps members
+- Special recognition system for exceptional demon-slaying achievements`
+            }
+        ]
+    },
+    combat: {
+        title: '⚔️ Combat Guide',
+        description: 'Master the art of battle and enemy encounters',
+        sections: [
+            {
+                name: 'Combat Fundamentals',
+                content: `**Core Combat Statistics:**
+
+**HP (Health Points)** - Your life force and combat endurance
+• Determines how much damage you can absorb before defeat
+• Restored through rest, items, and certain faction abilities
+• Some abilities and equipment can temporarily increase maximum HP
+• Reaching 0 HP results in defeat but not permanent character loss
+
+**ATK (Attack Power)** - Your offensive capability and damage output  
+• Primary factor in determining damage dealt to enemies
+• Enhanced by equipment, faction bonuses, and level progression
+• Some enemies have resistances that reduce your effective ATK
+• Critical hits multiply your ATK damage by 1.5x
+
+**DEF (Defense Rating)** - Your ability to mitigate incoming damage
+• Reduces damage received from enemy attacks
+• High DEF can completely negate weak attacks
+• Some enemy attacks bypass DEF through special abilities
+• Defensive stances and abilities can temporarily boost DEF
+
+**SPD (Speed Factor)** - Your agility and reaction time in combat
+• Affects dodge chance and critical hit probability
+• Determines combat turn order in complex battles
+• High SPD difference can result in multiple attacks per turn
+• Essential for certain advanced combat techniques
+
+**Critical Hit Mechanics:**
+• Base critical hit chance: 5% for all characters
+• SPD differential bonus: +1% per 5 SPD difference over enemy
+• Faction bonuses: Some factions have inherent crit bonuses
+• Equipment effects: Certain items and abilities increase crit chance
+• Critical hits deal 150% damage and cannot be reduced by enemy abilities
+
+**Damage Calculation Formula:**
+Base Damage = (ATK × Random Multiplier[0.8-1.2]) - Enemy DEF
+Final Damage = Base Damage × Critical Multiplier × Weakness/Resistance Modifiers`
+            },
+            {
+                name: 'Enemy Classification System',
+                content: `**Combat Style Categories:**
+
+🛡️ **Tank Enemies** - Defensive powerhouses
+• High HP (150-300% normal) and DEF (+40% base defense)
+• Low SPD (-30% base speed) making them predictable
+• Powerful but infrequent attacks that can devastate unprepared opponents
+• Strategy: Use hit-and-run tactics, focus on speed and critical hits
+
+🏃 **Agile Enemies** - Speed demons and dodge specialists  
+• High SPD (+50% base speed) and enhanced dodge rates
+• Low DEF (-40% base defense) making them fragile when hit
+• Multiple quick attacks per turn cycle
+• Strategy: Tank their attacks and capitalize on their low defense
+
+⚔️ **Aggressive Enemies** - Relentless attackers
+• High ATK (+35% base attack) with enhanced critical hit rates
+• Rushdown tactics focusing on overwhelming offense
+• Moderate stats in other areas
+• Strategy: Prioritize defense and counter-attack opportunities
+
+🛡️ **Defensive Enemies** - Fortress-style opponents
+• Extremely high DEF (+60% base defense) and damage reduction
+• Turtle-like combat style with patient, methodical attacks
+• Often possess damage reflection or retaliation abilities
+• Strategy: Use armor-piercing abilities or outlast through superior resources
+
+💨 **Evasive Enemies** - Masters of hit-and-run
+• Extreme SPD (+70% base speed) with enhanced escape abilities
+• Very low DEF (-50% base defense) but difficult to pin down
+• Guerrilla warfare tactics with surprise attacks
+• Strategy: Use area-of-effect abilities or predict their movement patterns
+
+🐝 **Swarm Enemies** - Strength in numbers
+• Multiple entities acting as single combat encounter
+• Individual components are weak but collectively dangerous
+• Overwhelming through sheer number of attacks per turn
+• Strategy: Area-of-effect abilities or divide-and-conquer tactics
+
+🎲 **Erratic Enemies** - Unpredictable chaos fighters
+• Random stat fluctuations each turn cycle
+• Abilities that change mid-combat without warning
+• Impossible to predict or strategize against consistently
+• Strategy: Adaptability and quick reaction to changing circumstances
+
+🏹 **Hit-and-Run Enemies** - Tactical strikers
+• Balanced stats with emphasis on tactical positioning
+• Strike hard then retreat to defensive positions
+• Often possess terrain manipulation or mobility abilities
+• Strategy: Control the battlefield and limit their movement options`
+            },
+            {
+                name: 'Advanced Combat Mechanics',
+                content: `**Elemental Weakness and Resistance System:**
+
+**Weakness Interactions (+30% damage):**
+• Fire vs Ice/Plant enemies (melting/burning effects)
+• Water vs Fire/Earth enemies (extinguishing/erosion effects)
+• Lightning vs Water/Metal enemies (conductivity enhancement)
+• Light vs Dark/Undead enemies (purification effects)
+• Physical vs Magical constructs (dispelling effects)
+
+**Resistance Interactions (-30% damage):**
+• Fire vs Fire enemies (natural immunity)
+• Water vs Water enemies (elemental harmony)
+• Dark vs Light attacks (opposing force neutralization)
+• Physical vs Incorporeal enemies (reduced physical interaction)
+• Magic vs Anti-magic enemies (spell resistance)
+
+**Status Effects and Conditions:**
+
+**Positive Status Effects:**
+• **Blessed:** +20% all stats, +10% critical hit rate
+• **Haste:** +2 actions per turn, +15% dodge chance
+• **Fortified:** +50% DEF, immunity to status debuffs
+• **Focused:** +30% ATK, guaranteed critical on next attack
+
+**Negative Status Effects:**
+• **Poisoned:** -5 HP per turn, -10% all stats
+• **Cursed:** -20% all stats, -15% accuracy
+• **Stunned:** Skip next turn, -50% DEF
+• **Blinded:** -40% accuracy, -20% dodge chance
+
+**Environmental Combat Factors:**
+
+**Terrain Advantages:**
+• High Ground: +15% ATK, +10% dodge chance
+• Water Combat: Bonus for Water-aligned abilities
+• Confined Spaces: -20% SPD, enhanced defensive positioning
+• Open Areas: +25% SPD, enhanced mobility options
+
+**Weather and Atmospheric Conditions:**
+• Rain: -10% accuracy, +20% Lightning damage
+• Fog: -25% accuracy for both sides, enhanced stealth
+• Sunlight: +15% Holy damage, -20% Dark abilities
+• Night: +20% Dark abilities, -10% accuracy without darkvision
+
+**Combat Encounter Probability Formula:**
+Base Rate (30%) + Quest Category Modifier + Level Scaling + Random Variation
+• Hunting Quests: +15% encounter rate
+• Protection Quests: +12% encounter rate
+• Training Quests: +20% encounter rate
+• Gathering Quests: +5% encounter rate
+• Community Work: -8% encounter rate
+• Simple Errands: -5% encounter rate
+• Level Scaling: +2% per level above 1
+• Final range: 10% minimum, 55% maximum encounter rate`
+            },
+            {
+                name: 'Enemy Bestiary',
+                content: `**Forest and Nature Enemies:**
+
+**🌲 Forest Goblin** (Levels 1-3)
+• Combat Style: Swarm + Erratic
+• HP: 25-35, ATK: 8-12, DEF: 3-5, SPD: 12-18
+• Special Ability: Pack Tactics (15% chance) - Call reinforcements
+• Weakness: Fire damage (+30%), Light magic (+20%)
+• Resistance: Nature magic (-20%)
+• Drops: Goblin Ear, Forest Herbs, Small Coins
+
+**🐺 Forest Wolf** (Levels 2-5)
+• Combat Style: Aggressive + Hit-and-Run
+• HP: 40-60, ATK: 15-22, DEF: 8-12, SPD: 20-28
+• Special Ability: Pack Howl (20% chance) - +25% ATK for 3 turns
+• Weakness: Silver weapons (+40%), Fire damage (+25%)
+• Resistance: Physical damage (-15% when in pack)
+• Drops: Wolf Pelt, Fang, Beast Essence
+
+**🕷️ Cave Spider** (Levels 3-7)
+• Combat Style: Evasive + Defensive
+• HP: 30-45, ATK: 12-18, DEF: 15-22, SPD: 25-35
+• Special Ability: Web Shot (25% chance) - Reduce enemy SPD by 50% for 2 turns
+• Weakness: Fire damage (+35%), Crushing weapons (+20%)
+• Resistance: Poison damage (-40%), Piercing weapons (-25%)
+• Drops: Spider Silk, Venom Sac, Cave Minerals
+
+**🐗 Wild Boar** (Levels 4-8)
+• Combat Style: Tank + Aggressive
+• HP: 80-120, ATK: 20-28, DEF: 18-25, SPD: 8-15
+• Special Ability: Tusked Charge (18% chance) - Double damage attack, +50% crit
+• Weakness: Spear weapons (+30%), Lightning damage (+25%)
+• Resistance: Blunt weapons (-20%), Earth damage (-30%)
+• Drops: Boar Hide, Tusk, Wild Meat
+
+**💧 Water Slime** (Levels 1-4)
+• Combat Style: Defensive + Erratic
+• HP: 35-50, ATK: 6-10, DEF: 20-30, SPD: 5-12
+• Special Ability: Split (12% chance) - Create smaller copy when damaged
+• Weakness: Lightning damage (+40%), Salt-based attacks (+50%)
+• Resistance: Physical damage (-35%), Water damage (-60%)
+• Drops: Slime Core, Purified Water, Gelatinous Substance
+
+**Humanoid Enemies:**
+
+**🗡️ Bandit Scout** (Levels 3-6)
+• Combat Style: Hit-and-Run + Agile
+• HP: 45-65, ATK: 16-24, DEF: 10-15, SPD: 22-30
+• Special Ability: Sneak Attack (22% chance) - Ignore DEF, +100% crit chance
+• Weakness: Holy damage (+25%), Area-of-effect attacks (+20%)
+• Resistance: Stealth detection (-30%)
+• Drops: Bandit Blade, Leather Armor, Stolen Goods
+
+**🛡️ Guard Captain** (Levels 5-9)
+• Combat Style: Tank + Defensive
+• HP: 100-140, ATK: 18-26, DEF: 25-35, SPD: 12-18
+• Special Ability: Rally Cry (15% chance) - +30% all stats for 3 turns
+• Weakness: Armor-piercing attacks (+35%), Magic damage (+20%)
+• Resistance: Physical damage (-25%), Fear effects (-50%)
+• Drops: Captain's Sword, Chain Mail, Authority Badge
+
+**Magical and Supernatural Enemies:**
+
+**✨ Will-o'-Wisp** (Levels 4-8)
+• Combat Style: Evasive + Erratic
+• HP: 25-40, ATK: 14-20, DEF: 5-10, SPD: 35-45
+• Special Ability: Phase (30% chance) - Become incorporeal, immune to physical
+• Weakness: Light magic (+40%), Iron weapons (+30%)
+• Resistance: All elemental damage (-20%), Physical when phased (-90%)
+• Drops: Wisp Essence, Ethereal Fragment, Spectral Light
+
+**🎃 Animated Scarecrow** (Levels 6-10)
+• Combat Style: Defensive + Swarm
+• HP: 70-100, ATK: 15-22, DEF: 22-30, SPD: 8-15
+• Special Ability: Confuse (20% chance) - Enemy attacks random target for 2 turns
+• Weakness: Fire damage (+45%), Dispel magic (+35%)
+• Resistance: Physical damage (-30%), Mental effects (-40%)
+• Drops: Enchanted Straw, Magic Binding, Harvest Charm
+
+**🗿 Stone Golem** (Levels 8-15)
+• Combat Style: Tank + Defensive
+• HP: 150-250, ATK: 25-35, DEF: 40-55, SPD: 5-10
+• Special Ability: Stone Skin (25% chance) - +100% DEF for 3 turns
+• Weakness: Lightning damage (+30%), Hammer weapons (+40%)
+• Resistance: All physical damage (-40%), Earth damage (-60%)
+• Drops: Golem Core, Enchanted Stone, Earth Essence`
+            }
+        ]
+    },
+    progression: {
+        title: '📈 Character Progression',
+        description: 'Level up, unlock abilities, and grow stronger',
+        sections: [
+            {
+                name: 'Experience and Leveling System',
+                content: `**XP Requirements and Scaling:**
+
+**Level Progression Formula:**
+• Level 1 → 2: 100 XP
+• Level 2 → 3: 200 XP  
+• Level 3 → 4: 300 XP
+• Pattern: Each level requires (Current Level × 100) XP
+• Example: Level 10 → 11 requires 1,000 XP
+
+**Cumulative XP Requirements:**
+• Level 5: 1,500 total XP
+• Level 10: 5,500 total XP
+• Level 15: 12,000 total XP
+• Level 20: 21,000 total XP
+• Level 25: 32,500 total XP
+• Level 30: 46,500 total XP
+
+**Level Up Statistical Bonuses:**
+Every level advancement grants consistent growth:
+• **+10 HP** (both current and maximum HP)
+• **+2 ATK** (base attack power increase)
+• **+1 DEF** (base defense rating increase)
+• **+1 SPD** (base speed factor increase)
+
+**Example Character Progression:**
+Level 1 Base: 50 HP, 10 ATK, 5 DEF, 8 SPD
+Level 10: 140 HP, 28 ATK, 14 DEF, 17 SPD
+Level 20: 240 HP, 48 ATK, 24 DEF, 27 SPD
+
+**XP Source Categories and Values:**
+
+**Quest Completion XP:**
+• Gathering Quests: 50-150 base XP
+• Hunting Quests: 100-300 base XP
+• Delivery Quests: 75-200 base XP
+• Protection Quests: 120-250 base XP
+• Training Quests: 150-400 base XP
+• Community Quests: 80-180 base XP
+• Errand Quests: 40-120 base XP
+
+**Combat Victory Bonuses:**
+• Enemy defeat: 10-50 XP based on enemy strength
+• Perfect victory (no damage taken): +25% bonus
+• Weakness exploitation: +15% bonus
+• Critical hit finish: +10% bonus
+
+**Faction Multiplier Effects:**
+XP gains are modified by faction affinity with quest types:
+• One Piece Pirates: +20% on Gathering, +30% on Delivery
+• Naruto Shinobi: +40% on Protection, +50% on Training  
+• Jujutsu Sorcerers: +40% on Hunting, +30% on Training
+• Demon Slayers: +50% on Hunting, +40% on Training
+
+**Special XP Sources:**
+• Item Usage: XP Potions provide 25-100 instant XP
+• Achievement Completion: Major milestones grant 200-500 XP
+• First-time quest type completion: +50% bonus XP
+• Consecutive quest success streaks: Cumulative +5% per quest (max +50%)`
+            },
+            {
+                name: 'Faction Ability Unlock System',
+                content: `**Ability Unlock Requirements:**
+Faction abilities require BOTH level thresholds AND specific achievement conditions.
+
+**🏴‍☠️ One Piece Pirates Unlock Conditions:**
+
+**Level 3 - Sea Legs:**
+• Requirements: Complete 5 Delivery quests, defeat 3 water-based enemies
+• Effect: Immunity to water debuffs, +10% swimming speed
+• Advanced: Can walk on water surfaces during certain quests
+
+**Level 7 - Treasure Sense:**
+• Requirements: Find 10 rare items, complete 15 Gathering quests
+• Effect: +25% item discovery rate, detect hidden treasures
+• Advanced: Treasure maps reveal additional secret locations
+
+**Level 12 - Haki Awakening:**
+• Requirements: Win 20 combat encounters, complete "Willpower Trial" quest
+• Effect: Observation Haki (+15% dodge), Armament Haki (+10% ATK/DEF)
+• Advanced: Can sense enemy intentions and hidden enemies
+
+**Level 18 - Devil Fruit Resonance:**
+• Requirements: Consume rare Devil Fruit item, master all basic abilities
+• Effect: Gain unique Devil Fruit power based on character personality
+• Advanced: Power awakening unlocks at Level 25
+
+**Level 25 - Conqueror's Will:**
+• Requirements: Defeat 50 enemies, lead successful group activities
+• Effect: Intimidate weaker enemies (auto-win vs enemies 5+ levels lower)
+• Advanced: Can influence NPC behavior during quests
+
+**🥷 Naruto Shinobi Unlock Conditions:**
+
+**Level 4 - Shadow Clone Technique:**
+• Requirements: Complete 8 Training quests, learn "Basic Ninjutsu" from mentor
+• Effect: Double XP gain from Training quests, can attempt multiple objectives
+• Advanced: Can send clones on simple solo quests
+
+**Level 8 - Elemental Affinity:**
+• Requirements: Complete elemental trial quests for each element
+• Effect: Choose primary element (Fire/Water/Earth/Wind/Lightning)
+• Advanced: Secondary element unlocks at Level 15
+
+**Level 13 - Advanced Ninjutsu:**
+• Requirements: Master chosen element, complete 25 stealth missions
+• Effect: Combine basic techniques for enhanced effects
+• Advanced: Create custom jutsu combinations
+
+**Level 19 - Sage Mode Training:**
+• Requirements: Find Sage training location, complete "Stillness Trial"
+• Effect: +35% all combat stats when activated, enhanced perception
+• Advanced: Perfect Sage Mode eliminates activation requirements
+
+**Level 28 - Tailed Beast Partnership:**
+• Requirements: Complete "Tailed Beast Encounter" legendary quest chain
+• Effect: Massive temporary power boost, unique chakra abilities
+• Advanced: Full synchronization unlocks additional transformation stages
+
+**👁️ Jujutsu Sorcerers Unlock Conditions:**
+
+**Level 5 - Cursed Technique Development:**
+• Requirements: Defeat 15 cursed enemies, understand "Cursed Energy Theory"
+• Effect: Develop personal cursed technique based on character traits
+• Advanced: Technique evolution possible through specific achievement paths
+
+**Level 9 - Reverse Cursed Technique:**
+• Requirements: Master basic cursed energy, complete "Life and Death" trial
+• Effect: Convert cursed energy to healing energy, remove debuffs
+• Advanced: Can heal others and reverse certain fatal conditions
+
+**Level 15 - Simple Domain:**
+• Requirements: Understand domain theory, survive "Domain Invasion" event
+• Effect: Create protective barrier, neutralize enemy domain advantages
+• Advanced: Simple Domain can be maintained continuously
+
+**Level 22 - Domain Expansion:**
+• Requirements: Master Simple Domain, complete "Inner World" meditation
+• Effect: Create personal reality space with guaranteed technique hits
+• Advanced: Domain refinement increases size and complexity
+
+**Level 30 - Maximum Technique:**
+• Requirements: Master all previous abilities, complete "Ultimate Trial"
+• Effect: Unleash maximum potential of personal cursed technique
+• Advanced: Can develop multiple Maximum variations
+
+**⚔️ Demon Slayers Unlock Conditions:**
+
+**Level 4 - Breathing Style Mastery:**
+• Requirements: Choose mentor, complete breathing training regimen
+• Effect: Select specialized breathing style (Water/Thunder/Flame/Stone/Wind)
+• Advanced: Each style has unique form progressions
+
+**Level 8 - Enhanced Blade Techniques:**
+• Requirements: Master 10 basic sword forms, defeat 20 demons
+• Effect: Advanced swordsmanship techniques, blade technique combinations
+• Advanced: Can create personal sword forms
+
+**Level 14 - Demon Slayer Mark:**
+• Requirements: Survive near-death experience, push beyond normal limits
+• Effect: +50% all physical stats when activated, enhanced abilities
+• Advanced: Permanent Mark activation at extreme mastery levels
+
+**Level 20 - See-Through World:**
+• Requirements: Achieve perfect Mark control, complete "Clarity Trial"
+• Effect: See enemy weak points, predict attacks, enhanced perception
+• Advanced: Can see through illusions and detect hidden enemies
+
+**Level 26 - Breathing Style Evolution:**
+• Requirements: Master chosen style completely, create innovation
+• Effect: Develop unique breathing techniques, combine multiple styles
+• Advanced: Can teach evolved techniques to other Demon Slayers`
+            },
+            {
+                name: 'Item Usage and Enhancement System',
+                content: `**Consumable Item Categories:**
+
+**🍖 HP Recovery Items:**
+• **Small Health Potion:** Restores 25 HP instantly
+• **Health Potion:** Restores 50 HP instantly  
+• **Greater Health Potion:** Restores 100 HP instantly
+• **Sea King Meat (Pirates):** Restores 75 HP + 10 temporary ATK for 3 quests
+• **Recovery Pill (Demon Slayers):** Restores 20 HP per turn for 5 turns
+
+**💙 MP/Energy Recovery Items:**
+• **Soldier Pill (Shinobi):** Restores 30 chakra + removes fatigue
+• **Cursed Energy Serum (Sorcerers):** Restores 40 cursed energy + cleanses curses
+• **Stamina Restoration Draught:** Restores energy for all factions
+
+**⭐ XP Enhancement Items:**
+• **Experience Crystal (Small):** Grants 25 XP instantly
+• **Experience Crystal (Medium):** Grants 50 XP instantly
+• **Experience Crystal (Large):** Grants 100 XP instantly
+• **Training Manual:** Grants 75 XP + increases next Training quest XP by 50%
+
+**💰 Wealth Items:**
+• **Gold Pouch (Small):** Grants 25-50 gold
+• **Treasure Chest:** Grants 100-200 gold + chance for rare item
+• **Merchant's Ledger:** Grants 75 gold + increases next Delivery quest rewards
+
+**🛡️ Temporary Buff Items:**
+• **Warrior's Elixir:** +15 ATK for next 3 combat encounters
+• **Guardian's Blessing:** +20 DEF for next 3 combat encounters  
+• **Speed Enhancer:** +10 SPD for next 5 quests
+• **Lucky Charm:** +25% critical hit rate for next 2 combat encounters
+
+**💨 Utility Items:**
+• **Smoke Bomb (Shinobi):** Escape combat encounter without penalty
+• **Flash Powder:** Blind enemy (-50% accuracy for 3 turns)
+• **Rope and Grapple:** Automatically succeed climbing challenges
+• **Lockpick Set:** Automatically succeed lock/trap challenges
+
+**Item Stacking and Combination Effects:**
+• Multiple HP restoration items can stack but with diminishing returns
+• Buff items of same type override each other (only strongest active)
+• Utility items can be combined for enhanced effects
+• Some faction-specific items have unique interactions
+
+**Item Quality Tiers:**
+• **Common (White):** Standard effectiveness, widely available
+• **Uncommon (Green):** +25% effectiveness, moderate rarity
+• **Rare (Blue):** +50% effectiveness, rare quest rewards
+• **Epic (Purple):** +100% effectiveness, very rare drops
+• **Legendary (Orange):** +200% effectiveness, unique items`
+            },
+            {
+                name: 'Economic System and Gold Usage',
+                content: `**Gold Acquisition Sources:**
+
+**Quest Completion Rewards:**
+Base gold rewards are modified by faction bonuses and quest success rates:
+• Gathering Quests: 20-60 base gold
+• Hunting Quests: 30-80 base gold  
+• Delivery Quests: 40-100 base gold
+• Protection Quests: 50-120 base gold
+• Training Quests: 15-50 base gold (knowledge > wealth)
+• Community Quests: 35-90 base gold
+• Errand Quests: 25-75 base gold
+
+**Combat Victory Bonuses:**
+• Enemy defeat: 5-25 gold based on enemy strength
+• Perfect victory: +50% gold bonus
+• Rare enemy defeat: +100-500% gold bonus
+• Boss enemy defeat: 100-500 gold bonus
+
+**Faction Economic Bonuses:**
+• **One Piece Pirates:** +40% gold from Gathering, +20% from Delivery
+• **Naruto Shinobi:** +30% gold from Protection, Mission efficiency bonuses
+• **Jujutsu Sorcerers:** +20% gold from Hunting, Curse removal fees
+• **Demon Slayers:** +30% gold from Hunting, +10% from Protection
+
+**Special Gold Sources:**
+• Treasure discoveries during quests: 50-500 gold
+• Rare item sales to NPCs: Variable pricing
+• Achievement bonuses: 100-1000 gold for major milestones
+• Daily login bonuses: 10-50 gold (planned feature)
+
+**Planned Gold Expenditure Systems:**
+
+**Equipment Shop (Future Implementation):**
+• **Weapon Upgrades:** 500-5000 gold for enhanced ATK bonuses
+• **Armor Sets:** 300-3000 gold for DEF and special resistances
+• **Accessories:** 200-2000 gold for unique passive abilities
+• **Faction Gear:** Premium equipment with faction-specific bonuses
+
+**Training Facilities (Future Implementation):**
+• **Skill Trainers:** 100-1000 gold for ability advancement
+• **Stat Enhancement:** 200-2000 gold for permanent small stat boosts
+• **Technique Learning:** 500-5000 gold for new combat abilities
+
+**Quest Enhancement Services (Future Implementation):**
+• **Information Brokers:** 50-200 gold for quest hints and enemy weaknesses
+• **Equipment Repair:** 25-500 gold for maintaining gear durability
+• **Travel Services:** 100-1000 gold for accessing distant quest locations
+
+**Social and Guild Systems (Future Implementation):**
+• **Guild Creation:** 5000 gold to establish player guild
+• **Guild Upgrades:** 1000-10000 gold for enhanced guild facilities
+• **Social Events:** 200-2000 gold for organizing community events`
+            }
+        ]
+    },
+    quests: {
+        title: '🎯 Quest System',
+        description: 'Embark on adventures and complete missions',
+        sections: [
+            {
+                name: 'Quest Category Deep Dive',
+                content: `**🌿 Gathering Quest Mechanics:**
+
+**Quest Types:**
+• **Herb Collection:** Gather medicinal plants from dangerous locations
+• **Mineral Mining:** Extract valuable ores from monster-infested caves
+• **Artifact Recovery:** Retrieve ancient items from ruins and dungeons
+• **Treasure Hunting:** Use maps and clues to find hidden caches
+
+**Success Rate Factors:**
+• Base success rate: 60-80% depending on quest difficulty
+• Character level vs quest level: ±5% per level difference
+• Faction bonus (Pirates): +15% success rate, +25% item discovery
+• Equipment bonuses: Compass (+10%), Detector (+15%), Maps (+20%)
+
+**Reward Structure:**
+• Base XP: 50-150, Gold: 20-60, Item chance: 40-60%
+• Faction multipliers: Pirates get +20% XP, +40% Gold, +25% Items
+• Critical success (20% chance): Double rewards + bonus rare item
+• Perfect execution: Additional environmental discovery bonuses
+
+**⚔️ Hunting Quest Mechanics:**
+
+**Quest Types:**
+• **Monster Elimination:** Clear specific creatures from territories
+• **Bounty Hunting:** Track and defeat notorious enemies
+• **Beast Subjugation:** Capture or defeat legendary creatures
+• **Demon Extermination:** Specialized supernatural entity removal
+
+**Combat Encounter Probability:**
+• Base encounter rate: 85-95% (intentionally combat-focused)
+• Enemy scaling: +1 level per character level above quest minimum
+• Multiple enemy encounters possible (2-4 enemies in advanced hunts)
+• Boss encounters: 25% chance for significantly stronger unique enemy
+
+**Reward Structure:**
+• Base XP: 100-300, Gold: 30-80, Item chance: 50-70%
+• Combat victory bonuses stack with quest completion rewards
+• Faction multipliers: Demon Slayers +50% XP, Sorcerers +40% XP
+• Rare material drops: 15-30% chance for crafting components
+
+**📦 Delivery Quest Mechanics:**
+
+**Quest Types:**
+• **Package Transport:** Deliver items between distant locations
+• **Message Running:** Carry important communications across territories
+• **Escort Missions:** Protect travelers during dangerous journeys
+• **Supply Lines:** Establish and maintain resource distribution networks
+
+**Success Rate Factors:**
+• Base success rate: 70-85% depending on distance and danger
+• Speed-based bonuses: High SPD characters get +10% success rate
+• Faction bonuses: Shinobi +30% XP, Pirates +30% XP from navigation skills
+• Weather and terrain can modify success rates ±15%
+
+**Reward Structure:**
+• Base XP: 75-200, Gold: 40-100, Item chance: 30-50%
+• Distance bonuses: Longer deliveries provide exponentially better rewards
+• Reputation system: Successful deliveries improve NPC relationships
+• Time bonuses: Completing ahead of schedule grants +25% rewards
+
+**🛡️ Protection Quest Mechanics:**
+
+**Quest Types:**
+• **Settlement Defense:** Protect villages from monster raids
+• **VIP Escort:** Guard important individuals during travel
+• **Caravan Protection:** Defend merchant convoys from bandits
+• **Sacred Site Guardian:** Prevent desecration of holy locations
+
+**Dynamic Threat System:**
+• Threat level scales with character capability and quest duration
+• Multiple waves of enemies possible during extended protection missions
+• Environmental hazards can complicate defensive positioning
+• Civilian safety affects quest success rating and rewards
+
+**Reward Structure:**
+• Base XP: 120-250, Gold: 50-120, Item chance: 35-55%
+• Faction bonuses: Shinobi +40% XP, Demon Slayers +20% XP
+• Perfect protection (no casualties): +50% all rewards
+• Community reputation significantly increased on success`
+            },
+            {
+                name: 'Advanced Quest Mechanics',
+                content: `**🏋️ Training Quest Deep Analysis:**
+
+**Quest Types:**
+• **Physical Conditioning:** Intensive stat-building exercises
+• **Technique Mastery:** Practice and refine faction-specific abilities
+• **Sparring Matches:** Combat training against skilled opponents
+• **Meditation Retreats:** Mental and spiritual development sessions
+
+**Unique Training Mechanics:**
+• **Double XP Window:** Training quests can trigger "breakthrough moments"
+• **Stat Focus:** Choose which stats receive enhanced development
+• **Ability Progress:** Direct progress toward faction ability unlocks
+• **Master Encounters:** Chance to meet legendary trainers for unique benefits
+
+**Faction-Specific Training:**
+• **Pirates:** Treasure hunting drills, navigation training, crew coordination
+• **Shinobi:** Stealth exercises, chakra control, elemental technique practice
+• **Sorcerers:** Cursed energy manipulation, technique refinement, domain theory
+• **Demon Slayers:** Breathing technique perfection, sword form mastery, endurance trials
+
+**🏘️ Community Quest Ecosystem:**
+
+**Quest Types:**
+• **Construction Projects:** Help build or repair community infrastructure
+• **Agricultural Assistance:** Support farming and food production efforts
+• **Festival Organization:** Plan and execute community celebrations
+• **Conflict Resolution:** Mediate disputes between community members
+
+**Community Reputation System:**
+• Reputation levels: Unknown → Recognized → Trusted → Honored → Legendary
+• Higher reputation unlocks exclusive quest types and better rewards
+• Some faction abilities require specific community reputation levels
+• Reputation affects NPC interactions and shop prices
+
+**📋 Errand Quest Optimization:**
+
+**Quest Types:**
+• **Item Retrieval:** Fetch specific objects from various locations
+• **Information Gathering:** Collect data, rumors, and intelligence
+• **Simple Repairs:** Fix basic equipment and infrastructure issues
+• **Administrative Tasks:** Help with record-keeping and organization
+
+**Efficiency Strategies:**
+• Batch similar errands for travel optimization
+• Build relationships with quest-givers for repeat business
+• Use errands to explore new areas safely
+• Perfect for new characters to build basic experience safely
+
+**Quest Chain System:**
+
+**Chain Categories:**
+• **Storyline Chains:** Multi-part narrative quests with developing plots
+• **Reputation Chains:** Series of quests building relationships with factions
+• **Ability Chains:** Prerequisite quests for unlocking faction abilities
+• **Regional Chains:** Area-specific quest series revealing local lore
+
+**Chain Benefits:**
+• Completing full chains provides massive bonus rewards
+• Chain progression unlocks unique areas and NPCs
+• Some chains are faction-exclusive and reveal faction secrets
+• Chain completion often required for major ability unlocks`
+            },
+            {
+                name: 'Faction Quest Synergies',
+                content: `**🏴‍☠️ One Piece Pirates Quest Mastery:**
+
+**Optimal Quest Rotation:**
+1. **Gathering (Primary):** +20% XP, +40% Gold, +25% Items
+2. **Delivery (Secondary):** +30% XP, +20% Gold, +10% Items
+3. **Community (Avoid):** -20% XP, -10% Gold (pirates are outsiders)
+
+**Pirate-Specific Quest Features:**
+• **Treasure Maps:** Gathering quests can discover map fragments
+• **Naval Adventures:** Special water-based delivery missions available
+• **Pirate Code:** Honor-based quest resolution options unlock unique rewards
+• **Crew Dynamics:** Group quest bonuses when multiple pirates participate
+
+**Advanced Strategies:**
+• Focus on coastal and island locations for maximum faction synergy
+• Prioritize quests involving rare item discovery and treasure hunting
+• Build reputation with merchant factions for exclusive delivery contracts
+• Seek out legendary treasure quests that unlock Devil Fruit items
+
+**🥷 Naruto Shinobi Quest Mastery:**
+
+**Optimal Quest Rotation:**
+1. **Protection (Primary):** +40% XP, +30% Gold, +20% Items
+2. **Training (Secondary):** +50% XP, +30% Items (mission specialists)
+3. **Delivery (Tertiary):** +30% XP, +10% Gold (excellent messengers)
+
+**Shinobi-Specific Quest Features:**
+• **Stealth Options:** Many quests offer stealth-based resolution paths
+• **Information Network:** Access to exclusive intel-gathering missions
+• **Village Loyalty:** Completing village protection missions unlocks advanced training
+• **Shadow Clone Applications:** Can attempt multiple quest objectives simultaneously
+
+**Advanced Strategies:**
+• Develop relationships with village elders for exclusive protection contracts
+• Use training quests strategically to accelerate ability unlock progress
+• Master stealth mechanics to avoid unnecessary combat encounters
+• Participate in group missions for enhanced village reputation gains
+
+**👁️ Jujutsu Sorcerers Quest Mastery:**
+
+**Optimal Quest Rotation:**
+1. **Hunting (Primary):** +40% XP, +20% Gold, +30% Items
+2. **Training (Secondary):** +30% XP, +40% Items (technique development)
+3. **Community (Avoid):** -10% XP, -20% Gold (secretive nature)
+
+**Sorcerer-Specific Quest Features:**
+• **Curse Detection:** Identify and purify cursed locations and objects
+• **Supernatural Encounters:** Exclusive access to otherworldly quest types
+• **Technique Research:** Training quests can unlock cursed technique variations
+• **Domain Investigations:** Explore mysterious dimensional anomalies
+
+**Advanced Strategies:**
+• Prioritize hunts involving cursed spirits and supernatural entities
+• Use training quests to develop unique cursed technique combinations
+• Seek out ancient sites and forbidden knowledge for technique advancement
+• Collaborate with other sorcerers for domain expansion training
+
+**⚔️ Demon Slayers Quest Mastery:**
+
+**Optimal Quest Rotation:**
+1. **Hunting (Primary):** +50% XP, +30% Gold, +40% Items
+2. **Training (Secondary):** +40% XP, +30% Items (intensive culture)
+3. **Protection (Tertiary):** +20% XP, +10% Gold, +20% Items
+
+**Demon Slayer-Specific Quest Features:**
+• **Demon Tracking:** Specialized hunting missions targeting demonic entities
+• **Breathing Mastery:** Training quests directly advance breathing technique levels
+• **Corps Missions:** Official Demon Slayer Corps assignments with enhanced rewards
+• **Sword Saint Encounters:** Rare training opportunities with legendary swordmasters
+
+**Advanced Strategies:**
+• Focus intensively on hunting missions for rapid level advancement
+• Use training quests to perfect breathing techniques and unlock new forms
+• Build relationships with Corps leadership for access to advanced missions
+• Seek out legendary demons for maximum challenge and reward potential`
+            }
+        ]
+    },
+    items: {
+        title: '🎒 Items & Inventory',
+        description: 'Manage your equipment and consumables',
+        sections: [
+            {
+                name: 'Item Usage Mastery',
+                content: `**Command Syntax and Advanced Usage:**
+
+**Basic Usage:**
+\`/use <item_name> [quantity]\`
+• Auto-complete suggests items from your current inventory
+• Partial name matching: "health" matches "Health Potion"
+• Case-insensitive: "HEALTH POTION" = "health potion"
+• Default quantity is 1 if not specified
+
+**Advanced Usage Examples:**
+\`/use Health Potion 3\` - Use 3 Health Potions simultaneously
+\`/use XP Crystal 5\` - Consume 5 XP Crystals for maximum experience gain
+\`/use Warrior Elixir 1\` - Activate combat buff for next encounters
+
+**Multiple Effect Resolution:**
+Many items provide multiple benefits that all activate simultaneously:
+
+**Complex Item Examples:**
+• **Sea King Meat:** Restores 75 HP + grants +10 ATK for next 3 quests
+• **Soldier Pill:** Restores 30 chakra + removes all fatigue debuffs + grants energy
+• **Cursed Energy Serum:** Restores 40 cursed energy + cleanses curse debuffs + enhances technique power
+
+**Buff Stacking Rules:**
+• **HP/MP Restoration:** Multiple healing items stack fully
+• **Stat Buffs:** Only the strongest buff of each type remains active
+• **Duration Buffs:** Using same buff type resets duration to maximum
+• **Utility Effects:** Most utility effects can stack and combine
+
+**Item Interaction Systems:**
+• **Faction Synergy:** Some items have enhanced effects for specific factions
+• **Timing Strategy:** Buff items are best used before anticipated challenges
+• **Inventory Management:** Items have stack limits and inventory space considerations
+• **Quest Integration:** Some items are specifically designed for certain quest types`
+            },
+            {
+                name: 'Comprehensive Item Categories',
+                content: `**💊 Consumable Items - Complete Catalog:**
+
+**Basic Restoration Items:**
+• **Small Health Potion** - 25 HP, common quest reward
+• **Health Potion** - 50 HP, standard healing item  
+• **Greater Health Potion** - 100 HP, rare healing item
+• **Master Health Elixir** - 200 HP + removes all debuffs, very rare
+• **Mana Restoration Draught** - Restores all MP/chakra/cursed energy
+• **Rejuvenation Tonic** - 50 HP + 25 MP + removes fatigue
+
+**Experience Enhancement Items:**
+• **Experience Crystal (Tiny)** - 10 XP, common drop
+• **Experience Crystal (Small)** - 25 XP, uncommon reward
+• **Experience Crystal (Medium)** - 50 XP, rare quest completion
+• **Experience Crystal (Large)** - 100 XP, very rare achievement
+• **Master's Tome** - 150 XP + unlocks technique hint
+• **Ancient Scroll** - 200 XP + reveals hidden quest location
+
+**Combat Enhancement Items:**
+• **Warrior's Draught** - +10 ATK for 3 combat encounters
+• **Warrior's Elixir** - +15 ATK for 3 combat encounters
+• **Berserker's Fury** - +25 ATK, -10 DEF for 2 encounters
+• **Guardian's Blessing** - +20 DEF for 3 combat encounters
+• **Iron Skin Potion** - +30 DEF, -5 SPD for 4 encounters
+• **Speed Enhancer** - +10 SPD for 5 quests
+• **Lightning Reflexes** - +15 SPD, +20% dodge for 2 encounters
+
+**Faction-Specific Consumables:**
+• **Sea King Meat (Pirates)** - 75 HP + 10 ATK for 3 quests + treasure sense boost
+• **Soldier Pill (Shinobi)** - 30 chakra + removes fatigue + stealth bonus
+• **Cursed Energy Serum (Sorcerers)** - 40 cursed energy + curse cleansing + technique power
+• **Recovery Pill (Demon Slayers)** - 20 HP per turn for 5 turns + poison immunity
+• **Sunlight Essence (Demon Slayers)** - +50% damage vs demons for 1 encounter
+
+**⚔️ Equipment System (Current and Planned):**
+
+**Weapon Categories:**
+• **Swords:** High ATK, balanced stats, critical hit bonuses
+• **Axes:** Very high ATK, low SPD, armor penetration
+• **Spears:** Medium ATK, high reach, defensive bonuses
+• **Daggers:** Low ATK, very high SPD, stealth bonuses
+• **Ranged Weapons:** Medium ATK, SPD bonuses, range advantages
+
+**Armor Categories:**
+• **Heavy Armor:** Very high DEF, -SPD penalty, physical resistance
+• **Medium Armor:** Balanced DEF/SPD, moderate resistances
+• **Light Armor:** Low DEF, +SPD bonus, mobility advantages
+• **Robes:** Low DEF, +MP bonus, magical resistances
+• **Specialized Gear:** Faction-specific equipment with unique bonuses
+
+**Accessory Categories:**
+• **Rings:** Small stat bonuses, special passive abilities
+• **Amulets:** Moderate stat bonuses, elemental resistances
+• **Charms:** Utility effects, luck bonuses, faction synergies
+• **Tools:** Quest-specific bonuses, exploration advantages
+
+**🎁 Special and Quest Items:**
+
+**Rare Material Components:**
+• **Dragon Scale** - Crafting component for legendary armor
+• **Moonstone Shard** - Magical enhancement material
+• **Ancient Rune** - Weapon enchantment component
+• **Demon Horn** - Specialized crafting material for demon slayer gear
+• **Chakra Crystal** - Shinobi technique enhancement material
+
+**Quest-Specific Items:**
+• **Treasure Map Fragment** - Combine 5 for complete treasure map
+• **Village Pass** - Access to restricted areas during missions
+• **Demon Slayer Badge** - Proof of Corps membership, unlocks exclusive areas
+• **Sage Medallion** - Required for advanced sage training quests
+• **Cursed Talisman** - Dangerous but powerful sorcerer research material`
+            }
+        ]
+    },
+    commands: {
+        title: '💻 Command Reference',
+        description: 'Complete technical reference for all bot commands',
+        sections: [
+            {
+                name: 'Character Management Commands',
+                content: `**\`/create <faction> [character_name]\`**
+Initialize your Cross Realm Chronicles character and begin your adventure.
+
+**Parameters:**
+• **faction (required):** Choose from four available options:
+  - \`one_piece\` - Become a freedom-loving pirate with treasure hunting abilities
+  - \`naruto\` - Join the shinobi ranks with stealth and chakra techniques
+  - \`jujutsu_kaisen\` - Master cursed energy as a supernatural sorcerer
+  - \`demon_slayer\` - Wield breathing techniques as a demon hunting warrior
+
+• **character_name (optional):** Custom character identity
+  - Maximum 32 characters including spaces and special characters
+  - If omitted, uses your Discord username as character name
+  - Examples: "Monkey D. Luffy", "Shadow Master", "Curse Breaker"
+
+**Creation Effects:**
+• Assigns faction-specific starting statistics and abilities
+• Provides faction-appropriate starting equipment loadout
+• Unlocks faction-specific quest bonuses and progression paths
+• **WARNING:** Faction choice is permanent and cannot be changed without character reset
+
+**Error Handling:**
+• Invalid faction names display available options
+• Character name too long prompts for shorter alternative
+• Existing character prevents creation (use /reset first)
+
+**\`/profile [user]\`**
+Display comprehensive character information and progression statistics.
+
+**Parameters:**
+• **user (optional):** Discord user to view profile for
+  - Defaults to command user if not specified
+  - Can view any player's profile for comparison
+  - Respects privacy settings if implemented
+
+**Profile Information Displayed:**
+• **Basic Identity:** Character name, faction affiliation, current level
+• **Core Statistics:** HP, ATK, DEF, SPD with faction bonuses applied
+• **Progression Data:** Current XP, XP required for next level, total XP earned
+• **Wealth Status:** Current gold amount, lifetime gold earned
+• **Achievement Progress:** Faction ability unlocks, quest milestones
+• **Equipment Summary:** Currently equipped items and their bonuses
+
+**Advanced Features:**
+• Color-coded embeds matching faction themes
+• Progress bars showing XP advancement
+• Faction ability unlock preview for next milestones
+• Quest completion statistics and success rates
+
+**\`/reset\`**
+Permanently delete current character and all associated progress.
+
+**Safety Features:**
+• Requires explicit confirmation button click to prevent accidental deletion
+• Displays warning about permanent data loss
+• Shows current character level and progress before deletion
+• Cannot be undone - all progress, items, and achievements are lost
+
+**Reset Process:**
+1. Command displays current character summary and deletion warning
+2. User must click confirmation button within 60 seconds
+3. All character data is permanently removed from database
+4. User can immediately create new character with /create command
+
+**What Gets Deleted:**
+• All character statistics and progression
+• Complete inventory including rare and unique items
+• All quest completion history and achievements
+• Faction ability unlocks and training progress
+• Gold, XP, and accumulated resources`
+            },
+            {
+                name: 'Gameplay Commands',
+                content: `**\`/quest\`**
+Embark on procedurally generated adventures based on your character level and faction.
+
+**Quest Generation System:**
+• **Level Scaling:** Quest difficulty and rewards scale to character level
+• **Faction Bonuses:** Preferred quest types appear more frequently
+• **Success Calculation:** Based on character stats vs quest requirements
+• **Reward Calculation:** XP, gold, and items modified by faction multipliers
+
+**Quest Categories Available:**
+• **Gathering:** Resource collection, treasure hunting, exploration
+• **Hunting:** Monster elimination, bounty collection, combat missions
+• **Delivery:** Package transport, message running, escort missions
+• **Protection:** Settlement defense, VIP escort, caravan guarding
+• **Training:** Skill development, ability practice, stat improvement
+• **Community:** Village assistance, construction, social missions
+• **Errands:** Simple tasks, information gathering, basic assistance
+
+**Combat Integration:**
+• Enemy encounters possible during any quest (30% base chance)
+• Combat encounter rates vary by quest category and character level
+• Victory in combat provides bonus XP and gold beyond quest rewards
+• Defeat results in quest failure but character survives with minimal XP gain
+
+**\`/inventory [page]\`**
+Access organized display of all owned items with interactive usage options.
+
+**Inventory Organization:**
+• **Categories:** Consumables, Equipment, Quest Items, Materials
+• **Sorting Options:** By type, rarity, quantity, recent acquisition
+• **Pagination:** 12 items displayed per page with navigation controls
+• **Search Function:** Filter items by name, type, or effect
+
+**Interactive Features:**
+• **Dropdown Selection:** Choose items directly from inventory display
+• **Quantity Input:** Specify how many items to use via modal dialog
+• **Refresh Button:** Update inventory display after item usage
+• **Item Information:** Detailed tooltips showing item effects and descriptions
+
+**Item Display Information:**
+• Item name with rarity color coding
+• Current quantity owned and stack limits
+• Brief effect description and usage requirements
+• Faction compatibility indicators where relevant
+
+**\`/use <item> [quantity]\`**
+Consume items from inventory with intelligent auto-completion and batch usage.
+
+**Auto-Completion Features:**
+• **Fuzzy Matching:** Partial names automatically completed
+• **Smart Suggestions:** Only suggests actually owned items
+• **Case Insensitive:** Works regardless of capitalization
+• **Error Correction:** Suggests closest matches for typos
+
+**Usage Examples:**
+• \`/use Health Potion\` - Use 1 Health Potion
+• \`/use health 3\` - Use 3 Health Potions (fuzzy matching)
+• \`/use XP Crystal 5\` - Consume 5 XP Crystals simultaneously
+• \`/use Sea King Meat\` - Use faction-specific item with multiple effects
+
+**Batch Usage Rules:**
+• Multiple identical items apply cumulative effects
+• Stat buffs don't stack (strongest replaces weaker)
+• Healing effects stack fully
+• Duration buffs reset to maximum duration
+
+**Error Handling:**
+• Item not found suggests similar items owned
+• Insufficient quantity displays current stock
+• Invalid quantity (0, negative, too large) prompts correction
+• Items with usage restrictions explain requirements`
+            },
+            {
+                name: 'Information and Help Commands',
+                content: `**\`/wiki [category]\`**
+Access the comprehensive Cross Realm Chronicles encyclopedia with detailed game mechanics.
+
+**Available Categories:**
+• **factions** - In-depth faction guides, abilities, and optimization strategies
+• **combat** - Battle mechanics, enemy types, and tactical combat systems
+• **progression** - Leveling, stat growth, and character advancement systems
+• **quests** - Quest types, faction bonuses, and advanced quest strategies
+• **items** - Item categories, usage mechanics, and inventory management
+• **commands** - Complete technical reference for all bot commands
+
+**Navigation Features:**
+• **Interactive Menus:** Dropdown selection for categories and sections
+• **Button Navigation:** Previous/Next buttons for easy section browsing
+• **Breadcrumb System:** Always know your current location in the wiki
+• **Cross-References:** Links between related topics across categories
+
+**Wiki Content Depth:**
+• **Beginner Information:** Basic mechanics and getting started guides
+• **Advanced Strategies:** Optimization techniques and min-maxing advice
+• **Technical Details:** Exact formulas, probabilities, and mechanical breakdowns
+• **Faction Specialization:** Deep dives into each faction's unique systems
+
+**\`/help\`**
+Complete beginner's guide specifically designed for new Cross Realm Chronicles players.
+
+**Help Content Sections:**
+• **Character Creation Guide:** Detailed faction selection and character naming
+• **First Quest Adventure:** Step-by-step guide to the quest system
+• **Essential Commands Mastery:** Core command usage and best practices
+
+**Interactive Navigation:**
+• **Section Buttons:** Jump directly to specific help topics
+• **Progressive Learning:** Information presented in logical learning order
+• **Quick Reference:** Essential information highlighted for easy scanning
+• **Wiki Integration:** Seamless transition to detailed wiki sections for advanced topics
+
+**Target Audience:**
+• **New Players:** Never played Cross Realm Chronicles before
+• **Returning Players:** Need refresher on basic mechanics
+• **Quick Start:** Want to begin playing immediately with minimal reading
+• **Foundation Building:** Preparing for advanced gameplay and optimization
+
+**Content Philosophy:**
+• **Practical Focus:** Emphasizes actionable information over theoretical details
+• **Example-Heavy:** Shows actual command usage and real scenarios
+• **Goal-Oriented:** Provides clear objectives and progression milestones
+• **Encouragement:** Builds confidence for new players to explore independently
+
+**Advanced Command Features:**
+
+**Global Command Properties:**
+• **Channel Agnostic:** All commands work in any Discord channel
+• **Permission Respecting:** Honors Discord server permissions and roles
+• **Rate Limited:** Prevents spam while allowing normal usage patterns
+• **Error Recovery:** Graceful handling of network issues and timeouts
+
+**Response Types:**
+• **Ephemeral Responses:** Some error messages only visible to command user
+• **Public Responses:** Game results and character information shared publicly
+• **Interactive Components:** Buttons, dropdowns, and modals for enhanced UX
+• **Embed Formatting:** Rich, colorful displays with faction-themed styling`
+            }
+        ]
+    }
+};
+
+// Format long content strings to prevent Discord embed limits
+function formatWikiContent(content) {
+    // Discord embed description has a 4096 character limit
+    const MAX_LENGTH = 4000;
+    
+    if (content.length <= MAX_LENGTH) {
+        return content;
+    }
+    
+    // Truncate and add continuation indicator
+    const truncated = content.substring(0, MAX_LENGTH - 100);
+    const lastNewline = truncated.lastIndexOf('\n');
+    
+    return truncated.substring(0, lastNewline) + '\n\n*... (content continues in next section)*';
+}
+
+// Main wiki overview - no longer includes getting_started
+function getCategoryOverview() {
+    const categoryOverviews = Object.entries(WIKI_CATEGORIES).map(([key, category]) => {
+        return `**${category.title}**\n${category.description}`;
+    }).join('\n\n');
+
+    const embed = new EmbedBuilder()
+        .setTitle('📚 Cross Realm Chronicles - Advanced Game Encyclopedia')
+        .setDescription(`Welcome to the comprehensive Cross Realm Chronicles wiki system! This encyclopedia contains in-depth information about advanced game mechanics, optimization strategies, and detailed system explanations.
+
+**🎯 For New Players:** Use \`/help\` for the complete beginner guide!
+
+**📋 Advanced Wiki Categories:**
+
+${categoryOverviews}
+
+**🔍 How to Navigate:**
+• Use the dropdown menu below to select a category
+• Each category contains multiple detailed sections with deep mechanical explanations
+• Use the Previous/Next buttons to navigate between sections
+• All information is organized for reference and optimization planning
+
+**💡 Pro Tip:** This wiki focuses on advanced mechanics - master the basics with \`/help\` first!`)
+        .setColor(0x00AE86)
+        .setFooter({ text: 'Cross Realm Chronicles Advanced Wiki • Select a category to explore detailed mechanics!' });
+
+    const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId('wiki_main_categories')
+        .setPlaceholder('📂 Choose an advanced wiki category...')
+        .addOptions(
+            Object.entries(WIKI_CATEGORIES).map(([key, category]) => ({
+                label: category.title,
+                value: `wiki_category_${key}`,
+                description: category.description.length > 100 
+                    ? category.description.substring(0, 97) + '...' 
+                    : category.description
+            }))
+        );
+
+    const row = new ActionRowBuilder().addComponents(selectMenu);
+
+    return {
+        embeds: [embed],
+        components: [row]
+    };
+}
+
+// Enhanced category menu creation
+function getCategoryMenu(categoryKey) {
+    const category = WIKI_CATEGORIES[categoryKey];
+    if (!category) return null;
+
+    const sectionList = category.sections.map((section, index) => {
+        return `**${index + 1}.** ${section.name}`;
+    }).join('\n');
+
+    const embed = new EmbedBuilder()
+        .setTitle(`${category.title} - Advanced Mechanics Guide`)
+        .setDescription(`${category.description}
+
+**📑 Detailed Sections Available:**
+
+${sectionList}
+
+**🔍 Navigation Instructions:**
+• Use the dropdown menu below to select a specific section
+• Each section contains detailed mechanical explanations and optimization strategies
+• Use the "← Back to Categories" button to return to the main wiki menu
+• Navigate between sections using Previous/Next buttons for comprehensive reading`)
+        .setColor(0x00AE86)
+        .setFooter({ text: `Cross Realm Chronicles Advanced Wiki • ${category.title}` });
+
+    const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId(`wiki_section_${categoryKey}`)
+        .setPlaceholder('📄 Choose a detailed section...')
+        .addOptions(
+            category.sections.map((section, index) => ({
+                label: section.name,
+                value: `wiki_section_${categoryKey}_${index}`,
+                description: `Advanced mechanics - Section ${index + 1} of ${category.sections.length}`
+            }))
+        );
+
+    const backButton = new ButtonBuilder()
+        .setCustomId('wiki_main_menu')
+        .setLabel('← Back to Categories')
+        .setStyle(ButtonStyle.Secondary);
+
+    const row1 = new ActionRowBuilder().addComponents(selectMenu);
+    const row2 = new ActionRowBuilder().addComponents(backButton);
+
+    return {
+        embeds: [embed],
+        components: [row1, row2]
+    };
+}
+
+// Enhanced section content display
+function getSectionContent(categoryKey, sectionIndex) {
+    const category = WIKI_CATEGORIES[categoryKey];
+    if (!category || !category.sections[sectionIndex]) return null;
+
+    const section = category.sections[sectionIndex];
+    const formattedContent = formatWikiContent(section.content);
+
+    const embed = new EmbedBuilder()
+        .setTitle(`${category.title} - ${section.name}`)
+        .setDescription(formattedContent)
+        .setColor(0x00AE86)
+        .setFooter({ 
+            text: `Cross Realm Chronicles Advanced Wiki • ${category.title} • Section ${sectionIndex + 1} of ${category.sections.length}` 
+        });
+
+    // Navigation buttons
+    const backButton = new ButtonBuilder()
+        .setCustomId(`wiki_category_${categoryKey}`)
+        .setLabel('← Back to Sections')
+        .setStyle(ButtonStyle.Secondary);
+
+    const homeButton = new ButtonBuilder()
+        .setCustomId('wiki_main_menu')
+        .setLabel('🏠 Categories')
+        .setStyle(ButtonStyle.Primary);
+
+    const components = [backButton, homeButton];
+
+    // Previous section button
+    if (sectionIndex > 0) {
+        const prevButton = new ButtonBuilder()
+            .setCustomId(`wiki_section_${categoryKey}_${sectionIndex - 1}`)
+            .setLabel('⬅️ Previous')
+            .setStyle(ButtonStyle.Secondary);
+        components.unshift(prevButton);
+    }
+
+    // Next section button
+    if (sectionIndex < category.sections.length - 1) {
+        const nextButton = new ButtonBuilder()
+            .setCustomId(`wiki_section_${categoryKey}_${sectionIndex + 1}`)
+            .setLabel('Next ➡️')
+            .setStyle(ButtonStyle.Secondary);
+        components.push(nextButton);
+    }
+
+    // Discord has a limit of 5 components per row
+    const rows = [];
+    for (let i = 0; i < components.length; i += 5) {
+        const row = new ActionRowBuilder().addComponents(components.slice(i, i + 5));
+        rows.push(row);
+    }
+
+    return {
+        embeds: [embed],
+        components: rows
+    };
+}
+
+// Helper functions for enhanced navigation
+function createMainWikiEmbed() {
+    return getCategoryOverview().embeds[0];
+}
+
+function createMainMenuNavigation() {
+    return getCategoryOverview().components;
+}
+
+function createCategoryOverviewEmbed(categoryKey) {
+    return getCategoryMenu(categoryKey).embeds[0];
+}
+
+function createCategoryNavigation(categoryKey) {
+    return getCategoryMenu(categoryKey).components;
+}
+
+function createWikiEmbed(categoryKey, sectionIndex) {
+    return getSectionContent(categoryKey, sectionIndex).embeds[0];
+}
+
+function createWikiNavigation(categoryKey, sectionIndex) {
+    return getSectionContent(categoryKey, sectionIndex).components;
+}
+
+module.exports = {
+    WIKI_CATEGORIES,
+    getCategoryOverview,
+    getCategoryMenu,
+    getSectionContent,
+    formatWikiContent,
+    createMainWikiEmbed,
+    createMainMenuNavigation,
+    createCategoryOverviewEmbed,
+    createCategoryNavigation,
+    createWikiEmbed,
+    createWikiNavigation
+};
