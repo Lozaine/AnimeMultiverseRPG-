@@ -242,8 +242,67 @@ module.exports = {
     async handleButtonInteraction(interaction) {
         try {
             if (interaction.customId === 'help_main_menu') {
-                // Return to main help menu
-                return await this.execute(interaction);
+                // Return to main help menu - rebuild the main menu embed
+                const embed = new EmbedBuilder()
+                    .setColor('#00d4aa')
+                    .setTitle('🎮 Cross Realm Chronicles - Complete Beginner Guide')
+                    .setDescription('**Welcome to Cross Realm Chronicles!**\n\nThis comprehensive guide will teach you everything you need to start your anime multiverse adventure. Navigate through the sections below to master the game mechanics.\n\n**Use `/wiki` for detailed game mechanics after you understand the basics!**')
+                    .addFields([
+                        {
+                            name: '🚀 Quick Start (3 Easy Steps)',
+                            value: '**1.** `/create <faction>` - Pick your anime faction and create your character\n**2.** `/quest` - Go on your first adventure to earn XP and gold\n**3.** `/profile` - Check your progress and see how strong you\'ve become!',
+                            inline: false
+                        },
+                        {
+                            name: '🌟 Choose Your Faction',
+                            value: '🏴‍☠️ **One Piece Pirates** - Adventure-loving pirates with treasure hunting skills\n🥷 **Naruto Shinobi** - Stealthy shinobi with chakra techniques\n👁️ **Jujutsu Sorcerers** - Powerful sorcerers with cursed energy\n⚔️ **Demon Slayers** - Skilled warriors with breathing techniques',
+                            inline: false
+                        },
+                        {
+                            name: '⚡ Essential Commands',
+                            value: '`/quest` - Start adventures to level up\n`/inventory` - See what items you have\n`/use <item>` - Use potions and tools\n`/profile` - View your character stats',
+                            inline: true
+                        },
+                        {
+                            name: '📱 Quick Tips',
+                            value: '• Each faction is good at different quest types\n• Use items to heal and boost your character\n• Combat can happen during quests - be ready!\n• Level up to unlock new faction abilities',
+                            inline: true
+                        },
+                        {
+                            name: '📖 Detailed Guide Sections',
+                            value: 'Use the navigation buttons below to explore:\n**1.** Creating Your Character\n**2.** Your First Quest Adventure\n**3.** Essential Commands Mastery',
+                            inline: false
+                        },
+                        {
+                            name: '🎯 Your First Goal',
+                            value: 'Create a character, complete 3-5 quests, and reach level 3 to unlock your first faction ability. Good luck, adventurer!',
+                            inline: false
+                        }
+                    ])
+                    .setFooter({ text: 'Cross Realm Chronicles • Navigate with buttons below or use /wiki for advanced mechanics' })
+                    .setTimestamp();
+
+                // Navigation buttons
+                const navigationRow = new ActionRowBuilder()
+                    .addComponents(
+                        new ButtonBuilder()
+                            .setCustomId('help_section_0')
+                            .setLabel('1️⃣ Character Creation')
+                            .setStyle(ButtonStyle.Primary),
+                        new ButtonBuilder()
+                            .setCustomId('help_section_1')
+                            .setLabel('2️⃣ Quest Adventure')
+                            .setStyle(ButtonStyle.Primary),
+                        new ButtonBuilder()
+                            .setCustomId('help_section_2')
+                            .setLabel('3️⃣ Commands Guide')
+                            .setStyle(ButtonStyle.Primary)
+                    );
+
+                return await interaction.update({ 
+                    embeds: [embed], 
+                    components: [navigationRow] 
+                });
             }
 
             if (interaction.customId.startsWith('help_section_')) {
