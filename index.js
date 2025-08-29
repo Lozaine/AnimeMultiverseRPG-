@@ -469,6 +469,151 @@ client.on('interactionCreate', async interaction => {
                 return;
             }
             
+            // Handle Daily Quest button interactions
+            if (interaction.customId.startsWith('dailyquest_accept_')) {
+                const parts = interaction.customId.split('_');
+                const buttonUserId = parts[2];
+
+                if (interaction.user.id !== buttonUserId) {
+                    return interaction.reply({ content: '❌ This is not your daily quest!', ephemeral: true });
+                }
+
+                // Get fresh character data
+                const character = await getCharacter(buttonUserId);
+                const { calculateRewards } = require('./utils/factionQuests');
+                
+                // Generate daily quest rewards based on character level
+                const difficulty = Math.min(Math.floor(character.level / 5) + 1, 5);
+                const dailyRewards = calculateRewards(difficulty, 'daily', character.level);
+                
+                const newExp = character.experience + dailyRewards.xp;
+                const newGold = character.gold + dailyRewards.coins;
+                const lastDailyQuest = Date.now();
+
+                const levelUpData = checkLevelUp(character.level, character.experience, newExp);
+
+                if (levelUpData.leveledUp) {
+                    await updateCharacterProgress(buttonUserId, newExp, newGold, levelUpData.newLevel, levelUpData.newStats.hp, levelUpData.newStats.max_hp, levelUpData.newStats.atk, levelUpData.newStats.def, levelUpData.newStats.spd, newExp, character.faction_quest_progress, lastDailyQuest);
+                } else {
+                    await updateCharacterProgress(buttonUserId, newExp, newGold, character.level, character.hp, character.max_hp, character.atk, character.def, character.spd, character.xp, character.faction_quest_progress, lastDailyQuest);
+                }
+                
+                const resultEmbed = new EmbedBuilder()
+                    .setColor('#FFD700')
+                    .setTitle(`📅 Daily Quest Complete!`)
+                    .setDescription(`You successfully completed your daily training!`)
+                    .addFields(
+                        { name: '📊 Daily Rewards', value: `+${dailyRewards.xp} XP\n+${dailyRewards.coins} Coins`, inline: false },
+                        { name: '⏰ Next Daily', value: 'Available in 24 hours', inline: false }
+                    );
+
+                if (levelUpData.leveledUp) {
+                    resultEmbed.addFields({ 
+                        name: '🆙 LEVEL UP!', 
+                        value: `You are now level ${levelUpData.newLevel}!\n` +
+                               `+${levelUpData.hpGained} HP (${levelUpData.newStats.max_hp} total)\n` +
+                               `+${levelUpData.atkGained} ATK (${levelUpData.newStats.atk} total)\n` +
+                               `+${levelUpData.defGained} DEF (${levelUpData.newStats.def} total)\n` +
+                               `+${levelUpData.spdGained} SPD (${levelUpData.newStats.spd} total)`, 
+                        inline: false 
+                    });
+                }
+                
+                await interaction.update({ embeds: [resultEmbed], components: [] });
+                return;
+            }
+            
+            // Handle Random Quest button interactions
+            if (interaction.customId.startsWith('randomquest_accept_')) {
+                const parts = interaction.customId.split('_');
+                const buttonUserId = parts[2];
+
+                if (interaction.user.id !== buttonUserId) {
+                    return interaction.reply({ content: '❌ This is not your quest!', ephemeral: true });
+                }
+
+                // Get fresh character data
+                const character = await getCharacter(buttonUserId);
+                const { calculateRewards } = require('./utils/factionQuests');
+                
+                // Generate random quest rewards
+                const difficulty = Math.random() < 0.3 ? character.level + 1 : Math.max(1, character.level - 1);
+                const randomRewards = calculateRewards(Math.min(difficulty, 8), 'side_mission', character.level);
+                
+                const newExp = character.experience + randomRewards.xp;
+                const newGold = character.gold + randomRewards.coins;
+
+                const levelUpData = checkLevelUp(character.level, character.experience, newExp);
+
+                if (levelUpData.leveledUp) {
+                    await updateCharacterProgress(buttonUserId, newExp, newGold, levelUpData.newLevel, levelUpData.newStats.hp, levelUpData.newStats.max_hp, levelUpData.newStats.atk, levelUpData.newStats.def, levelUpData.newStats.spd, newExp, character.faction_quest_progress);
+                } else {
+                    await updateCharacterProgress(buttonUserId, newExp, newGold, character.level, character.hp, character.max_hp, character.atk, character.def, character.spd, character.xp, character.faction_quest_progress);
+                }
+                
+                const resultEmbed = new EmbedBuilder()
+                    .setColor('#FF6B6B')
+                    .setTitle(`🎲 Random Mission Complete!`)
+                    .setDescription(`You successfully completed the side mission!`)
+                    .addFields(
+                        { name: '📊 Mission Rewards', value: `+${randomRewards.xp} XP\n+${randomRewards.coins} Coins`, inline: false }
+                    );
+
+                if (levelUpData.leveledUp) {
+                    resultEmbed.addFields({ 
+                        name: '🆙 LEVEL UP!', 
+                        value: `You are now level ${levelUpData.newLevel}!\n` +
+                               `+${levelUpData.hpGained} HP (${levelUpData.newStats.max_hp} total)\n` +
+                               `+${levelUpData.atkGained} ATK (${levelUpData.newStats.atk} total)\n` +
+                               `+${levelUpData.defGained} DEF (${levelUpData.newStats.def} total)\n` +
+                               `+${levelUpData.spdGained} SPD (${levelUpData.newStats.spd} total)`, 
+                        inline: false 
+                    });
+                }
+                
+                await interaction.update({ embeds: [resultEmbed], components: [] });
+                return;
+            }
+            
+            // Handle quest reroll button
+            if (interaction.customId.startsWith('randomquest_reroll_')) {
+                const buttonUserId = interaction.customId.split('_')[2];
+                if (interaction.user.id !== buttonUserId) {
+                    return interaction.reply({ content: '❌ This is not your quest!', ephemeral: true });
+                }
+                
+                // Reroll by calling the random quest subcommand
+                const factionquestCommand = client.commands.get('factionquest');
+                if (factionquestCommand) {
+                    // Create a fake interaction for the random subcommand
+                    const mockInteraction = {
+                        ...interaction,
+                        options: {
+                            getSubcommand: () => 'random'
+                        }
+                    };
+                    await factionquestCommand.execute(mockInteraction);
+                }
+                return;
+            }
+            
+            // Handle faction quest cancel button
+            if (interaction.customId.startsWith('factionquest_cancel_')) {
+                const buttonUserId = interaction.customId.split('_')[2];
+                if (interaction.user.id !== buttonUserId) {
+                    return interaction.reply({ content: '❌ This is not your quest!', ephemeral: true });
+                }
+                
+                const cancelEmbed = new EmbedBuilder()
+                    .setColor('#95A5A6')
+                    .setTitle('📋 Quest Cancelled')
+                    .setDescription('You decided to postpone this quest for now. You can return anytime with `/factionquest story`.')
+                    .setFooter({ text: 'Your progress is saved - the quest will be waiting when you\'re ready!' });
+                
+                await interaction.update({ embeds: [cancelEmbed], components: [] });
+                return;
+            }
+            
             // Handle reset button interactions
             if (interaction.customId.startsWith('reset_')) {
                 const resetCommand = client.commands.get('reset');

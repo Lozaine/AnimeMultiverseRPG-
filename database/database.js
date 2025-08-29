@@ -34,6 +34,7 @@ async function initializeDatabase() {
                     def INTEGER DEFAULT 10,
                     spd INTEGER DEFAULT 15,
                     faction_quest_progress INTEGER DEFAULT 0,
+                    last_daily_quest INTEGER DEFAULT 0,
                     devil_fruit TEXT,
                     chakra_nature TEXT,
                     cursed_technique TEXT,
@@ -54,6 +55,7 @@ async function initializeDatabase() {
                     db.run(`ALTER TABLE characters ADD COLUMN def INTEGER DEFAULT 10`, () => {});
                     db.run(`ALTER TABLE characters ADD COLUMN spd INTEGER DEFAULT 15`, () => {});
                     db.run(`ALTER TABLE characters ADD COLUMN faction_quest_progress INTEGER DEFAULT 0`, () => {});
+                    db.run(`ALTER TABLE characters ADD COLUMN last_daily_quest INTEGER DEFAULT 0`, () => {});
                     
                     // Create inventory table
                     db.run(`
@@ -112,7 +114,7 @@ async function getCharacter(userId) {
 }
 
 // Update character progress
-async function updateCharacterProgress(userId, experience, gold, level, hp = null, maxHp = null, atk = null, def = null, spd = null, xp = null, factionQuestProgress = null) {
+async function updateCharacterProgress(userId, experience, gold, level, hp = null, maxHp = null, atk = null, def = null, spd = null, xp = null, factionQuestProgress = null, lastDailyQuest = null) {
     return new Promise((resolve, reject) => {
         // Build dynamic query based on provided parameters
         let query = `UPDATE characters SET experience = ?, gold = ?, level = ?, updated_at = CURRENT_TIMESTAMP`;
@@ -145,6 +147,10 @@ async function updateCharacterProgress(userId, experience, gold, level, hp = nul
         if (factionQuestProgress !== null) {
             query += `, faction_quest_progress = ?`;
             params.push(factionQuestProgress);
+        }
+        if (lastDailyQuest !== null) {
+            query += `, last_daily_quest = ?`;
+            params.push(lastDailyQuest);
         }
         
         query += ` WHERE user_id = ?`;
