@@ -1,7 +1,23 @@
-const { EmbedBuilder, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
+const { 
+    EmbedBuilder, 
+    SlashCommandBuilder, 
+    ActionRowBuilder, 
+    ButtonBuilder, 
+    ButtonStyle, 
+    StringSelectMenuBuilder, 
+    ModalBuilder, 
+    TextInputBuilder, 
+    TextInputStyle,
+    TextDisplayBuilder,
+    ContainerBuilder,
+    SectionBuilder,
+    SeparatorBuilder,
+    SeparatorSpacingSize,
+    MessageFlags 
+} = require('discord.js');
 const { getCharacter, getPlayerInventory, usePlayerItem } = require('../database/database');
 const { FACTIONS } = require('../utils/factions');
-const { createEmbed } = require('../utils/embeds');
+const { createEmbed, createErrorContainer } = require('../utils/embeds');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -21,30 +37,38 @@ module.exports = {
             const character = await getCharacter(userId);
             
             if (!character) {
-                const embed = createEmbed('No Character Found', 
-                    'You don\'t have a character yet! Use `/create` to create one.', 
-                    '#ff6b6b');
-                return interaction.reply({ embeds: [embed] });
+                const errorContainer = createErrorContainer('No Character Found', 
+                    'You don\'t have a character yet! Use `/create` to create one.');
+                return interaction.reply({ 
+                    components: [errorContainer], 
+                    flags: MessageFlags.IsComponentsV2 
+                });
             }
 
             const inventory = await getPlayerInventory(userId);
             const faction = FACTIONS[character.faction];
 
             if (inventory.length === 0) {
-                const embed = new EmbedBuilder()
-                    .setColor(faction.color)
-                    .setTitle(`🎒 ${character.name}'s Inventory`)
-                    .setDescription(`**${faction.name}** Inventory`)
-                    .addFields([
-                        { 
-                            name: '📦 Empty Inventory', 
-                            value: 'Your inventory is empty. Complete quests to earn items!', 
-                            inline: false 
-                        }
-                    ])
-                    .setFooter({ text: 'Cross Realm Chronicles • Inventory System' })
-                    .setTimestamp();
-                return interaction.reply({ embeds: [embed] });
+                const titleDisplay = new TextDisplayBuilder()
+                    .setContent(`# 🎒 ${character.character_name || character.name}'s Inventory\n**${faction.name}** Inventory`);
+
+                const emptyDisplay = new TextDisplayBuilder()
+                    .setContent(`## 📦 Empty Inventory\n\nYour inventory is empty. Complete quests to earn items!\n\n*Use \`/quest\` to start your adventure and find treasure!*`);
+
+                const emptyContainer = new ContainerBuilder()
+                    .setAccentColor(parseInt(faction.color.replace('#', ''), 16))
+                    .addTextDisplayComponents(titleDisplay)
+                    .addSeparatorComponents(
+                        new SeparatorBuilder()
+                            .setDivider(true)
+                            .setSpacing(SeparatorSpacingSize.Medium)
+                    )
+                    .addTextDisplayComponents(emptyDisplay);
+
+                return interaction.reply({ 
+                    components: [emptyContainer], 
+                    flags: MessageFlags.IsComponentsV2 
+                });
             }
 
             // Group items by type
@@ -65,13 +89,6 @@ module.exports = {
             const endIndex = startIndex + itemsPerPage;
             const pageItems = allItems.slice(startIndex, endIndex);
 
-            const embed = new EmbedBuilder()
-                .setColor(faction.color)
-                .setTitle(`🎒 ${character.name}'s Inventory`)
-                .setDescription(`**${faction.name}** Inventory • Page ${currentPage}/${totalPages}`)
-                .setFooter({ text: `Cross Realm Chronicles • Showing ${pageItems.length} of ${allItems.length} items` })
-                .setTimestamp();
-
             // Display items by category with emojis
             const typeEmojis = {
                 'food': '🍽️',
@@ -85,57 +102,86 @@ module.exports = {
                 'consumable': '📦'
             };
 
-            // Create column layout - 3 columns per row
-            const columns = [[], [], []];
-            pageItems.forEach((item, index) => {
-                const columnIndex = index % 3;
-                const typeEmoji = typeEmojis[item.item_type] || '📦';
-                const itemText = `${typeEmoji} **${item.item_name}** (x${item.quantity})`;
-                columns[columnIndex].push(itemText);
-            });
+            // Create main inventory container using Components V2
+            const titleDisplay = new TextDisplayBuilder()
+                .setContent(`# 🎒 ${character.character_name || character.name}'s Inventory\n**${faction.name}** Inventory • Page ${currentPage}/${totalPages}`);
 
-            // Add columns as inline fields
-            for (let i = 0; i < 3; i++) {
-                if (columns[i].length > 0) {
-                    embed.addFields([
-                        {
-                            name: i === 0 ? '📋 Items' : '\u200b', // Only show title on first column
-                            value: columns[i].join('\n') || '\u200b',
-                            inline: true
-                        }
-                    ]);
-                }
-            }
+            // Create items display organized by type
+            const itemsDisplay = new TextDisplayBuilder()
+                .setContent(`## 📋 Items Collection\n\n${
+                    Object.entries(itemsByType).map(([type, items]) => {
+                        const emoji = typeEmojis[type] || '📦';
+                        const itemList = items.slice(0, 8).map(item => 
+                            `• **${item.item_name}** (x${item.quantity})`
+                        ).join('\n');
+                        return `**${emoji} ${type.charAt(0).toUpperCase() + type.slice(1)}:**\n${itemList}`;
+                    }).join('\n\n')
+                }`);
 
-            // Add spacing and summary
-            embed.addFields([
-                { name: '\u200b', value: '\u200b', inline: false } // Spacer
-            ]);
-
-            // Summary section
+            // Summary stats section
             const totalItems = inventory.reduce((sum, item) => sum + item.quantity, 0);
             const usableCount = inventory.filter(item => ['food', 'healing', 'potion', 'consumable'].includes(item.item_type)).length;
-            
-            embed.addFields([
-                { 
-                    name: '📊 Summary', 
-                    value: `**${totalItems}/100** items total\n**${Object.keys(itemsByType).length}** different types\n**${usableCount}** usable items`, 
-                    inline: true 
-                },
-                { 
-                    name: '🗂️ Categories', 
-                    value: Object.entries(itemsByType).map(([type, items]) => {
-                        const emoji = typeEmojis[type] || '📦';
-                        return `${emoji} ${type.charAt(0).toUpperCase() + type.slice(1)} (${items.length})`;
-                    }).join('\n'), 
-                    inline: true 
-                },
-                { 
-                    name: '📖 Navigation', 
-                    value: totalPages > 1 ? `Use \`/inventory page:${currentPage + 1 <= totalPages ? currentPage + 1 : 1}\` for ${currentPage + 1 <= totalPages ? 'next' : 'first'} page` : 'All items shown', 
-                    inline: true 
-                }
-            ]);
+
+            const summarySection = new SectionBuilder()
+                .addTextDisplayComponents(
+                    new TextDisplayBuilder().setContent(`## 📊 Inventory Statistics`),
+                    new TextDisplayBuilder().setContent(
+                        `**Storage:** ${totalItems}/100 items total\n` +
+                        `**Categories:** ${Object.keys(itemsByType).length} different types\n` +
+                        `**Usable Items:** ${usableCount} ready to consume`
+                    )
+                );
+
+            // Categories breakdown
+            const categoriesDisplay = new TextDisplayBuilder()
+                .setContent(
+                    `## 🗂️ Categories Breakdown\n\n${
+                        Object.entries(itemsByType).map(([type, items]) => {
+                            const emoji = typeEmojis[type] || '📦';
+                            const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
+                            return `${emoji} **${type.charAt(0).toUpperCase() + type.slice(1)}:** ${items.length} types (${totalQuantity} items)`;
+                        }).join('\n')
+                    }`
+                );
+
+            // Navigation info
+            let navigationDisplay = null;
+            if (totalPages > 1) {
+                navigationDisplay = new TextDisplayBuilder()
+                    .setContent(
+                        `## 📖 Navigation\n\n` +
+                        `**Current Page:** ${currentPage} of ${totalPages}\n` +
+                        `**Items Shown:** ${pageItems.length} of ${allItems.length}\n\n` +
+                        `*Use \`/inventory page:${currentPage + 1 <= totalPages ? currentPage + 1 : 1}\` for ${currentPage + 1 <= totalPages ? 'next' : 'first'} page*`
+                    );
+            }
+
+            // Build the container
+            const inventoryContainer = new ContainerBuilder()
+                .setAccentColor(parseInt(faction.color.replace('#', ''), 16))
+                .addTextDisplayComponents(titleDisplay)
+                .addSeparatorComponents(
+                    new SeparatorBuilder()
+                        .setDivider(true)
+                        .setSpacing(SeparatorSpacingSize.Medium)
+                )
+                .addTextDisplayComponents(itemsDisplay)
+                .addSeparatorComponents(
+                    new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Medium)
+                )
+                .addSectionComponents(summarySection)
+                .addSeparatorComponents(
+                    new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
+                )
+                .addTextDisplayComponents(categoriesDisplay);
+
+            if (navigationDisplay) {
+                inventoryContainer
+                    .addSeparatorComponents(
+                        new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
+                    )
+                    .addTextDisplayComponents(navigationDisplay);
+            }
 
             // Create interactive components
             const components = [];
@@ -173,14 +219,19 @@ module.exports = {
                 components.push(utilityRow);
             }
 
-            interaction.reply({ embeds: [embed], components: components });
+            interaction.reply({ 
+                components: [inventoryContainer, ...components], 
+                flags: MessageFlags.IsComponentsV2 
+            });
 
         } catch (error) {
             console.error('Inventory view error:', error);
-            const embed = createEmbed('Inventory Error', 
-                'An error occurred while retrieving your inventory. Please try again.', 
-                '#ff6b6b');
-            interaction.reply({ embeds: [embed] });
+            const errorContainer = createErrorContainer('Inventory Error', 
+                'An error occurred while retrieving your inventory. Please try again.');
+            interaction.reply({ 
+                components: [errorContainer], 
+                flags: MessageFlags.IsComponentsV2 
+            });
         }
     }
 };
