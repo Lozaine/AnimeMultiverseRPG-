@@ -389,6 +389,23 @@ client.on('interactionCreate', async interaction => {
                 return;
             }
             
+            // Handle repeat quest button
+            if (interaction.customId.startsWith('quest_repeat_')) {
+                const buttonUserId = interaction.customId.split('_')[2];
+                if (interaction.user.id !== buttonUserId) {
+                    return interaction.reply({
+                        content: '❌ You can only repeat your own quests!',
+                        flags: [4096] // EPHEMERAL flag
+                    });
+                }
+                const questCommand = client.commands.get('quest');
+                if (questCommand) {
+                    await interaction.update({ components: [] }); // This removes the button from the original message.
+                    await questCommand.execute(interaction);
+                }
+                return;
+            }
+            
             // Handle reset button interactions
             if (interaction.customId.startsWith('reset_')) {
                 const resetCommand = client.commands.get('reset');
