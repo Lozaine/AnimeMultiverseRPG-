@@ -41,7 +41,7 @@ module.exports = {
 
             switch (subcommand) {
                 case 'story':
-                    await handleStoryQuest(interaction, character);
+                    await handleStoryQuest(interaction, character, userId);
                     break;
                 case 'daily':
                     await handleDailyQuest(interaction, character, userId);
@@ -50,23 +50,25 @@ module.exports = {
                     await handleRandomQuest(interaction, character, userId);
                     break;
                 case 'status':
-                    await handleQuestStatus(interaction, character);
+                    await handleQuestStatus(interaction, character, userId);
                     break;
                 default:
-                    await handleStoryQuest(interaction, character);
+                    await handleStoryQuest(interaction, character, userId);
             }
 
         } catch (error) {
             console.error('Faction quest error:', error);
-            await interaction.reply({ 
-                embeds: [createEmbed('Error', 'An error occurred while processing your quest request.', '#ff6b6b')], 
-                flags: [4096] 
-            });
+            if (!interaction.replied && !interaction.deferred) {
+                await interaction.reply({ 
+                    embeds: [createEmbed('Error', 'An error occurred while processing your quest request.', '#ff6b6b')], 
+                    flags: [4096] 
+                });
+            }
         }
     }
 };
 
-async function handleStoryQuest(interaction, character) {
+async function handleStoryQuest(interaction, character, userId) {
     const factionQuests = FACTION_QUESTS[character.faction];
     if (!factionQuests) {
         return interaction.reply({ 
@@ -209,7 +211,7 @@ async function handleRandomQuest(interaction, character, userId) {
     await interaction.reply({ embeds: [embed], components: [row] });
 }
 
-async function handleQuestStatus(interaction, character) {
+async function handleQuestStatus(interaction, character, userId) {
     const factionQuests = FACTION_QUESTS[character.faction];
     const questProgress = character.faction_quest_progress || 0;
     const completionPercentage = Math.floor((questProgress / factionQuests.length) * 100);
