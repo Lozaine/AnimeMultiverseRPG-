@@ -35,7 +35,7 @@ module.exports = {
             if (!character) {
                 return interaction.reply({ 
                     embeds: [createEmbed('No Character Found', 'You must create a character with `/create` first!', '#ff6b6b')], 
-                    ephemeral: true 
+                    flags: [4096] 
                 });
             }
 
@@ -44,10 +44,10 @@ module.exports = {
                     await handleStoryQuest(interaction, character);
                     break;
                 case 'daily':
-                    await handleDailyQuest(interaction, character);
+                    await handleDailyQuest(interaction, character, userId);
                     break;
                 case 'random':
-                    await handleRandomQuest(interaction, character);
+                    await handleRandomQuest(interaction, character, userId);
                     break;
                 case 'status':
                     await handleQuestStatus(interaction, character);
@@ -60,7 +60,7 @@ module.exports = {
             console.error('Faction quest error:', error);
             await interaction.reply({ 
                 embeds: [createEmbed('Error', 'An error occurred while processing your quest request.', '#ff6b6b')], 
-                ephemeral: true 
+                flags: [4096] 
             });
         }
     }
@@ -71,7 +71,7 @@ async function handleStoryQuest(interaction, character) {
     if (!factionQuests) {
         return interaction.reply({ 
             embeds: [createEmbed('Error', 'No faction quests found for your faction.', '#ff6b6b')], 
-            ephemeral: true 
+            flags: [4096] 
         });
     }
 
@@ -130,7 +130,7 @@ async function handleStoryQuest(interaction, character) {
     await interaction.reply({ embeds: [embed], components: [row] });
 }
 
-async function handleDailyQuest(interaction, character) {
+async function handleDailyQuest(interaction, character, userId) {
     // Check if player has already done daily quest (implement cooldown logic)
     const lastDaily = character.last_daily_quest || 0;
     const now = Date.now();
@@ -145,7 +145,7 @@ async function handleDailyQuest(interaction, character) {
             embeds: [createEmbed('Daily Quest Completed', 
                 `You've already completed today's quest! Come back in ${hoursLeft}h ${minutesLeft}m.`, 
                 '#ffd700')],
-            ephemeral: true
+            flags: [4096]
         });
     }
 
@@ -174,7 +174,7 @@ async function handleDailyQuest(interaction, character) {
     await interaction.reply({ embeds: [embed], components: [row] });
 }
 
-async function handleRandomQuest(interaction, character) {
+async function handleRandomQuest(interaction, character, userId) {
     const difficulty = Math.random() < 0.3 ? character.level + 1 : Math.max(1, character.level - 1);
     const randomQuest = generateRandomQuest(character.faction, Math.min(difficulty, 8));
 
