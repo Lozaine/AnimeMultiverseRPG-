@@ -1,0 +1,62 @@
+// Handle Faction Quest button interactions
+            if (interaction.customId.startsWith('factionquest_accept_')) {
+                const parts = interaction.customId.split('_');
+                const buttonUserId = parts[2];
+                const questIndex = parseInt(parts[3]);
+
+                if (interaction.user.id !== buttonUserId) {
+                    return interaction.reply({ content: '❌ This is not your mission!', ephemeral: true });
+                }
+
+                // Get fresh character data
+                const character = await getCharacter(buttonUserId);
+                const { FACTION_QUESTS } = require('./utils/factionQuests');
+                const factionQuests = FACTION_QUESTS[character.faction];
+                const quest = factionQuests[questIndex];
+
+                // Apply rewards
+                const newExp = character.experience + quest.rewards.xp;
+                const newGold = character.gold + quest.rewards.coins;
+                const newFactionQuestProgress = character.faction_quest_progress + 1;
+
+                let itemReceived = null;
+                if (Math.random() * 100 < quest.itemChance && quest.possibleItems.length > 0) {
+                    itemReceived = quest.possibleItems[Math.floor(Math.random() * quest.possibleItems.length)];
+                    await addItemToInventory(buttonUserId, itemReceived.name, itemReceived.description, itemReceived.type, 1, 'faction quest');
+                }
+
+                const levelUpData = checkLevelUp(character.level, character.experience, newExp);
+
+                if (levelUpData.leveledUp) {
+                    await updateCharacterProgress(buttonUserId, newExp, newGold, levelUpData.newLevel, levelUpData.newStats.hp, levelUpData.newStats.max_hp, levelUpData.newStats.atk, levelUpData.newStats.def, levelUpData.newStats.spd, newExp, newFactionQuestProgress);
+                } else {
+                    await updateCharacterProgress(buttonUserId, newExp, newGold, character.level, character.hp, character.max_hp, character.atk, character.def, character.spd, character.xp, newFactionQuestProgress);
+                }
+                
+                const resultEmbed = new EmbedBuilder()
+                    .setColor('#7CFC00')
+                    .setTitle(`📜 Mission Complete: ${quest.title}`)
+                    .setDescription(`You successfully completed your mission!`)
+                    .addFields(
+                        { name: '📊 Rewards Gained', value: `+${quest.rewards.xp} XP\n+${quest.rewards.coins} Coins`, inline: false }
+                    );
+                
+                if(itemReceived) {
+                    resultEmbed.addFields({ name: '🎁 Item Found!', value: `You received: **${itemReceived.name}**` });
+                }
+
+                if (levelUpData.leveledUp) {
+                    resultEmbed.addFields({ 
+                        name: '🆙 LEVEL UP!', 
+                        value: `You are now level ${levelUpData.newLevel}!\n` +
+                               `+${levelUpData.hpGained} HP (${levelUpData.newStats.max_hp} total)\n` +
+                               `+${levelUpData.atkGained} ATK (${levelUpData.newStats.atk} total)\n` +
+                               `+${levelUpData.defGained} DEF (${levelUpData.newStats.def} total)\n` +
+                               `+${levelUpData.spdGained} SPD (${levelUpData.newStats.spd} total)`, 
+                        inline: false 
+                    });
+                }
+                
+                await interaction.update({ embeds: [resultEmbed], components: [] });
+                return;
+            }
