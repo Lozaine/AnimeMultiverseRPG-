@@ -87,6 +87,23 @@ After character creation, use \`/quest\` to begin your adventure! The quest syst
 - Best for: All factions (ability unlocking)
 - Rewards: Massive XP (150-400), stat improvements
 
+**🎭 Faction Quest Categories:**
+
+📖 **Story Quests** (\`/factionquest story\`)
+- Epic multi-chapter narratives unique to each faction
+- Unlock powerful faction abilities and deep lore
+- Best rewards: Massive XP (200-500), unique items, faction abilities
+
+📅 **Daily Quests** (\`/factionquest daily\`)
+- Daily training missions with 24-hour cooldown
+- Level-scaled rewards perfect for consistent progression
+- Best rewards: Reliable XP (100-300), daily engagement bonus
+
+🎲 **Random Missions** (\`/factionquest random\`)
+- Procedurally generated side adventures
+- Variable difficulty and unique encounter combinations
+- Best rewards: Surprise XP (75-250), exploration variety
+
 **💡 Quest Tips:**
 - Your faction gets bonuses on preferred quest types
 - Combat encounters can happen during quests
@@ -126,6 +143,13 @@ Go on adventures to earn XP, gold, and items!
 • Faction bonuses apply to preferred quest types
 • Potential enemy encounters in dangerous missions
 
+**\`/factionquest <type>\`**
+Experience faction-specific storylines and missions!
+• \`story\` - Continue your faction's epic storyline
+• \`daily\` - Complete daily training (24-hour cooldown)
+• \`random\` - Take on procedurally generated side missions
+• \`status\` - View your faction quest progress
+
 **⚔️ Inventory & Items:**
 
 **\`/inventory [page]\`**
@@ -138,6 +162,23 @@ Access your item collection with organized categories.
 Consume items from your inventory.
 • Auto-complete suggests available items
 • Healing potions, stat boosters, and more
+
+**🎌 Faction Quest Commands:**
+
+**\`/factionquest story\`**
+Progress through your faction's main storyline.
+• Unique multi-chapter narratives for each faction
+• Unlock powerful faction-specific abilities and lore
+
+**\`/factionquest daily\`**
+Complete daily faction training missions.
+• Available once every 24 hours
+• Scaled rewards based on character level
+
+**\`/factionquest random\`**
+Take on randomly generated side missions.
+• Procedurally created adventures with variable difficulty
+• Great for additional XP and exploration
 
 **📚 Information Commands:**
 
@@ -183,7 +224,7 @@ module.exports = {
                     },
                     {
                         name: '⚡ Essential Commands',
-                        value: '`/quest` - Start adventures to level up\n`/inventory` - See what items you have\n`/use <item>` - Use potions and tools\n`/profile` - View your character stats',
+                        value: '`/quest` - Start adventures to level up\n`/factionquest story` - Continue your faction storyline\n`/inventory` - See what items you have\n`/profile` - View your character stats',
                         inline: true
                     },
                     {

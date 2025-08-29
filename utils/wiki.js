@@ -702,6 +702,123 @@ Major achievements unlock permanent character enhancements:
 • **One Piece Pirates:** +20% protection success, +25% against naval threats`
             },
             {
+                name: 'Faction Quest System',
+                content: `**📖 Story Quests - Epic Faction Narratives**
+
+**Comprehensive Storyline Framework:**
+Faction story quests represent the pinnacle of narrative-driven gameplay, offering deep, multi-chapter adventures that explore each faction's unique mythology, characters, and philosophical foundations.
+
+**Story Quest Structure:**
+• **Chapter-Based Progression:** 10+ unique story chapters per faction
+• **Progressive Difficulty:** Each chapter increases in challenge and rewards
+• **Faction Ability Unlocks:** Story completion unlocks powerful faction-specific abilities
+• **Lore Integration:** Deep exploration of anime universe backstories and characters
+
+**Faction Story Themes:**
+• **🏴‍☠️ One Piece Pirates:** Adventure, freedom, friendship, and the pursuit of dreams across the Grand Line
+• **🥷 Naruto Shinobi:** Honor, village protection, ninja way philosophy, and mastering chakra techniques
+• **👁️ Jujutsu Sorcerers:** Curse exorcism, supernatural combat, domain theory, and protecting humanity
+• **⚔️ Demon Slayers:** Dedication, breathing mastery, demon hunting, and protecting innocent lives
+
+**Story Quest Rewards:**
+• **Massive XP Gains:** 200-500 XP per chapter completion
+• **Unique Faction Items:** Equipment and consumables exclusive to story progression
+• **Ability Unlocks:** Progressive faction abilities tied to story milestones
+• **Lore Bonuses:** Deep character development and faction understanding
+
+**📅 Daily Quests - Consistent Progression Training**
+
+**Daily Quest Mechanics:**
+Daily quests provide consistent, reliable character progression with a 24-hour cooldown system designed to encourage regular engagement while respecting player time.
+
+**Daily Quest Generation:**
+• **Level-Scaled Content:** Quest difficulty automatically adjusts to character level
+• **Faction-Themed Training:** Each day's quest reflects your faction's training philosophy
+• **Reward Scaling:** Higher-level characters receive proportionally better rewards
+• **Cooldown Management:** Precisely 24 hours from last completion
+
+**Daily Quest Categories:**
+• **💪 Training Routines:** Stat improvement and technique practice
+• **🗺️ Exploration Tasks:** Area discovery and reconnaissance missions
+• **🤝 Social Interactions:** Community building and relationship development
+• **⚔️ Combat Drills:** Battle readiness and tactical preparation
+
+**Daily Reward Structure:**
+• **Reliable XP:** 100-300 XP scaled to character level
+• **Consistent Gold:** 50-150 gold for equipment and item purchases
+• **Engagement Bonus:** Special rewards for consecutive daily completions
+• **No Penalty System:** Missing days doesn't punish players, just postpones next opportunity
+
+**🎲 Random Missions - Endless Adventure Variety**
+
+**Procedural Quest Generation:**
+Random missions use advanced procedural generation to create unlimited variety in side quest content, ensuring fresh experiences for every player.
+
+**Generation Algorithm Components:**
+• **Location Variety:** 12+ unique location types from abandoned warehouses to ancient temples
+• **Enemy Diversity:** 8+ enemy archetypes with unique behavioral patterns
+• **Objective Combinations:** 8+ quest objectives that combine dynamically
+• **Complication Systems:** 8+ challenge modifiers that add strategic depth
+
+**Random Mission Categories:**
+• **📝 Side Missions:** Self-contained adventures with unique story elements
+• **🔍 Investigation Tasks:** Mystery-solving with clues and deduction elements
+• **🚨 Emergency Responses:** Time-sensitive crisis situations requiring quick action
+• **🎯 Bounty Contracts:** Target elimination with strategic planning requirements
+
+**Dynamic Difficulty Scaling:**
+• **Adaptive Challenge:** Difficulty adjusts based on character level and performance
+• **Risk/Reward Balance:** Higher difficulty missions offer proportionally better rewards
+• **Reroll System:** Players can regenerate missions if current options don't appeal
+• **Variety Guarantee:** Algorithm ensures diverse mission types over time
+
+**Random Mission Rewards:**
+• **Variable XP:** 75-250 XP based on difficulty and execution quality
+• **Surprise Elements:** Unexpected item drops and bonus rewards
+• **Exploration Bonuses:** Unique encounters and discoveries not available elsewhere
+• **Skill Development:** Challenges that encourage creative problem-solving
+
+**📊 Quest Status and Progress Tracking**
+
+**Comprehensive Progress Monitoring:**
+The faction quest status system provides detailed analytics on your quest journey, helping optimize progression strategies and celebrate achievements.
+
+**Status Dashboard Information:**
+• **Story Progress:** Current chapter, completed missions, remaining content
+• **Daily Quest History:** Streak tracking, total completions, next availability
+• **Random Mission Statistics:** Total completed, favorite types, success rates
+• **Overall Progress Metrics:** Total faction quests completed, XP earned, time invested
+
+**Progress Milestones:**
+• **Chapter Completion Rewards:** Special bonuses for finishing story segments
+• **Daily Streak Benefits:** Escalating rewards for consecutive daily quest completion
+• **Mission Variety Bonuses:** Extra rewards for completing diverse random mission types
+• **Mastery Recognition:** Titles and recognition for extensive faction quest engagement
+
+**Strategic Planning Tools:**
+• **Cooldown Timers:** Precise countdown to next daily quest availability
+• **Difficulty Recommendations:** Suggested quest types based on current character capabilities
+• **Reward Projections:** Estimated progression benefits from different quest choices
+• **Faction Comparison:** See how your progress compares to other faction members
+
+**Advanced Quest Integration:**
+
+**Synergy with Main Quest System:**
+Faction quests integrate seamlessly with the main quest system, providing complementary progression paths that enhance rather than replace traditional adventuring.
+
+**Cross-System Benefits:**
+• **Stat Synergy:** Faction quest stat gains apply to all quest types
+• **Equipment Integration:** Faction quest items enhance performance in main quests
+• **Experience Diversity:** Varied progression paths prevent monotonous grinding
+• **Strategic Choice:** Players can optimize their advancement through quest type selection
+
+**Endgame Faction Content:**
+• **Weekly Boss Rotations:** High-level faction-specific raid content
+• **Legendary Quest Chains:** Ultra-challenging story continuations for max-level characters
+• **Faction Leadership Paths:** Progression toward faction-specific leadership roles
+• **Cross-Faction Collaboration:** Special quests requiring cooperation between different factions`
+            },
+            {
                 name: 'Quest Rewards and Economy',
                 content: `**Base Reward Scaling System:**
 
@@ -1119,6 +1236,55 @@ Embark on procedurally generated adventures based on your character level and fa
 • Combat encounter rates vary by quest category and character level
 • Victory in combat provides bonus XP and gold beyond quest rewards
 • Defeat results in quest failure but character survives with minimal XP gain
+
+**\`/factionquest <subcommand>\`**
+Experience faction-specific storylines, daily training, and procedurally generated missions.
+
+**Subcommand Options:**
+• **story** - Continue your faction's epic narrative campaign
+• **daily** - Complete faction training with 24-hour cooldown
+• **random** - Take on procedurally generated side missions
+• **status** - View comprehensive faction quest progress
+
+**\`/factionquest story\`**
+Progress through multi-chapter faction narratives with unique lore and powerful rewards.
+
+**Story Quest Features:**
+• **Chapter-Based Progression:** 10+ unique story chapters per faction
+• **Epic Narratives:** Deep exploration of anime universe lore and characters
+• **Progressive Difficulty:** Each chapter increases challenge and rewards
+• **Ability Unlocks:** Story completion unlocks powerful faction-specific abilities
+• **Massive Rewards:** 200-500 XP per chapter, unique items, and faction abilities
+
+**\`/factionquest daily\`**
+Complete faction-themed daily training missions with level-scaled rewards.
+
+**Daily Quest System:**
+• **24-Hour Cooldown:** Available once every 24 hours from last completion
+• **Level Scaling:** Quest difficulty and rewards automatically adjust to character level
+• **Faction Themes:** Training reflects your faction's philosophy and methods
+• **Consistent Rewards:** 100-300 XP and 50-150 gold based on character level
+• **No Penalty:** Missing days doesn't punish players, just postpones next opportunity
+
+**\`/factionquest random\`**
+Take on procedurally generated side missions with unlimited variety.
+
+**Random Mission Generation:**
+• **Procedural Content:** Advanced algorithms create unique mission combinations
+• **Dynamic Difficulty:** Adjusts based on character level and recent performance
+• **Variable Rewards:** 75-250 XP based on difficulty and execution quality
+• **Reroll Option:** Can regenerate missions if current options don't appeal
+• **Endless Variety:** Millions of possible quest combinations for unlimited replayability
+
+**\`/factionquest status\`**
+View comprehensive analytics on your faction quest journey and progress.
+
+**Status Information:**
+• **Story Progress:** Current chapter, completed missions, remaining content
+• **Daily Quest History:** Streak tracking, total completions, next availability timer
+• **Random Mission Statistics:** Total completed, success rates, favorite types
+• **Progress Metrics:** Total faction quests completed, XP earned from faction quests
+• **Milestone Tracking:** Upcoming rewards and achievement progress
 
 **\`/inventory [page]\`**
 Access organized display of all owned items with interactive usage options.
