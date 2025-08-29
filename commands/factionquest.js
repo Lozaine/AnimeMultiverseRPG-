@@ -28,15 +28,24 @@ module.exports = {
 
     async execute(interaction) {
         const userId = interaction.user.id;
-        const subcommand = interaction.options.getSubcommand();
+        const subcommand = interaction.options?.getSubcommand() || 'story';
 
         try {
             const character = await getCharacter(userId);
             if (!character) {
-                return interaction.reply({ 
-                    embeds: [createEmbed('No Character Found', 'You must create a character with `/create` first!', '#ff6b6b')], 
-                    flags: [4096] 
-                });
+                const errorEmbed = createEmbed('No Character Found', 'You must create a character with `/create` first!', '#ff6b6b');
+                
+                if (interaction.isButton()) {
+                    return interaction.update({ 
+                        embeds: [errorEmbed], 
+                        components: [] 
+                    });
+                } else {
+                    return interaction.reply({ 
+                        embeds: [errorEmbed], 
+                        flags: [4096] 
+                    });
+                }
             }
 
             switch (subcommand) {
@@ -58,11 +67,20 @@ module.exports = {
 
         } catch (error) {
             console.error('Faction quest error:', error);
+            const errorEmbed = createEmbed('Error', 'An error occurred while processing your quest request.', '#ff6b6b');
+            
             if (!interaction.replied && !interaction.deferred) {
-                await interaction.reply({ 
-                    embeds: [createEmbed('Error', 'An error occurred while processing your quest request.', '#ff6b6b')], 
-                    flags: [4096] 
-                });
+                if (interaction.isButton()) {
+                    await interaction.update({ 
+                        embeds: [errorEmbed], 
+                        components: [] 
+                    });
+                } else {
+                    await interaction.reply({ 
+                        embeds: [errorEmbed], 
+                        flags: [4096] 
+                    });
+                }
             }
         }
     }
@@ -88,7 +106,11 @@ async function handleStoryQuest(interaction, character, userId) {
                           `⭐ **Faction Mastery:** Achieved\n\n` +
                           `*More adventures await in future updates. Check back for new story chapters!*`)
             .setFooter({ text: 'Cross Realm Chronicles • Faction Quests Complete' });
-        return interaction.reply({ embeds: [completedEmbed] });
+        if (interaction.isButton()) {
+            return interaction.update({ embeds: [completedEmbed], components: [] });
+        } else {
+            return interaction.reply({ embeds: [completedEmbed] });
+        }
     }
 
     const currentQuest = factionQuests[questProgress];
@@ -129,7 +151,11 @@ async function handleStoryQuest(interaction, character, userId) {
 
     const row = new ActionRowBuilder().addComponents(acceptButton, cancelButton);
 
-    await interaction.reply({ embeds: [embed], components: [row] });
+    if (interaction.isButton()) {
+        await interaction.update({ embeds: [embed], components: [row] });
+    } else {
+        await interaction.reply({ embeds: [embed], components: [row] });
+    }
 }
 
 async function handleDailyQuest(interaction, character, userId) {
@@ -143,12 +169,14 @@ async function handleDailyQuest(interaction, character, userId) {
         const hoursLeft = Math.floor(timeLeft / (60 * 60 * 1000));
         const minutesLeft = Math.floor((timeLeft % (60 * 60 * 1000)) / (60 * 1000));
 
-        return interaction.reply({
-            embeds: [createEmbed('Daily Quest Completed', 
-                `You've already completed today's quest! Come back in ${hoursLeft}h ${minutesLeft}m.`, 
-                '#ffd700')],
-            flags: [4096]
-        });
+        const cooldownEmbed = createEmbed('Daily Quest Completed', 
+            `You've already completed today's quest! Come back in ${hoursLeft}h ${minutesLeft}m.`, 
+            '#ffd700');
+        if (interaction.isButton()) {
+            return interaction.update({ embeds: [cooldownEmbed], components: [] });
+        } else {
+            return interaction.reply({ embeds: [cooldownEmbed], flags: [4096] });
+        }
     }
 
     // Generate daily quest based on character level and faction
@@ -173,7 +201,11 @@ async function handleDailyQuest(interaction, character, userId) {
 
     const row = new ActionRowBuilder().addComponents(acceptButton);
 
-    await interaction.reply({ embeds: [embed], components: [row] });
+    if (interaction.isButton()) {
+        await interaction.update({ embeds: [embed], components: [row] });
+    } else {
+        await interaction.reply({ embeds: [embed], components: [row] });
+    }
 }
 
 async function handleRandomQuest(interaction, character, userId) {
@@ -208,7 +240,11 @@ async function handleRandomQuest(interaction, character, userId) {
 
     const row = new ActionRowBuilder().addComponents(acceptButton, rerollButton);
 
-    await interaction.reply({ embeds: [embed], components: [row] });
+    if (interaction.isButton()) {
+        await interaction.update({ embeds: [embed], components: [row] });
+    } else {
+        await interaction.reply({ embeds: [embed], components: [row] });
+    }
 }
 
 async function handleQuestStatus(interaction, character, userId) {
@@ -246,7 +282,11 @@ async function handleQuestStatus(interaction, character, userId) {
         });
     }
 
-    await interaction.reply({ embeds: [embed] });
+    if (interaction.isButton()) {
+        await interaction.update({ embeds: [embed], components: [] });
+    } else {
+        await interaction.reply({ embeds: [embed] });
+    }
 }
 
 function generateDailyQuest(faction, difficulty) {
